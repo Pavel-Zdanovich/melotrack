@@ -1,6 +1,8 @@
 import {Track} from "./entities/track.js";
 import {Tour} from "./entities/tour.js";
 
+document.body.firstElementChild.firstElementChild.innerHTML = `Melotrack 1`;
+
 /*let json = await fetch(`data/tour1.json`).then(response => response.json());
 let tour = Object.setPrototypeOf(json, Tour.prototype);
 tour.tracks.map(track => Object.setPrototypeOf(track, Track.prototype));*/
