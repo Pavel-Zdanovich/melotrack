@@ -38,7 +38,6 @@ export class Player {
         if (onPlayed != null && typeof onPlayed === `function`) {
             let play = this._play;
             this._play = () => {
-                //console.log(`onPlayed() added in series before play()`);
                 let promise = new Promise(() => console.log(`Source not loaded!`));
                 if (this._source != null) {
                     onPlayed();
@@ -52,7 +51,6 @@ export class Player {
             this._onStopped = onStopped;
             let stop = this._stop;
             this._stop = () => {
-                //console.log(`onStopped() added in series before stop()`);
                 onStopped();
                 return stop();
             };
@@ -101,14 +99,12 @@ export class Player {
 
         let play = this._play;
         this._play = () => {
-            //console.log(`timer.start() added in series before play()`);
             this._timer.start();
             return play();
         };
 
         let stop = this._stop;
         this._stop = () => {
-            //console.log(`timer.stop() added in series before stop()`);
             this._timer.stop();
             return stop();
         };
@@ -222,12 +218,4 @@ export class Player {
             throwError({rate});
         }
     }
-
-    addEventListener(type, listener, options) {
-        //TODO realize
-    };
-
-    removeEventListener(type, listener, options) {
-        //TODO realize
-    };
 }

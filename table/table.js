@@ -15,7 +15,7 @@ export class Table {
         if (col == null || typeof col !== `string` || !this._tour.keys.includes(col)) {
             throwError({col});
         }
-        if (row == null || typeof row !== `string` || !this._tour.tracks.map(track => track.id).includes(row)) {
+        if (row == null || typeof row !== `number` || !this._tour.tracks.map(track => track.id).includes(row)) {
             throwError({row});
         }
 

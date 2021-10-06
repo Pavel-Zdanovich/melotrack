@@ -8,7 +8,6 @@ export class Progress {
     constructor(percent = 0) {
         if (percent != null && typeof percent === `number` && (percent >= MIN_PERCENT && percent <= MAX_PERCENT)) {
             this._percent = percent;
-            //console.log(`Percent: ${percent}`);
         } else {
             throwError({percent});
         }
@@ -21,7 +20,6 @@ export class Progress {
     set(percent) {
         if (percent != null && typeof percent === `number` && (percent >= MIN_PERCENT && percent <= MAX_PERCENT)) {
             this._percent = percent;
-            //console.log(`Percent: ${percent}`);
         } else {
             throwError({percent});
         }
@@ -34,7 +32,6 @@ export class Progress {
             } else {
                 this._percent = MAX_PERCENT;
             }
-            //console.log(`Percent: ${this._percent}`);
         } else {
             throwError({value});
         }
@@ -47,7 +44,6 @@ export class Progress {
             } else {
                 this._percent = MIN_PERCENT;
             }
-            //console.log(`Percent: ${this._percent}`);
         } else {
             throwError({value});
         }

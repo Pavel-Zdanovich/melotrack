@@ -3,7 +3,7 @@ let {throwError} = await import(`../utils/utils.js`);
 export class Track {
 
     constructor(id, artist, title, url) {
-        if (id != null && typeof id === `string`) {
+        if (id != null && typeof id === `number`) {
             this.id = id;
         } else {
             throwError({id});

@@ -176,7 +176,7 @@ footerElement.addEventListener(`click`, () => {
             let col = input.getAttribute(`name`);
             let row = input.getAttribute(`id`);
             let actual = input.value;
-            let expected = table.get(col, row);
+            let expected = table.get(col, Number.parseInt(row));
             let result = table.similarity(expected, actual);
             console.log(`${col}_${row} '${actual}' = '${expected}' on ${result * 100}%`);
         });
