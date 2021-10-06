@@ -14,7 +14,7 @@ let createRow = (classType) => {
     let row = document.createElement(`tr`);
 
     if (classType != null && typeof classType === `string`) {
-        row.setAttribute(`class`, classType);
+        row.classList.add(classType);
     }
 
     return row;
@@ -24,7 +24,7 @@ let createCell = (cellType, classType) => {
     let cell = document.createElement(cellType);
 
     if (classType != null && typeof classType === `string`) {
-        cell.setAttribute(`class`, classType);
+        cell.classList.add(classType);
     }
 
     return cell;
@@ -32,12 +32,12 @@ let createCell = (cellType, classType) => {
 
 let createInput = (col, row, classType) => {
     let label = document.createElement(`label`);
-    label.setAttribute(`class`, classType);
+    label.classList.add(classType);
     let input = document.createElement(`input`);
-    input.setAttribute(`id`, row);
-    input.setAttribute(`name`, col);
-    input.setAttribute(`type`, `text`);
-    input.setAttribute(`class`, classType);
+    input.id = row;
+    input.name = col;
+    input.type = `text`;
+    input.classList.add(classType);
     label.appendChild(input);
     return label;
 };

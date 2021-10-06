@@ -48,6 +48,7 @@ export const whenLoaded = new Promise((resolve) => {
 
 console.log(`promise`);
 
+import("./utils/mobile.js");
 import("./loader/configuration.js").then(() => console.log(`loader loaded`));
 import("./player/configuration.js").then(() => console.log(`player loaded`));
 import("./table/configuration.js").then(() => console.log(`table loaded`));

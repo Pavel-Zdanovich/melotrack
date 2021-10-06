@@ -13,8 +13,8 @@ let index;
 const load = (tour) => {
     console.log(tour);
     loadTour(tour);
-    //document.documentElement.style.setProperty(`--background-color`, tour.background);
-    //document.documentElement.style.setProperty(`--border-color`, tour.border);
+    document.documentElement.style.setProperty(`--background-color`, tour.background);
+    document.documentElement.style.setProperty(`--border-color`, tour.border);
 }
 
 const prev = document.body.children[1];
