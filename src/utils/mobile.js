@@ -40,6 +40,13 @@ document.addEventListener(`dblclick`, () => {
     }
 });
 
+window.addEventListener(`load`,() => {
+    setTimeout(() => {
+        //document.body.children[2].children[0].innerText = document.body.children[2].children[0].innerText + `\tScroll`;
+        window.scrollTo(0, 1);
+    }, 0);
+});
+
 document.addEventListener(`readystatechange`, () => {
     if (mobile) {
         if (os === `ios`) {
@@ -54,10 +61,10 @@ document.addEventListener(`readystatechange`, () => {
             );
         } else {
             window.addEventListener(`resize`, () => {
-                //document.body.children[2].children[0].innerText = document.body.children[2].children[0].innerText + `\nResize: ${window.innerHeight} ? ${height}`;
+                //document.body.children[2].children[0].innerText = document.body.children[2].children[0].innerText + `\tResize from ${height} to ${window.innerHeight}, key=${keyboard}`;
 
                 if (screenState !== fullscreen) {
-                    //document.body.children[2].children[0].innerText = document.body.children[2].children[0].innerText + `\nFullscreen: ${fullscreen}. ${window.innerHeight} ? ${height}`;
+                    document.body.children[2].children[0].innerText = document.body.children[2].children[0].innerText + `\tFullscreen ${fullscreen}\n`;
                     screenState = fullscreen;
                     height = window.innerHeight;
                     width = window.innerWidth;
@@ -72,16 +79,25 @@ document.addEventListener(`readystatechange`, () => {
                 }
 
                 if (resizePercentage > 0.3) {
-                    if (!keyboard) {
-                        //document.body.children[2].children[0].innerText = document.body.children[2].children[0].innerText + `\nKeyboard on. ${window.innerHeight} ? ${height}`;
-                        onKeyboardOpened();
-                        keyboard = true;
+                    if (window.innerHeight < height) {
+                        if (!keyboard) {
+                            document.body.children[2].children[0].innerText = document.body.children[2].children[0].innerText + `\tKeyboard on\n`;
+                            onKeyboardOpened();
+                            keyboard = true;
+                            return;
+                        } else {
+                            return;
+                        }
+                    } else {
+                        return;
                     }
-                } else if (keyboard) {
-                     //document.body.children[2].children[0].innerText = document.body.children[2].children[0].innerText + `\nKeyboard off. ${window.innerHeight} ? ${height}`;
-                     onKeyboardClosed();
-                     keyboard = false;
-                 }
+                }
+
+                if (keyboard) {
+                    document.body.children[2].children[0].innerText = document.body.children[2].children[0].innerText + `\tKeyboard off\n`;
+                    onKeyboardClosed();
+                    keyboard = false;
+                }
             });
         }
     }
