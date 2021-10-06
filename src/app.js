@@ -1,44 +1,12 @@
-import {Track} from "./entities/track.js";
-import {Tour} from "./entities/tour.js";
+import {album} from "./modes/album.js";
+import {artist} from "./modes/artist.js";
+import {chart} from "./modes/chart.js";
+import {playlist} from "./modes/playlist.js";
+import {random} from "./modes/random.js";
 
-const CORS = `https://cors-anywhere.herokuapp.com/`;
-
-const randomColor = () => {
-    const letters = '0123456789ABCDEF';
-    let color = '#';
-    for (let i = 0; i < 6; i++) {
-        color += letters[Math.floor(Math.random() * 16)];
-    }
-    return color;
-};
-
-export const random = () => {
-    const URL = `https://api.deezer.com/track/`;
-
-    let tracks = [];
-
-    let counter = 0;
-    let attempts = 0;
-
-    while (counter < 10 && attempts < 20) {
-        let id = 10000000 + Math.floor(Math.random() * 1000000);
-
-        console.log(`Try fetch ${CORS + URL + id}`);
-
-        fetch(CORS + URL + id)
-            .then(response => response.json())
-            .then(json => {
-                let track = Track.parse(json);
-                tracks.push(track);
-                counter++;
-            })
-            .catch(error => console.error(error));
-
-        attempts++;
-    }
-
-    return new Tour(`Random`, `Guess the artist and title.`, 60000, randomColor(), randomColor(), [`artist`, `title`], tracks);
-};
+export const tours = [
+    album, artist, chart, playlist, random
+];
 
 export let loadTour;
 

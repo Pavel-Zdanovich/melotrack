@@ -24,8 +24,8 @@ export class Loader {
             })
             .then(buffer => {
                 track.setBuffer(buffer);
-                this._map.set(track.url, track);
                 console.log(`${track.url} TRACKED`);
+                this._map.set(track.url, track);
             })
             .catch(error => console.error(error));
 

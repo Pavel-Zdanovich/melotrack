@@ -87,8 +87,9 @@ whenLoaded.then((tour) => {
         let row = createRow(classType);
 
         row.addEventListener(`mousedown`, () => {
-            if (player.get() !== loader.get(track.url)) {
-                player.set(loader.get(track.url));
+            let t = loader.get(track.url);
+            if (player.get() !== t) {
+                player.set(t);
             }
         });
 

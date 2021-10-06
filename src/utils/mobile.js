@@ -19,22 +19,15 @@ document.addEventListener(`readystatechange`, () => {
     if (os === `ios`) {
         `focus blur`.split(` `).forEach(type =>
             document.addEventListener(type, (e) => {
-                console.log(e);
                 onKeyboard(e.type === `focus`);
             })
         );
     } else {
-        let width = window.innerWidth;
-        let height = window.innerHeight;
+        let initialHeight = window.innerHeight;
 
         `resize orientationchange`.split(` `).forEach(type =>
             window.addEventListener(type, (e) => {
-                console.log(e);
-                onKeyboard(
-                    //width !== window.innerWidth
-                    //||
-                    height !== window.innerHeight
-                );
+                onKeyboard(window.innerHeight < initialHeight); //TODO on resize desktop browser
             })
         );
     }
@@ -44,10 +37,8 @@ let footerElement = document.body.children[4];
 
 function onKeyboard(isOpen) {
     if (isOpen) {
-        console.log(`keyboard active`);
         footerElement.classList.remove(`fixed`);
     } else {
-        console.log(`keyboard closed`);
         footerElement.classList.add(`fixed`);
     }
 }

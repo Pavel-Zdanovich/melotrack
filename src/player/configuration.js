@@ -64,10 +64,12 @@ audioBarElement.addEventListener(`click`, (e) => {
 
 let repeatElement = controlsElement;
 let nextElement = document.createElement(`div`);
-nextElement.classList.add(`controls centralized`);
+nextElement.classList.add(`controls`);
+nextElement.classList.add(`centralized`);
 nextElement.innerHTML = `⏩`; //⏭
 let previousElement = document.createElement(`div`);
-previousElement.classList.add(`controls centralized`);
+previousElement.classList.add(`controls`);
+previousElement.classList.add(`centralized`);
 previousElement.innerHTML = `⏪`; //⏮
 
 repeatElement.addEventListener(`click`, () => {
