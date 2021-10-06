@@ -1,7 +1,15 @@
 * {
-    /*border: 1px solid black;*/
+    --background-color: white;
+    background-color: var(--background-color);
+
+    --border-color: black;
+    /*border: 1px solid var(--border-color);*/
+    color: var(--border-color);
 
     text-align: center; /*horizontal center*/
+    /*font-weight: 300;*/
+    /*font-size: 15px;*/
+    /*font-family: 'Noto Music', serif;*/
     line-height: normal; /*как-то двигает текст*/
     vertical-align: middle;
 
@@ -40,22 +48,27 @@ html {
 
 body {
     height: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
+    overflow: auto;
 }
 
 .bordered {
-    border: 1px solid black;
+    border: 1px solid var(--border-color);
 }
 
 .staved {
-    background: repeating-linear-gradient(white 11%, gray 15%, white 16%, white 33.3%);
+    background-image: repeating-linear-gradient(var(--background-color) 11%, var(--border-color) 15%, var(--background-color) 16%, var(--background-color) 33.3%);
+}
+
+.transparent {
+    background: none;
+}
+
+.fixed {
+    position: fixed;
+    z-index: 1;
 }
 
 header {
-    position: sticky;
-    top: 0;
     display: flex;
     height: 10%;
 }
@@ -63,7 +76,22 @@ header {
 .heading {
     display: flex;
     align-items: center;
-    justify-content: space-around;
+    justify-content: center;
+    height: 100%;
+}
+
+.heading > * {
+    flex-basis: 15%;
+}
+
+.logo {
+    min-width: 27.5%;
+    margin-right: 0;
+}
+
+.text {
+    min-width: 70%;
+    margin-left: 0;
 }
 
 .player {
@@ -91,7 +119,7 @@ header {
 
 .audio-bar {
     grid-area: audio-bar;
-    flex-shrink: 0.22084;
+    /*flex-shrink: 0.22084;*/
 }
 
 .audio-info {
@@ -100,7 +128,7 @@ header {
 
 .audio-progress {
     position: relative;
-    background-color: gray;
+    background-color: var(--border-color);
     opacity: 0.5;
     bottom: 100%;
     height: 100%;
@@ -120,7 +148,7 @@ header {
 
 .volume-progress {
     position: relative;
-    background-color: gray;
+    background-color: var(--border-color);
     opacity: 0.5;
     bottom: 100%;
     height: 100%;
@@ -128,34 +156,41 @@ header {
 }
 
 .volume {
-    transform: rotate(-90deg);
+    transform: rotate(90deg);
     width: auto;
 }
 
 .timer {
-    display: flex;
-    align-items: center;
-    justify-content: space-around;
+    height: 100%;
 }
 
-main {
-    width: 75%;
-    height: 75%;
-    overflow: auto;
+.side {
+    width: 5%;
+    top: 50%;
+}
+
+.left {
+    left: 2.5%;
 }
 
 table {
+    height: 100%;
+    margin-top: 11%;
+    margin-bottom: 11%;
     display: flex;
     flex-direction: column;
-    border-spacing: 0;
+}
+
+table > * {
+    width: 75%;
 }
 
 caption {
-    margin-bottom: 3.33%;
+    height: 30%;
 }
 
 thead {
-    display: flex;
+
 }
 
 .thr {
@@ -164,39 +199,37 @@ thead {
 
 tr {
     display: flex;
-    justify-content: center;
     align-items: stretch;
+    justify-content: center;
 }
 
 th {
     border-bottom-width: 2px;
     border-bottom-style: solid;
-    border-bottom-color: black;
+    border-bottom-color: var(--border-color);
 }
 
 tbody {
     display: flex;
     flex-direction: column;
+    height: 100%;
 }
 
 .tbr {
-    height: 2.8rem;
+    height: 10%;
 }
 
 td {
     border-bottom-width: 2px;
     border-bottom-style: solid;
-    border-bottom-color: black;
+    border-bottom-color: var(--border-color);
+    background: none;
 }
 
 .tc {
     border-right-width: 2px;
     border-right-style: solid;
-    border-right-color: black;
-}
-
-object {
-    height: 100%;
+    border-right-color: var(--border-color);
 }
 
 input {
@@ -209,8 +242,12 @@ input:focus {
     box-shadow: none;
 }
 
+.right {
+    right: 2.5%;
+}
+
 footer {
-    position: sticky;
+    display: flex;
     bottom: 0;
     height: 10%;
 }
@@ -222,10 +259,16 @@ footer {
 
 a {
     color: inherit;
+    height: 100%;
+    width: 100%;
 }
 
 .about {
     height: 100%;
+}
+
+.clef {
+    width: 20%;
 }
 
 .contacts {
@@ -233,18 +276,17 @@ a {
 }
 
 .icon {
-    height: 50%;
+    width: 15%;
 }
 
 svg {
-    fill: none;
-    stroke: black;
+    fill: var(--background-color);
+    stroke: var(--border-color);
     stroke-width: 5%;
 }
 
 @media (max-device-width: 480px) {
     * {
-        /*background-color: red;*/
         font-size: 36px;
     }
 
@@ -258,12 +300,19 @@ svg {
 
     .heading {
         grid-area: heading;
-        width: 100%;
+    }
+
+    .logo {
+        min-width: 10%;
+        max-width: 10%;
+    }
+
+    .text {
+        min-width: 25%;
     }
 
     .timer {
         grid-area: timer;
-        width: 100%;
     }
 
     .player {
@@ -273,14 +322,12 @@ svg {
 
 @media (min-device-width: 480px) and (max-device-width: 768px) {
     * {
-        /*background-color: yellow;*/
         font-size: 27px;
     }
 }
 
 @media (min-device-width: 768px) {
     * {
-        /*background-color: green;*/
         font-size: 27px;
     }
 }

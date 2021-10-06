@@ -3,10 +3,8 @@ import {loader} from "../loader/configuration.js";
 import {player} from "../player/configuration.js";
 import {Table} from "./table.js";
 
-let mainElement = document.body.children[1];
-let footerElement = document.body.children[2];
-
-let tableElement = mainElement.children[0];
+let tableElement = document.body.children[2];
+let footerElement = document.body.children[4];
 
 let captionElement = tableElement.children[0];
 let theadElement = tableElement.children[1];
@@ -22,136 +20,175 @@ let createRow = (classType) => {
     return row;
 };
 
-let createCell = (cellType, classType, inner) => {
+let createCell = (cellType, classType) => {
     let cell = document.createElement(cellType);
 
     if (classType != null && typeof classType === `string`) {
         cell.setAttribute(`class`, classType);
     }
 
-    if (typeof inner === `string`) {
-        cell.innerHTML = inner;
-    } else if (inner instanceof Element) {
-        cell.appendChild(inner);
-    } else {
-        throw new Error(`Illegal inner: ${inner}`);
-    }
-
     return cell;
 };
 
-let createInput = (col, row) => {
+let createInput = (col, row, classType) => {
     let label = document.createElement(`label`);
+    label.setAttribute(`class`, classType);
     let input = document.createElement(`input`);
-    input.setAttribute(`form`, `form`);
     input.setAttribute(`id`, row);
     input.setAttribute(`name`, col);
     input.setAttribute(`type`, `text`);
+    input.setAttribute(`class`, classType);
     label.appendChild(input);
     return label;
 };
 
-let gray = `#BDBDBD`;
-let grayer = `#7E7E7E`;
-let grayest = `#636363`;
+const map = [[]];
 
-let rowMouseEnter;
-let rowMouseLeave;
+const colColor = `lightgray`;
+const rowColor = `lightgray`;
+const cellColor = `gray`;
 
-let addRowEventListener = (url, row) => {
-    if (row == null || !(row instanceof HTMLTableRowElement)) {
-        throw new Error(`Not row!`);
-    }
-
-    row.addEventListener(`mouseenter`, () => {
-        rowMouseEnter(url);
-        row.style.backgroundColor = gray;
-    });
-    row.addEventListener(`mouseleave`, () => {
-        rowMouseLeave(url);
-        row.removeAttribute(`style`);
-    });
-};
-
-let addCellEventListener = (key, cell) => {
-    if (cell == null || !(cell instanceof HTMLTableCellElement)) {
-        throw new Error(`Not cell!`);
-    }
-
-    cell.addEventListener(`mouseenter`, () => {
-        colMouseEnter(key);
-        cell.style.backgroundColor = grayest;
-    });
-    cell.addEventListener(`mouseleave`, () => {
-        colMouseLeave(key);
-        cell.removeAttribute(`style`);
-    });
-};
+let currentCol;
+let currentRow;
 
 captionElement.innerText = tour.description;
 theadElement.innerHTML = ``;
 tbodyElement.innerHTML = ``;
 
-let map = new Map();
-
-let colMouseEnter;
-let colMouseLeave;
-
 let theadRow = createRow(`thr`);
 theadElement.appendChild(theadRow);
+map[0][0] = theadRow;
 
 tour.keys.forEach((key, index, array) => {
     let classType = (index >= 0 && index < array.length - 1) ? `tc` : undefined;
 
-    let cell = createCell(`th`, classType,key.charAt(0).toUpperCase() + key.slice(1));
+    let cell = createCell(`th`, classType);
+    cell.innerText = key.charAt(0).toUpperCase() + key.slice(1).toLowerCase();
+
     cell.addEventListener(`mouseenter`, () => {
-        colMouseEnter(key);
+        map[index + 1].forEach(cell => {
+            cell.style.backgroundColor = colColor;
+        });
     });
     cell.addEventListener(`mouseleave`, () => {
-        colMouseLeave(key);
+        map[index + 1].forEach(cell => {
+            cell.removeAttribute(`style`);
+        });
     });
+
     theadRow.appendChild(cell);
 
-    map.set(key, [cell]);
+    map[index + 1] = [cell];
 });
 
-tour.tracks.forEach(track => {
-    let row = createRow(`tbr`);
-    addRowEventListener(track.url, row);
+tour.tracks.forEach((track, rowIndex) => {
+    let classType = rowIndex % 2 === 1 ? 'tbr' : 'tbr staved';
+    let row = createRow(classType);
 
-    tour.keys.forEach((key, index, array) => {
-        let classType = (index >= 0 && index < array.length - 1) ? `tc centralized` : `centralized`;
-        let cell = createCell(`td`, classType, createInput(key, track.id));
-        addCellEventListener(key, cell);
-        row.appendChild(cell);
-        map.get(key).push(cell);
+    row.addEventListener(`mousedown`, () => {
+        if (player.get() !== loader.get(track.url)) {
+            player.set(loader.get(track.url));
+        }
     });
 
     tbodyElement.appendChild(row);
+
+    map[0][rowIndex + 1] = row;
+
+    tour.keys.forEach((key, colIndex, array) => {
+        let input = createInput(key, track.id, 'transparent');
+
+        let classType = (colIndex >= 0 && colIndex < array.length - 1) ? `tc centralized transparent` : `centralized transparent`;
+
+        let cell = createCell(`td`, classType);
+
+        cell.addEventListener(`mouseenter`, () => {
+            currentCol = colIndex + 1;
+            currentRow = rowIndex + 1;
+
+            console.log(`Enter: [${currentCol}, ${currentRow}]`);
+
+            map[currentCol].forEach(cell => cell.style.backgroundColor = colColor);
+            map.forEach(col => col[currentRow].style.backgroundColor = rowColor);
+            map[currentCol][currentRow].style.backgroundColor = cellColor;
+        });
+        cell.addEventListener(`mouseleave`, () => {
+            console.log(`Leave: [${currentCol}, ${currentRow}]`);
+
+            map[currentCol].forEach(cell => cell.removeAttribute(`style`));
+            map.forEach(col => col[currentRow].removeAttribute(`style`));
+        });
+
+        cell.appendChild(input);
+
+        row.appendChild(cell);
+
+        map[colIndex + 1][rowIndex + 1] = cell;
+    });
 });
 
-colMouseEnter = (key) => {
-    map.get(key).forEach(cell => {
-        cell.style.backgroundColor = gray;
-    });
-};
-colMouseLeave = (key) => {
-    map.get(key).forEach(cell => {
-        cell.removeAttribute(`style`);
-    });
-};
+tableElement.addEventListener(`keydown`, (e) => {
+    let previousCol = currentCol;
+    let previousRow = currentRow;
 
-rowMouseEnter = (url) => {
-    player.set(loader.get(url));
-};
-rowMouseLeave = (url) => {
-};
+    switch (e.code) {
+        case `ArrowUp`: {
+            if (currentRow === 1) {
+                currentRow = map[0].length - 1;
+            } else {
+                currentRow--;
+            }
+            break;
+        }
+        case `ArrowDown`: {
+            if (currentRow === map[0].length - 1) {
+                currentRow = 1;
+            } else {
+                currentRow++;
+            }
+            break;
+        }
+        case `ArrowLeft`: {
+            if (currentCol === map.length - 1) {
+                currentCol = 1;
+            } else {
+                currentCol++;
+            }
+            break;
+        }
+        case `ArrowRight`: {
+            if (currentCol === 1) {
+                currentCol = map.length - 1;
+            } else {
+                currentCol--;
+            }
+            break;
+        }
+        default: {
+            return;
+        }
+    }
+
+    console.log(`Previous: [${previousCol}, ${previousRow}]. Current: [${currentCol}, ${currentRow}]`);
+
+    map[previousCol].forEach(cell => cell.removeAttribute(`style`));
+    map.forEach(col => col[previousRow].removeAttribute(`style`));
+
+    map[currentCol].forEach(cell => cell.style.backgroundColor = colColor);
+    map.forEach(col => col[currentRow].style.backgroundColor = rowColor);
+    map[currentCol][currentRow].style.backgroundColor = cellColor;
+
+    map[currentCol][currentRow].firstElementChild.firstElementChild.select();
+});
 
 let table = new Table(tour);
-footerElement.addEventListener(`click`, () => {
-    Array.from(map.values())
+footerElement.addEventListener(`click`, (event) => {
+    console.log(`Footer clicked!`);
+    map
         .flatMap(value => value)
-        .filter(cell => `th` !== cell.tagName.toLowerCase())
+        .filter(cell => {
+            return `th` !== cell.tagName.toLowerCase() && `tr` !== cell.tagName.toLowerCase();
+        })
         .map(cell => cell.lastElementChild.lastElementChild)
         .forEach(input => {
             let col = input.getAttribute(`name`);

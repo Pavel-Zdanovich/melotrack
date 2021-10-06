@@ -120,6 +120,10 @@ export class Player {
         return this._context.decodeAudioData(promise);
     }
 
+    get() {
+        return this._track;
+    }
+
     set(track) {
         if (track instanceof Track) {
             this._track = track;

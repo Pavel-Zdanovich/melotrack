@@ -1,0 +1,17 @@
+{
+  "name": "Melotrack",
+  "description": "Melotrack is a melo-intellectual game, the essence of which is to solve riddles encrypted in various ways that are directly related to music.",
+  "display": "fullscreen",
+  "icons": [
+    {
+      "src": "/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
