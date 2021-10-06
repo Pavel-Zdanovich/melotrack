@@ -4,48 +4,43 @@ import {chart} from "./modes/chart.js";
 import {playlist} from "./modes/playlist.js";
 import {random} from "./modes/random.js";
 
-const tours = [
+const modes = [
     album, artist, chart, playlist, random
 ];
-
-let loadTour;
-
-const onLoad = new Promise((resolve) => {
-    loadTour = resolve;
-});
 
 let index = 0;
 const indexElement = document.body.children[2].children[0];
 const outputIndex = () => {
-    indexElement.innerHTML = indexElement.innerHTML + `${index + 1}/${tours.length}`;
+    indexElement.innerHTML = indexElement.innerHTML + `${index + 1}/${modes.length}`;
 };
 
-const load = async (get) => {
+const load = (mode) => {
     outputIndex();
-    const tour = await get();
-    console.log(tour);
-    loadTour(tour);
-    document.documentElement.style.setProperty(`--background-color`, tour.background);
-    document.documentElement.style.setProperty(`--border-color`, tour.border);
+    mode().then(tour => {
+        console.log(tour);
+        document.dispatchEvent(new CustomEvent(`tour`, {detail: tour}));
+        document.documentElement.style.setProperty(`--background-color`, tour.background);
+        document.documentElement.style.setProperty(`--border-color`, tour.border);
+    });
 };
 
 const prev = () => {
     if (index > 0) {
         index--;
     } else {
-        index = tours.length;
+        index = modes.length;
     }
 
-    return tours[index];
+    return modes[index];
 };
 const next = () => {
-    if (index <= tours.length - 2) {
+    if (index <= modes.length - 2) {
         index++;
     } else {
         index = 0;
     }
 
-    return tours[index];
+    return modes[index];
 };
 
 const leftElement = document.body.children[1];
@@ -61,9 +56,7 @@ rightElement.addEventListener(`click`, () => {
 const clefElement = document.body.children[4].children[1];
 
 clefElement.addEventListener(`click`, () => {
-    load(tours[index]);
+    load(modes[index]);
 });
-
-export {onLoad};
 
 console.log(`app loaded`);

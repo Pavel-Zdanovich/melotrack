@@ -1,6 +1,6 @@
 export class Validator {
 
-    similarity(expected, actual) {
+    static similarity(expected, actual) {
         let longer = expected;
         let shorter = actual;
         if (expected.length < actual.length) {
@@ -14,7 +14,7 @@ export class Validator {
         return (longerLength - this.#editDistance(longer, shorter)) / parseFloat(longerLength);
     }
 
-    #editDistance(string1, string2) {
+    static #editDistance(string1, string2) {
         string1 = string1.toLowerCase();
         string2 = string2.toLowerCase();
 

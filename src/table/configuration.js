@@ -1,12 +1,11 @@
-import {Track} from "../entities/track.js";
-import {onLoad} from "../app.js";
-import {mobile} from "../utils/mobile.js";
 import {loader} from "../loader/configuration.js";
 import {player} from "../player/configuration.js";
+import {timer} from "../timer/configuration.js";
+import {mobile} from "../utils/mobile.js";
+import {Track} from "../entities/track.js";
 import {Validator} from "./validator.js";
 
 const tableElement = document.body.children[2];
-const footerElement = document.body.children[4];
 
 const captionElement = tableElement.children[0];
 const theadElement = tableElement.children[1];
@@ -28,71 +27,7 @@ const map = [[]]; //map[row][col] - [[thr, th1, th2], [tbr1, td1, td2], [tbr2, t
 let currentRowIndex;
 let currentColIndex;
 
-const color = `gray`;
 const border = `var(--border-color)`;
-
-let requestId;
-let touchEnd = false;
-tbodyElement.addEventListener(`touchend`, () => {
-    touchEnd = true;
-    tbodyElement.scrollBy(1, 0);
-})
-
-const scrollWidth = exampleRowElement.getBoundingClientRect().width;
-const threshold = theadCellElement.getBoundingClientRect().width;
-
-let prevScroll = 0;
-let scrollBy = 0;
-let direction;
-tbodyElement.addEventListener(`scroll`, () => {
-    const currentScroll = tbodyElement.scrollLeft - prevScroll;
-    prevScroll = tbodyElement.scrollLeft;
-    if (!direction) {
-        direction = currentScroll > 0 ? `>` : `<`;
-    }
-
-    const colIndex = Math.trunc(tbodyElement.scrollLeft / scrollWidth);
-
-    const left = colIndex * scrollWidth;
-    const right = left + scrollWidth;
-
-    const diffLeft = tbodyElement.scrollLeft - left;
-    const diffRight = right - tbodyElement.scrollLeft;
-
-    if (direction === `>`) {
-        if (diffLeft < threshold) {
-            scrollBy = -1 * diffLeft;
-        } else {
-            scrollBy = diffRight;
-        }
-    } else {
-        if (diffRight < threshold) {
-            scrollBy = diffRight;
-        } else {
-            scrollBy = -1 * diffLeft;
-        }
-    }
-
-    if (touchEnd) {
-        touchEnd = false;
-
-        const start = performance.now();
-        const duration = 1000;
-        const callback = (time) => {
-            let progress = (time - start) / duration;
-            const x = progress * scrollBy;
-            if (Number.parseInt(scrollBy.toFixed(1)) !== 0) {
-                tbodyElement.scrollBy(x, 0);
-                requestId = requestAnimationFrame(callback);
-            } else {
-                cancelAnimationFrame(requestId);
-                requestId = undefined;
-                direction = undefined;
-            }
-        }
-        requestId = requestAnimationFrame(callback);
-    }
-});
 
 const colEnter = (colIndex) => {
     //console.log(`Enter col ${colIndex}`);
@@ -100,7 +35,6 @@ const colEnter = (colIndex) => {
         const array = map[rowIndex];
         //const rowElement = array[0];
         const cellElement = map[rowIndex][colIndex];
-        cellElement.style.backgroundColor = color;
         if (colIndex === 1) {
             cellElement.style.borderLeftColor = border;
         } else if (colIndex === array.length - 1) {
@@ -140,18 +74,39 @@ const colLeave = (colIndex) => {
     currentColIndex = undefined;
 };
 
+const colLeaveEnter = (prevColIndex, nextColIndex) => {
+    colLeave(prevColIndex);
+    colEnter(nextColIndex);
+};
+
+let tracks = [
+    new Track(`melotrack1`, `Melotrack`, `1`, `./audio/melotrack1.mp3`),
+    new Track(`melotrack2`, `Melotrack`, `2`, `./audio/melotrack2.mp3`)
+];
+
+tracks.forEach(track => loader.load(track));
+
 const rowEnter = (rowIndex) => {
     //console.log(`Enter row ${rowIndex}`);
     map[rowIndex][0].classList.add(`staved`);
     currentRowIndex = rowIndex;
-    const url = tracks[currentRowIndex].url; //TODO
-    loader.get(url).then(track => player.set(track));
+    const track = tracks[currentRowIndex - 1];
+    if (track) {
+        loader.get(track.url).then(track => player.load(track));
+    }
 };
 
 const rowLeave = (rowIndex) => {
     //console.log(`Leave row ${rowIndex}`);
     map[rowIndex][0].classList.remove(`staved`);
+    player.unload();
     currentRowIndex = undefined;
+};
+
+const rowLeaveEnter = (prevRowIndex, nextRowIndex) => {
+    //console.log(`Leave row ${prevRowIndex}`);
+    map[prevRowIndex][0].classList.remove(`staved`);
+    rowEnter(nextRowIndex);
 };
 
 const cellEnter = (rowIndex, colIndex) => {
@@ -163,6 +118,8 @@ const cellEnter = (rowIndex, colIndex) => {
     label.appendChild(signElement);
 };
 
+labelElement.innerHTML = ``;
+
 const cellLeave = (rowIndex, colIndex) => {
     //console.log(`Leave TD [${rowIndex}][${colIndex}]`);
     const label = map[rowIndex][colIndex].children[0];
@@ -170,25 +127,28 @@ const cellLeave = (rowIndex, colIndex) => {
 };
 
 const isTable = (element) => {
-    const tagName = element ? element.tagName : element;
-    return tagName === `TH` || tagName === `TD` || tagName === `LABEL` || tagName === `svg` || tagName === `path` || tagName === `DIV` || tagName === `INPUT`; //TODO
+    if (!element) {
+        return false;
+    } else if (element.tagName === `THEAD` || element.tagName === `TBODY`) {
+        return true;
+    } else {
+        isTable(element.parentElement);
+    }
 }
 
-const addEventListeners = (rowIndex, colIndex, colEnter, colLeave, rowEnter, rowLeave, cellEnter, cellLeave) => {
+const addEventListeners = (rowIndex, colIndex, colEnter, colLeave, colLeaveEnter, rowEnter, rowLeave, rowLeaveEnter, cellEnter, cellLeave) => {
     const cellElement = map[rowIndex][colIndex];
     cellElement.addEventListener(`focusin`, (e) => {
         if (isTable(e.relatedTarget)) {
             if (currentColIndex !== colIndex) {
-                colLeave(currentColIndex);
-                colEnter(colIndex);
+                colLeaveEnter(currentColIndex, colIndex);
             }
         } else {
             colEnter(colIndex);
         }
         if (isTable(e.relatedTarget)) {
             if (currentRowIndex !== rowIndex) {
-                rowLeave(currentRowIndex);
-                rowEnter(rowIndex);
+                rowLeaveEnter(currentRowIndex, rowIndex);
             }
         } else {
             rowEnter(rowIndex);
@@ -206,7 +166,7 @@ const addEventListeners = (rowIndex, colIndex, colEnter, colLeave, rowEnter, row
     });
 }
 
-const fillCellsInRow = (rowIndex, colEnter, colLeave, rowEnter, rowLeave, cellEnter, cellLeave) => {
+const fillCellsInRow = (rowIndex, colEnter, colLeave, colLeaveEnter, rowEnter, rowLeave, rowLeaveEnter, cellEnter, cellLeave) => {
     const rowElement = map[rowIndex][0];
 
     for (let index = 0; index < rowElement.childElementCount; index++) {
@@ -216,17 +176,19 @@ const fillCellsInRow = (rowIndex, colEnter, colLeave, rowEnter, rowLeave, cellEn
 
         map[rowIndex][colIndex] = cellElement;
 
-        addEventListeners(rowIndex, colIndex, colEnter, colLeave, rowEnter, rowLeave, cellEnter, cellLeave);
+        addEventListeners(rowIndex, colIndex, colEnter, colLeave, colLeaveEnter, rowEnter, rowLeave, rowLeaveEnter, cellEnter, cellLeave);
     }
 };
 
-//initialization
-map[0][0] = theadRowElement;
+
+
+map[0][0] = theadRowElement; //initialization
 
 fillCellsInRow(
     0,
     colEnter,
     colLeave,
+    colLeaveEnter,
     (rowIndex) => {
         //console.log(`Enter row ${rowIndex}`);
         currentRowIndex = rowIndex;
@@ -234,6 +196,11 @@ fillCellsInRow(
     (rowIndex) => {
         //console.log(`Leave row ${rowIndex}`);
         currentRowIndex = undefined;
+    },
+    (prevRowIndex, nextRowIndex) => {
+        //console.log(`Leave row ${prevRowIndex}`);
+        //console.log(`Enter row ${nextRowIndex}`);
+        currentRowIndex = nextRowIndex;
     },
     (rowIndex, colIndex) => {
         //console.log(`Enter TH [${rowIndex}][${colIndex}]`);
@@ -262,7 +229,7 @@ fillCellsInRow(
     },
 );
 
-labelElement.innerHTML = ``;
+const scrollWidth = exampleRowElement.getBoundingClientRect().width;
 
 const stretchFor = (rowElement, cols) => {
     if (scrollWidth / cols <= 300 || mobile) {
@@ -279,8 +246,35 @@ for (let index = 0; index < tbodyElement.childElementCount; index++) {
 
     stretchFor(rowElement, rowElement.childElementCount);
 
-    fillCellsInRow(rowIndex, colEnter, colLeave, rowEnter, rowLeave, cellEnter, cellLeave);
+    fillCellsInRow(rowIndex, colEnter, colLeave, colLeaveEnter, rowEnter, rowLeave, rowLeaveEnter, cellEnter, cellLeave);
 }
+
+
+
+player.addEventListener(`end`, (e) => {
+    const current = e.detail;
+    const index = tracks.indexOf(current);
+    const selectNext = player.getSelectionMode();
+    const next = selectNext(index, tracks);
+    loader.get(next.url).then(track => player.load(track));
+});
+
+let keys = [`artist`, `title`];
+
+timer.addEventListener(`end`, () => {
+    for (let rowIndex = 1; rowIndex < map.length; rowIndex++) {
+        for (let colIndex = 1; colIndex < map[0].length; colIndex++) {
+            const cellElement = map[rowIndex][colIndex];
+            const inputElement = cellElement.lastElementChild;
+            const expected = tracks[rowIndex];
+            const actual = inputElement.value;
+            const result = Validator.similarity(expected, actual);
+            console.log(`${rowIndex}_${colIndex} '${actual}' = '${expected}' on ${result * 100}%`);
+            inputElement.value = expected[keys[colIndex - 1]];
+            inputElement.disabled = true;
+        }
+    }
+});
 
 tableElement.addEventListener(`keydown`, (e) => {
     switch (e.code) {
@@ -326,42 +320,99 @@ tableElement.addEventListener(`keydown`, (e) => {
     inputElement.focus();
 });
 
-let tracks = [
-    new Track(`melotrack1`, `Melotrack`, `1`, `./audio/melotrack1.mp3`),
-    new Track(`melotrack2`, `Melotrack`, `2`, `./audio/melotrack2.mp3`)
-];
+let touchEnd = false;
+tbodyElement.addEventListener(`touchend`, () => {
+    touchEnd = true;
+    tbodyElement.scrollBy(1, 0);
+})
 
-tracks.forEach(track => loader.load(track));
-loader.get(`./audio/melotrack1.mp3`).then(track => player.set(track));
+const threshold = theadCellElement.getBoundingClientRect().width;
 
-player.addEventListener(`end`, (e) => {
-    const selectNext = player.getSelectionMode();
-    const current = e.detail;
-    const index = tracks.indexOf(current);
-    const next = selectNext(index, tracks);
-    loader.get(next.url).then(track => player.set(track));
+let prevScroll = 0;
+let scroll = 0;
+let direction;
+let requestId;
+tbodyElement.addEventListener(`scroll`, () => {
+    const currentScroll = tbodyElement.scrollLeft - prevScroll;
+    prevScroll = tbodyElement.scrollLeft;
+    if (!direction) {
+        direction = currentScroll > 0 ? `>` : `<`;
+    }
+
+    const colIndex = Math.trunc(tbodyElement.scrollLeft / scrollWidth);
+
+    const left = colIndex * scrollWidth;
+    const right = left + scrollWidth;
+
+    const diffLeft = tbodyElement.scrollLeft - left;
+    const diffRight = right - tbodyElement.scrollLeft;
+
+    if (direction === `>`) {
+        if (diffLeft < threshold) {
+            scroll = -1 * diffLeft;
+        } else {
+            scroll = diffRight;
+        }
+    } else {
+        if (diffRight < threshold) {
+            scroll = diffRight;
+        } else {
+            scroll = -1 * diffLeft;
+        }
+    }
+
+    if (touchEnd) {
+        touchEnd = false;
+        const start = performance.now();
+        const duration = 1000;
+        const callback = (time) => {
+            let progress = (time - start) / duration;
+            let x = progress * scroll;
+            if (Math.abs(x) < 0.8) { //dead zone
+                x = Math.sign(x) * 0.8;
+            }
+            if (Number.parseInt(scroll.toFixed(1)) !== 0) {
+                tbodyElement.scrollBy(x, 0); //recursion: progress increases linearly, scroll  decreases exponentially
+                requestId = window.requestAnimationFrame(callback);
+            } else {
+                //window.cancelAnimationFrame(requestId);
+                requestId = undefined;
+                direction = undefined;
+            }
+        }
+        requestId = window.requestAnimationFrame(callback);
+    }
 });
 
-onLoad.then((tour) => {
+document.addEventListener(`tour`, (e) => {
+    const tour = e.detail;
+
+    keys = tour.keys;
     tracks = tour.tracks;
 
-    tracks.forEach(track => loader.load(track));
+    tracks.forEach(track => {
+        if (!loader.get(track.url)) {
+            loader.load(track);
+        }
+    });
+
+    timer.load(tour.time);
 
     captionElement.innerText = tour.description;
 
     const prevRowsCount = map.length - 1; // - thead
     const prevColsCount = map[0].length - 1; // - tr
 
-    if (prevRowsCount > tour.tracks.length) {
-        const arrays = map.splice(tour.tracks.length);
+    if (prevRowsCount > tracks.length) {
+        const arrays = map.splice(tracks.length);
         arrays.map(array => array[0]).forEach(row => tbodyElement.removeChild(row));
     } else {
-        if (prevColsCount > tour.keys.length) {
-            const cells = map[0].splice(tour.tracks.length);
+        if (prevColsCount > keys.length) {
+            const cells = map[0].splice(tracks.length);
             cells.forEach(cell => map[0][0].removeChild(cell));
         } else {
-            for (let keyIndex = 0; keyIndex < tour.keys.length; keyIndex++) {
-                const key = tour.keys[keyIndex];
+            for (let keyIndex = 0; keyIndex < keys.length; keyIndex++) {
+                const key = keys[keyIndex];
 
                 const colIndex = keyIndex + 1;
                 const rowIndex = 0;
@@ -387,7 +438,7 @@ onLoad.then((tour) => {
             }
         }
 
-        for (let trackIndex = 0; trackIndex < tour.tracks.length; trackIndex++) {
+        for (let trackIndex = 0; trackIndex < tracks.length; trackIndex++) {
             const rowIndex = trackIndex + 1;
 
             const array = map[rowIndex];
@@ -402,14 +453,14 @@ onLoad.then((tour) => {
                 tbodyElement.appendChild(rowElement);
             }
 
-            stretchFor(rowElement, tour.keys.length);
+            stretchFor(rowElement, keys.length);
 
-            if (prevColsCount > tour.keys.length) {
-                const cells = map[rowIndex].splice(tour.tracks.length);
+            if (prevColsCount > keys.length) {
+                const cells = map[rowIndex].splice(tracks.length);
                 cells.forEach(cell => rowElement.removeChild(cell));
             } else {
-                for (let keyIndex = 0; keyIndex < tour.keys.length; keyIndex++) {
-                    const key = tour.keys[keyIndex];
+                for (let keyIndex = 0; keyIndex < keys.length; keyIndex++) {
+                    const key = keys[keyIndex];
 
                     const colIndex = keyIndex + 1;
 
@@ -437,22 +488,6 @@ onLoad.then((tour) => {
                     }
                 }
             }
-        }
-    }
-});
-
-const validator = new Validator();
-
-footerElement.addEventListener(`click`, () => {
-    for (let rowIndex = 1; rowIndex < map.length; rowIndex++) {
-        for (let colIndex = 1; colIndex < map[0].length; colIndex++) {
-            const cellElement = map[rowIndex][colIndex];
-            const inputElement = cellElement.lastElementChild;
-            const expected = tour.tracks[rowIndex];
-            const actual = inputElement.value;
-            const result = validator.similarity(expected, actual);
-            console.log(`${rowIndex}_${colIndex} '${actual}' = '${expected}' on ${result * 100}%`);
-            inputElement.value = expected;
         }
     }
 });

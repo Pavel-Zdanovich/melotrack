@@ -5,7 +5,7 @@ const MAX_PERCENT = 100;
 
 export class Progress {
 
-    constructor(start = MIN_PERCENT, end = MAX_PERCENT, step = 1) {
+    load(start = MIN_PERCENT, end = MAX_PERCENT, step = 1) {
         if (typeof start === `number` && (start >= MIN_PERCENT && start <= MAX_PERCENT)) {
             this._start = start;
         } else {

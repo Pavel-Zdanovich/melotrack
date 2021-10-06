@@ -24,9 +24,8 @@
 <body>
 <header class="bordered fixed">
     <div class="heading staved">
-        <div class="title">
-            <div class="logo">
-                <svg viewBox="0 0 100 100">
+        <div class="logo">
+            <svg viewBox="0 0 100 100">
                     <path d="
                     m 3.5 100
                     c -6.37 -5.8013 -2.8438 -15.015 7.6213 -20.475
@@ -59,13 +58,14 @@
                     z
                 "/>
                 </svg>
-            </div>
-            <div class="text">elotrack</div>
         </div>
+        <div class="text">elotrack</div>
     </div>
     <div class="player bordered">
-        <div class="play bordered centralized">▶</div>
-        <div class="mode bordered centralized">🔁</div>
+        <div class="controls bordered">
+            <div>▶</div>
+            <div>🔁</div>
+        </div>
         <div class="audio bordered">
             <label for="audio">
                 <div>Artist - Title</div>
@@ -87,7 +87,7 @@
                 <div class="bar">
                     <div class="progress"></div>
                 </div>
-                <input id="volume" type="range"/>
+                <input id="volume" type="range" orient="vertical"/>
             </div>
         </div>
     </div>

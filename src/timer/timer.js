@@ -13,9 +13,11 @@ const MILLIS_IN_DAY = MILLIS_IN_HOUR * HOURS_IN_DAY;
 
 export class Timer extends EventTarget {
 
-    constructor(start, end = 0, step = 1000) {
+    constructor() {
         super();
+    }
 
+    load(start, end = 0, step = 1000) {
         if (typeof start === `number` && (start >= MIN_TIME && start <= MILLIS_IN_DAY)) {
             this._start = start;
         } else {
@@ -59,6 +61,8 @@ export class Timer extends EventTarget {
         }
 
         this.#initialize();
+
+        this.dispatchEvent(new CustomEvent(`load`, {detail: [this._hours, this._mins, this._secs, this._millis]}));
     }
 
     #initialize() {
@@ -187,35 +191,9 @@ export class Timer extends EventTarget {
         return this._interval;
     }
 
-    setStart(time) {
+    set(time) {
         this._duration = this._direction ? this._end - time : time - this._end;
         this._counter = this._duration / this._stepInMillis;
         [this._hours, this._mins, this._secs, this._millis] = Timer.millisToTime(time);
-    }
-
-    setTime(hours, mins, secs, millis) {
-        if (typeof hours === `number` && (hours >= MIN_TIME && hours <= HOURS_IN_DAY)) {
-            this._hours = hours;
-        } else {
-            throwError({hours});
-        }
-        if (typeof mins === `number` && (mins >= MIN_TIME && mins <= MINS_IN_HOUR)) {
-            this._mins = mins;
-        } else {
-            throwError({mins});
-        }
-        if (typeof secs === `number` && (secs >= MIN_TIME && secs <= SECS_IN_MIN)) {
-            this._secs = secs;
-        } else {
-            throwError({secs});
-        }
-        if (typeof secs === `number` && (millis >= MIN_TIME && millis <= MILLIS_IN_SEC)) {
-            this._millis = millis;
-        } else {
-            throwError({millis});
-        }
-
-        this._duration = ((hours * MILLIS_IN_HOUR) + (mins * MILLIS_IN_MIN) + (secs * MILLIS_IN_SEC) + millis);
-        this._counter = this._duration / this._stepInMillis;
     }
 }

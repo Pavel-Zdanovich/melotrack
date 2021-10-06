@@ -1,4 +1,3 @@
-import {onLoad} from "../app.js";
 import {outputHoursMinsAndSecs} from "../utils/utils.js";
 import {Timer} from "./timer.js";
 
@@ -8,16 +7,15 @@ const outputToElement = (hours, mins, secs, millis) => {
     timerElement.innerText = outputHoursMinsAndSecs(hours, mins, secs, millis);
 };
 
-const timer = onLoad
-    .then((tour) => {
-        const timer = new Timer(tour.time);
-        timer.addEventListener(`tick`, (e) => {
-            const time = e.detail;
-            outputToElement(...time);
-        });
-        outputToElement(...Timer.millisToTime(tour.time));
-        return timer;
-    });
+const timer = new Timer();
+timer.addEventListener(`load`, (e) => {
+    const time = e.detail;
+    outputToElement(...time);
+});
+timer.addEventListener(`tick`, (e) => {
+    const time = e.detail;
+    outputToElement(...time);
+});
 
 timerElement.addEventListener(`click`, () => {
     if (timer.isTicking()) {
@@ -26,5 +24,7 @@ timerElement.addEventListener(`click`, () => {
         timer.start();
     }
 });
+
+export {timer};
 
 console.log(`timer loaded`);

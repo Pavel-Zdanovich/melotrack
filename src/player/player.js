@@ -23,6 +23,32 @@ export class Player extends EventTarget {
         this._node = this._gain;
 
         this._node.connect(this._context.destination);
+
+        this._progress = new Progress();
+        this._timer = new Timer();
+        this._timer.addEventListener(`start`, () => {
+            this._context.resume().then(() => {
+                this.dispatchEvent(new CustomEvent(`play`, {detail: this._track}));
+            });
+        });
+        this._timer.addEventListener(`tick`, (e) => {
+            this._progress.make();
+            const progress = this._progress.get();
+            const time = e.detail;
+            this.dispatchEvent(new CustomEvent(`tick`, {detail: {progress, time}}));
+        });
+        this._timer.addEventListener(`stop`, () => {
+            console.log(`stop`);
+            this._context.suspend().then(() => {
+                this.dispatchEvent(new CustomEvent(`stop`, {detail: this._track}));
+            });
+        });
+        this._timer.addEventListener(`end`, () => {
+            console.log(`end`);
+            this._context.suspend().then(() => {
+                this.dispatchEvent(new CustomEvent(`end`, {detail: this._track}));
+            });
+        });
     }
 
     #createBufferSource(direction, rate, buffer) {
@@ -65,31 +91,8 @@ export class Player extends EventTarget {
         const progressEnd = (timerEnd / duration) * 100;
         const progressStep = 1 / COEFFICIENT;
 
-        this._progress = new Progress(progressStart, progressEnd, progressStep);
-        this._timer = new Timer(timerStart, timerEnd, timerStep);
-        this._timer.addEventListener(`start`, () => {
-            this._context.resume().then(() => {
-                this.dispatchEvent(new CustomEvent(`play`, {detail: this._track}));
-            });
-        });
-        this._timer.addEventListener(`tick`, (e) => {
-            this._progress.make();
-            const progress = this._progress.get();
-            const time = e.detail;
-            this.dispatchEvent(new CustomEvent(`tick`, {detail: {progress, time}}));
-        });
-        this._timer.addEventListener(`stop`, () => {
-            console.log(`stop`);
-            this._context.suspend().then(() => {
-                this.dispatchEvent(new CustomEvent(`stop`, {detail: this._track}));
-            });
-        });
-        this._timer.addEventListener(`end`, () => {
-            console.log(`end`);
-            this._context.suspend().then(() => {
-                this.dispatchEvent(new CustomEvent(`end`, {detail: this._track}));
-            });
-        });
+        this._progress.load(progressStart, progressEnd, progressStep);
+        this._timer.load(timerStart, timerEnd, timerStep);
     }
 
     decode(audioData) {
@@ -100,7 +103,7 @@ export class Player extends EventTarget {
         return this._track;
     }
 
-    set(track) {
+    load(track) {
         if (track instanceof Track) {
             this._track = track;
         } else {
@@ -123,6 +126,16 @@ export class Player extends EventTarget {
         const progress = this._progress.get();
         const time = Timer.millisToTime(this._track.getStart());
         this.dispatchEvent(new CustomEvent(`load`, {detail: {track, progress, time}}));
+    }
+
+    unload() {
+        this._track = undefined;
+
+        this._source = undefined;
+
+        this._progress.load();
+        this._timer.load(0);
+        this.dispatchEvent(new CustomEvent(`unload`));
     }
 
     play() {
@@ -159,7 +172,7 @@ export class Player extends EventTarget {
             this.#start(time, this._track.getEnd());
 
             this._progress.set(time / this._track.getDuration() * 100);
-            this._timer.setStart(time);
+            this._timer.set(time);
         } else {
             throwError({time});
         }

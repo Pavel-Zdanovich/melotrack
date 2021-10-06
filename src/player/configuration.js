@@ -4,10 +4,11 @@ import {Player} from "./player.js";
 
 const playerElement = document.body.children[0].children[1];
 
-const playElement = playerElement.children[0];
-const modeElement = playerElement.children[1];
+const controlsElement = playerElement.children[0];
+const playElement = controlsElement.children[0];
+const modeElement = controlsElement.children[1];
 
-const audioElement = playerElement.children[2];
+const audioElement = playerElement.children[1];
 
 const audioLabelElement = audioElement.firstElementChild;
 const audioTitleElement = audioLabelElement.firstElementChild;
@@ -18,7 +19,7 @@ const audioBarElement = audioSliderElement.firstElementChild;
 const audioProgressElement = audioBarElement.firstElementChild;
 const audioInputElement = audioSliderElement.lastElementChild;
 
-const volumeElement = playerElement.children[3];
+const volumeElement = playerElement.children[2];
 
 const volumeInfoElement = volumeElement.firstElementChild;
 const volumeValueElement = volumeInfoElement.firstElementChild;
@@ -57,6 +58,10 @@ player.addEventListener(`stop`, () => {
 player.addEventListener(`end`, () => {
     playElement.innerHTML = `▶`;
 });
+player.addEventListener(`unload`, (e) => {
+    audioTitleElement.innerHTML = `Artist - Title`;
+    outputToAudioElements(0, 0, 0, 0, 0);
+});
 
 playElement.addEventListener(`click`, () => {
     if (player.isPlaying()) {
@@ -83,6 +88,9 @@ player.setSelectionMode(modes.get(modeElement.innerHTML));
 audioElement.addEventListener(`input`, () => {
     const percentage = audioInputElement.value;
     const track = player.get();
+    if (!track) {
+        return;
+    }
     const millis = track.getDuration() * (percentage / 100);
     player.setTime(millis);
     if (!player.isPlaying()) {
@@ -95,7 +103,7 @@ audioElement.addEventListener(`input`, () => {
 volumeElement.addEventListener(`input`, () => {
     const percentage = volumeInputElement.value;
     player.setVolume(percentage / 100);
-    volumeProgressElement.style.width = `${percentage}%`;
+    volumeProgressElement.style.height = `${percentage}%`;
     volumeValueElement.innerHTML = percentage;
 });
 volumeInputElement.value = 50;
