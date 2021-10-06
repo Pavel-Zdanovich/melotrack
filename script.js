@@ -11,7 +11,9 @@ while (counter < 10) {
     let id = 10000000 + Math.floor(Math.random() * 1000000);
     let url = `https://api.deezer.com/track/${id}`;
     console.log(url);
-    fetch(url)
+    fetch(url, {
+        mode: `no-cors`
+    })
         .then(response => response.json())
         .then(body => {
             console.log(body);
