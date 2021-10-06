@@ -91,6 +91,9 @@ let addCellEventListener = (key, cell) => {
 };
 
 captionElement.innerText = tour.description;
+colgroupElement.innerHTML = ``;
+theadElement.innerHTML = ``;
+tbodyElement.innerHTML = ``;
 
 let map = new Map();
 

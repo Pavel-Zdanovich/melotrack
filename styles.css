@@ -45,8 +45,11 @@ body {
     justify-content: space-between;
 }
 
-header {
+.bordered {
     border: 1px solid black;
+}
+
+header {
     position: sticky;
     top: 0;
     display: flex;
@@ -54,14 +57,12 @@ header {
 }
 
 .heading {
-    border: 1px solid black;
     display: flex;
     align-items: center;
     justify-content: space-around;
 }
 
 .player {
-    border: 1px solid black;
     flex-shrink: 0.2847;
     display: grid;
     grid-template-areas:
@@ -71,10 +72,9 @@ header {
 }
 
 .centralized {
-    border: 1px solid black;
     display: flex;
-    justify-content: center;
     align-items: center;
+    justify-content: center;
 }
 
 .play {
@@ -104,7 +104,6 @@ header {
 }
 
 .volume-bar {
-    border: 1px solid black;
     grid-area: volume-bar;
 }
 
@@ -117,7 +116,7 @@ header {
 
 .volume-progress {
     position: relative;
-    background-color: black;
+    background-color: gray;
     opacity: 0.5;
     bottom: 100%;
     height: 100%;
@@ -126,14 +125,10 @@ header {
 
 .volume {
     transform: rotate(-90deg);
-    display: flex;
-    align-items: center;
-    justify-content: center;
     width: auto;
 }
 
 .timer {
-    border: 1px solid black;
     display: flex;
     align-items: center;
     justify-content: space-around;
@@ -159,7 +154,7 @@ caption {
     margin-bottom: 3.33%;
 }
 
-th, .tc, td {
+th, td {
     border-bottom-width: 2px;
     border-bottom-style: solid;
     border-bottom-color: black;
@@ -169,6 +164,10 @@ th, .tc, td {
     border-right-width: 2px;
     border-right-style: solid;
     border-right-color: black;
+}
+
+object {
+    height: 100%;
 }
 
 input {
@@ -182,19 +181,9 @@ input:focus {
 }
 
 footer {
-    border: 2px solid black;
     position: sticky;
     bottom: 0;
     height: 10%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-footer > div {
-    display: flex;
-    align-items: center;
-    justify-content: center;
 }
 
 .copyright {
@@ -204,19 +193,18 @@ footer > div {
 
 a {
     color: inherit;
-    text-decoration: none;
 }
 
 .about {
-
+    height: 100%;
 }
 
 .contacts {
-
+    height: 100%;
 }
 
 .icon {
-    flex-basis: 15%;
+    height: 50%;
 }
 
 svg {
