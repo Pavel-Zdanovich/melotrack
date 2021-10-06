@@ -17,13 +17,16 @@ const headRowElement = headElement.children[0];
 const headCellElement = headRowElement.children[0];
 
 const exampleRowElement = bodyElement.children[0];
-const exampleCellElement = exampleRowElement.children[0];
-const labelElement = exampleCellElement.children[0];
-const clefElement = labelElement.children[0];
-const signElement = labelElement.children[1];
-labelElement.innerHTML = ``;
-const upperElement = signElement.children[0];
-const lowerElement = signElement.children[1];
+
+const clefElement = footerElement.children[1].children[0].cloneNode(true);
+const upperElement = document.createElement(`div`);
+upperElement.classList.add(`upper`);
+const lowerElement = document.createElement(`div`);
+lowerElement.classList.add(`lower`);
+const signElement = document.createElement(`div`);
+signElement.classList.add(`signature`);
+signElement.appendChild(upperElement);
+signElement.appendChild(lowerElement);
 
 let tour = new Tour(
     `Melotrack`,
@@ -33,8 +36,16 @@ let tour = new Tour(
     document.documentElement.style.getPropertyValue(`--border-color`),
     [...headRowElement.children].map(cellElement => cellElement.innerText.toLowerCase()),
     [
-        new Track(`melotrack1`, `Melotrack`, `1`, `./audio/melotrack1.mp3`),
-        new Track(`melotrack2`, `Melotrack`, `2`, `./audio/melotrack2.mp3`)
+        new Track(`1`, `Melotrack`, `1`, `./audio/melotrack1.mp3`),
+        new Track(`2`, `Melotrack`, `2`, `./audio/melotrack2.mp3`),
+        new Track(`3`, `Melotrack`, `3`, `./audio/melotrack3.mp3`),
+        new Track(`4`, `Melotrack`, `4`, `./audio/melotrack4.mp3`),
+        new Track(`5`, `Melotrack`, `5`, `./audio/melotrack5.mp3`),
+        new Track(`6`, `Melotrack`, `6`, `./audio/melotrack6.mp3`),
+        new Track(`7`, `Melotrack`, `7`, `./audio/melotrack7.mp3`),
+        new Track(`8`, `Melotrack`, `8`, `./audio/melotrack8.mp3`),
+        new Track(`9`, `Melotrack`, `9`, `./audio/melotrack9.mp3`),
+        new Track(`10`, `Melotrack`, `10`, `./audio/melotrack10.mp3`)
     ]
 );
 
@@ -136,15 +147,15 @@ const headCellLeave = (rowIndex, colIndex) => {
 
 
 
+let reload = true;
 const bodyRowEnter = (rowIndex) => {
     map[rowIndex][0].classList.add(`staved`);
     currentRowIndex = rowIndex;
     const track = tour.tracks[currentRowIndex - 1];
-    if (track) {
+    if (track && reload) {
         loader.get(track.url).then(track => player.load(track));
-    } else {
-        player.unload();
     }
+    reload = true;
 };
 
 const bodyRowLeave = (rowIndex) => {
@@ -161,16 +172,19 @@ const bodyRowLeaveEnter = (prevRowIndex, nextRowIndex) => {
 
 
 const bodyCellEnter = (rowIndex, colIndex) => {
-    const label = map[rowIndex][colIndex].children[0];
-    label.appendChild(clefElement);
+    const cellElement = map[rowIndex][colIndex];
+    cellElement.style.setProperty(`display`, `flex`);
+    const labelElement = cellElement.children[0];
+    labelElement.appendChild(clefElement);
     upperElement.innerHTML = rowIndex;
     lowerElement.innerHTML = bodyElement.childElementCount;
-    label.appendChild(signElement);
+    labelElement.appendChild(signElement);
 };
 
 const bodyCellLeave = (rowIndex, colIndex) => {
-    const label = map[rowIndex][colIndex].children[0];
-    label.innerHTML = ``;
+    const cellElement = map[rowIndex][colIndex];
+    const labelElement = cellElement.children[0];
+    labelElement.innerHTML = ``;
 };
 
 
@@ -212,10 +226,16 @@ const addEventListeners = (rowIndex, colIndex, colEnter, colLeave, colLeaveEnter
         cellEnter(rowIndex, colIndex);
     });
     cellElement.addEventListener(`focusout`, (e) => {
-        cellLeave(rowIndex, colIndex);
-        if (!isTable(e.relatedTarget) && !isPlayer(e.relatedTarget)) {
-            rowLeave(rowIndex);
-            colLeave(colIndex);
+        if (!isTable(e.relatedTarget)) {
+            if (!isPlayer(e.relatedTarget)) {
+                cellLeave(rowIndex, colIndex);
+                rowLeave(rowIndex);
+                colLeave(colIndex);
+            } else {
+                reload = false;
+                const inputElement = cellElement.lastElementChild;
+                inputElement.focus();
+            }
         }
     });
 };
@@ -289,6 +309,7 @@ const check = () => {
 };
 
 timer.addEventListener(`end`, check);
+footerElement.addEventListener(`click`, check);
 
 tableElement.addEventListener(`keydown`, (e) => {
     switch (e.code) {
@@ -412,6 +433,7 @@ document.addEventListener(`tour`, (e) => {
     });
 
     player.setTitleMode(false);
+    bodyRowLeave(currentRowIndex);
 
     timer.load(tour.time);
     if (!timer.isTicking()) {

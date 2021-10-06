@@ -74,8 +74,8 @@ const spinnerElement = document.body.lastElementChild;
 spinner.addEventListener(`start`, () => {
     document.body.appendChild(spinnerElement);
 });
-const circleElement = spinnerElement.firstElementChild;
-const textElement = spinnerElement.lastElementChild;
+const circleElement = spinnerElement.children[0];
+const textElement = spinnerElement.children[2];
 const DASHES_IN_PERCENT = 3.078;
 spinner.addEventListener(`output`, (e) => {
     const percentage = e.detail;

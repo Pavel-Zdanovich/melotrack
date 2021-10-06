@@ -66,6 +66,10 @@ const load = (mode) => {
     });
 };
 
+indexElement.addEventListener(`click`, () => {
+    load(current);
+});
+
 const leftElement = document.body.children[1];
 const rightElement = document.body.children[3];
 

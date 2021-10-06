@@ -11,7 +11,18 @@ export const genre = (DZ, data, markProgressBy) => {
     });
     DZ.api(`/genre/${id}`, (playlist) => {
         markProgressBy(50);
-        outsideResolve(new Tour(`Playlist`, `Guess the artists and titles from playlist "${playlist.title}".`, 60000, `yellow`, `green`, [`artist`, `title`], playlist.tracks.data.map(json => Track.parse(json))));
+        outsideResolve(
+            new Tour(
+                `Playlist`,
+                `Guess the artists and titles from playlist "${playlist.title}".`,
+                60000,
+                `yellow`,
+                `green`,
+                [`artist`, `title`],
+                playlist.tracks.data.map(json => Track.parse(json)
+                )
+            )
+        );
     });
     return promise;
 };

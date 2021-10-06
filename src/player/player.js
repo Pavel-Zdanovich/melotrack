@@ -131,6 +131,9 @@ export class Player extends EventTarget {
     unload() {
         this._track = undefined;
 
+        if (this._source != null) {
+            this._source.disconnect(this._node); //because previous sources will play unless disconnect
+        }
         this._source = undefined;
 
         this._progress.load();

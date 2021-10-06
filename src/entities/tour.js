@@ -3,11 +3,11 @@ import {Track} from "./track.js";
 
 export class Tour {
 
-    constructor(title, description, time, background, border, keys, tracks) {
-        if (typeof title === `string`) {
-            this.title = title;
+    constructor(name, description, time, background, border, keys, tracks) {
+        if (typeof name === `string`) {
+            this.name = name;
         } else {
-            throwError({title});
+            throwError({name});
         }
 
         if (typeof description === `string`) {

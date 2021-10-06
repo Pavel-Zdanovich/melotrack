@@ -1,58 +1,7 @@
-* {
-    text-align: center; /*horizontal center*/
-    line-height: normal; /*как-то двигает текст*/
-    vertical-align: middle;
-
-    margin: 0 auto; /*make full screen*/
-    padding: 0; /*make full screen*/
-
-    overflow: hidden;
-
-    width: 100%;
-}
-
-.spinner {
-    border-radius: 50%;
-    border-width: calc(var(--border-width));
-    border-style: solid;
-    border-color: var(--other-color);
-}
-
-.absoluted {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    width: 10%;
-}
-
-.spinner circle {
-    stroke-dasharray: 0.855, 306.945; /*1° - 0.855*/
-    stroke-dashoffset: 76.95;
-    animation-name: rotation;
-    animation-duration: 3s;
-    animation-timing-function: linear;
-    animation-iteration-count: infinite;
-    transform-origin: center;
-}
-
-@keyframes rotation {
-    from {
-        transform: rotate(0deg);
-    }
-    to {
-        transform: rotate(359deg);
-    }
-}
-
-.spinner text {
-    text-anchor: middle;
-    dominant-baseline: middle;
-    stroke-width: 1px;
-}
-
 .bordered {
-    border: calc(var(--border-width)) solid var(--border-color);
+    border-width: var(--border-width);
+    border-style: solid;
+    border-color: var(--border-color);
 }
 
 .staved {
@@ -74,22 +23,37 @@
     justify-content: center;
 }
 
+.absoluted {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    /*
+    CSS Vendor Prefix
+    -webkit- Chrome, iOS, Safari
+    -moz- Firefox
+    -ms- Microsoft
+    -o- Opera
+    */
+    transform: translate(-50%, -50%);
+}
+
 html {
     background-color: var(--background-color);
 
     color: var(--border-color);
 
-    --other-color: rgba(0, 0, 0, 0.5);
+    --opacity: 25%;
 
     --border-width: 1px;
 
-    height: 100%;
+    text-align: center;
 }
 
 body {
-    height: 100%;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0;
 }
 
 /* Track */
@@ -105,7 +69,7 @@ body::-webkit-scrollbar-track {
 
 /* Handle */
 body::-webkit-scrollbar-thumb {
-    background: var(--other-color);
+    filter: opacity(var(--opacity));
 }
 
 /* Handle on hover */
@@ -113,17 +77,18 @@ body::-webkit-scrollbar-thumb:hover {
     background: var(--border-color);
 }
 
+
+
 header {
+    top: 0;
+    left: 0;
     display: flex;
-    min-height: 10%;
-    /*max-height: 10%;*/
+    width: 100%;
+    height: 10%;
     background-color: var(--background-color);
 }
 
 .heading {
-    display: flex;
-    align-items: center;
-    justify-content: center;
     flex-basis: 12.5%;
 }
 
@@ -142,6 +107,10 @@ header {
     flex-basis: 75%;
 }
 
+.player label {
+    height: 100%;
+}
+
 .controls {
     display: flex;
     flex-direction: column;
@@ -150,35 +119,28 @@ header {
     position: relative;
 }
 
-.controls label {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-}
-
-.controls :nth-child(2) {
-    position: absolute;
-    height: 50%;
-    top: 0;
-}
-
-.controls :nth-child(4) {
-    position: absolute;
-    height: 50%;
-    bottom: 0;
-}
-
-.controls :first-child {
+.controls > :nth-child(1) {
     border-bottom-width: var(--border-width);
     border-bottom-style: solid;
     border-bottom-color: var(--border-color);
 }
 
-.controls :last-child {
+.controls > :nth-child(2) {
+    position: absolute;
+    height: 50%;
+    top: 0;
+}
+
+.controls > :nth-child(3) {
     border-top-width: var(--border-width);
     border-top-style: solid;
     border-top-color: var(--border-color);
+}
+
+.controls > :nth-child(4) {
+    position: absolute;
+    height: 50%;
+    top: 50%;
 }
 
 .audio {
@@ -189,7 +151,6 @@ header {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    height: 100%;
 }
 
 .audio .progress {
@@ -208,7 +169,18 @@ header {
     display: flex;
     justify-content: flex-end;
     flex-direction: column;
+}
+
+.volume label * {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     height: 100%;
+}
+
+.volume label .icon {
+    align-self: center;
+    width: fit-content;
 }
 
 .volume .progress {
@@ -226,17 +198,21 @@ header {
 }
 
 .bar {
+    width: 100%;
     display: flex;
     align-items: flex-end;
     justify-content: center;
 }
 
 .progress {
-    height: 100%;
-    background-color: var(--other-color);
+    width: 100%;
+    background-color: var(--border-color);
+    filter: opacity(var(--opacity));
 }
 
 input[type=range] {
+    height: 100%;
+    width: 100%;
     position: fixed;
     opacity: 0;
 }
@@ -256,12 +232,13 @@ input[type=range]::-ms-track {
 .volume input[type=range][orient=vertical] {
     writing-mode: bt-lr; /* IE */
     -webkit-appearance: slider-vertical; /* Chromium */
-    height: 100%;
 }
 
 .timer {
     flex-basis: 12.5%;
 }
+
+
 
 .side {
     width: 5%;
@@ -280,57 +257,45 @@ input[type=range]::-ms-track {
     stroke-width: 3%;
 }
 
+
+
 table {
-    height: 120%;
+    margin-top: 12vh;
+    margin-bottom: 12vh;
+    width: 75%;
+    border-collapse: collapse;
+    overflow: hidden;
+}
+
+caption {
+    margin-bottom: 2%;
+}
+
+tbody {
+    overflow-x: scroll;
+    -webkit-overflow-scrolling: auto;
+}
+
+table label {
     display: flex;
-    flex-direction: column;
-    justify-content: center;
-    padding-left: calc(100vw - 100%);
 }
 
 tr {
+    height: 6.72vh; /*(100vh - 12vh(bottom) - 12vh(top) - 2vh(gap)) / 11(head+rows) = 6.72*/
     display: flex;
 }
 
 th, td {
     display: flex;
-    justify-content: center;
-    align-items: center;
+    width: 100%;
 }
 
-table > * {
-    width: 77.5%;
+input {
+    width: 100%;
 }
 
-caption {
-    height: 15.75%;
-}
-
-thead {
-    height: 5.485%;
-}
-
-thead tr {
-    height: 100%;
-}
-
-tbody {
-    height: 56.25%;
-    overflow-x: scroll;
-    -webkit-overflow-scrolling: auto;
-}
-
-tbody tr {
-    height: 9.75%;
-}
-
-td * {
-    height: 100%;
-}
-
-td label {
-    display: flex;
-    width: 15%;
+table .icon {
+    height: auto;
 }
 
 th {
@@ -408,7 +373,6 @@ tbody {
     border-right-color: var(--background-color);
 }
 
-
 .signature {
     display: flex;
     flex-direction: column;
@@ -428,12 +392,19 @@ input:focus {
     box-shadow: none;
 }
 
+
+
 footer {
-    display: flex;
     bottom: 0;
-    min-height: 10%;
-    max-height: 10%;
+    left: 0;
+    display: flex;
+    width: 100%;
+    height: 10%;
     background-color: var(--background-color);
+}
+
+footer > * {
+    flex-basis: 100%;
 }
 
 .copyright {
@@ -441,38 +412,76 @@ footer {
     flex-direction: column;
 }
 
-a {
-    color: inherit;
-    height: 100%;
-    width: 100%;
-}
-
-.about {
-    /*height: 100%;*/
-}
-
-.clef {
-    width: 2.5%;
+.about .icon {
+    height: 75%;
 }
 
 .contacts {
-    /*height: 100%;*/
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+}
+
+a {
+    color: inherit;
+    height: 50%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.spinner circle {
+    /*stroke-width reflects the width relative to the circle line out and in*/
+    stroke-width: 2%;
+    /*radius 50% - completely inscribed, to compensate for the stroke width: r = 50% - (stroke-width / 2)*/
+    r: 49%;
+}
+
+.spinner circle:first-child {
+    stroke-dasharray: 0.855, 306.945; /*1° - 0.855*/
+    stroke-dashoffset: 76.95;
+    animation-name: rotation;
+    animation-duration: 3s;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+    transform-origin: center;
+}
+
+@keyframes rotation {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(359deg);
+    }
+}
+
+.spinner :nth-child(2) {
+    stroke-dasharray: 307.8, 0;
+    filter: opacity(var(--opacity));
+}
+
+.spinner text {
+    text-anchor: middle;
+    dominant-baseline: middle;
+    stroke-width: var(--border-width);
+}
+
+.icon {
+    height: 100%;
 }
 
 svg {
     fill: var(--background-color);
     stroke: var(--border-color);
+    height: 100%;
 }
 
-rect {
-    width: 95%;
+#dz-root {
+    display: none;
 }
 
 @media (max-width: 480px) {
-    * {
-        /*font-size: 36px;*/
-    }
-
     header {
         display: grid;
         grid-template-areas:
@@ -483,14 +492,6 @@ rect {
 
     .heading {
         grid-area: heading;
-    }
-
-    .logo {
-        width: 10%;
-    }
-
-    .logo svg {
-        stroke-width: 3%;
     }
 
     .timer {
@@ -508,17 +509,28 @@ rect {
     thead, tbody {
         width: 80%;
     }
+}
 
-    .clef {
-        width: 30%;
+@media (max-width: 480px) {
+    * {
+        font-size: 14px;
+        /*background-color: red;*/
+    }
+
+    .spinner {
+        width: 25%;
+    }
+
+    .logo {
+        width: 10%;
+    }
+
+    .logo svg {
+        stroke-width: 4%;
     }
 
     .clef svg {
         stroke-width: 3%;
-    }
-
-    .icon {
-        width: 15%;
     }
 
     .icon svg {
@@ -528,27 +540,23 @@ rect {
 
 @media (min-width: 480px) and (max-width: 768px) {
     * {
-        /*font-size: 14px;*/
+        /*background-color: orange;*/
+    }
+
+    .spinner {
+        width: 20%;
     }
 
     .logo {
-        width: 30%;
+        width: 20%;
     }
 
     .logo svg {
         stroke-width: 3.5%;
     }
 
-    .clef {
-        width: 20%;
-    }
-
     .clef svg {
         stroke-width: 3%;
-    }
-
-    .icon {
-        width: 15%;
     }
 
     .icon svg {
@@ -556,29 +564,25 @@ rect {
     }
 }
 
-@media (min-width: 768px) and (max-width: 1056px) {
+@media (min-width: 768px) and (max-width: 992px) {
     * {
-        /*font-size: 18px;*/
+        /*background-color: yellow;*/
+    }
+
+    .spinner {
+        width: 15%;
     }
 
     .logo {
-        width: 35%;
+        width: 22.5%;
     }
 
     .logo svg {
-        stroke-width: 3.5%;
-    }
-
-    .clef {
-        width: 20%;
+        stroke-width: 3%;
     }
 
     .clef svg {
-        stroke-width: 2.5%;
-    }
-
-    .icon {
-        width: 10%;
+        stroke-width: 3%;
     }
 
     .icon svg {
@@ -586,13 +590,17 @@ rect {
     }
 }
 
-@media (min-width: 1056px) {
+@media (min-width: 992px) and (max-width: 1200px) {
     * {
-        /*font-size: 18px;*/
+        /*background-color: green;*/
+    }
+
+    .spinner {
+        width: 10%;
     }
 
     .logo {
-        width: 27.5%;
+        width: 25%;
     }
 
     .logo svg {
@@ -611,16 +619,46 @@ rect {
         right: 4%;
     }
 
-    .clef {
-        width: 12.5%;
-    }
-
     .clef svg {
         stroke-width: 2.5%;
     }
 
-    .icon {
-        width: 7.5%;
+    .icon svg {
+        stroke-width: 3.5%;
+    }
+}
+
+@media (min-width: 1200px) {
+    * {
+        /*background-color: blue;*/
+    }
+
+    .spinner {
+        width: 10%;
+    }
+
+    .logo {
+        width: 27.5%;
+    }
+
+    .logo svg {
+        stroke-width: 2%;
+    }
+
+    .side {
+        width: 3%;
+    }
+
+    .left {
+        left: 4%;
+    }
+
+    .right {
+        right: 4%;
+    }
+
+    .clef svg {
+        stroke-width: 2.5%;
     }
 
     .icon svg {

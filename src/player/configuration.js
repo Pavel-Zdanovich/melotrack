@@ -6,8 +6,16 @@ const playerElement = document.body.children[0].children[1];
 
 const controlsElement = playerElement.children[0];
 const playLabelElement = controlsElement.children[0];
+const playIconElement = playLabelElement.children[0];
+const stopIconElement = playLabelElement.children[1];
+playLabelElement.removeChild(stopIconElement);
 const playInputElement = controlsElement.children[1];
 const modeLabelElement = controlsElement.children[2];
+const repeatIconElement = modeLabelElement.children[0];
+const forwardIconElement = modeLabelElement.children[1];
+const previousIconElement = modeLabelElement.children[2];
+modeLabelElement.removeChild(forwardIconElement);
+modeLabelElement.removeChild(previousIconElement);
 const modeInputElement = controlsElement.children[3];
 
 const audioElement = playerElement.children[1];
@@ -49,7 +57,8 @@ player.addEventListener(`load`, (e) => {
     outputToAudioElements(progress, ...time);
 });
 player.addEventListener(`play`, () => {
-    playLabelElement.innerHTML = `⏸`;
+    playLabelElement.removeChild(playIconElement);
+    playLabelElement.appendChild(stopIconElement);
 });
 player.addEventListener(`tick`, (e) => {
     const progress = e.detail.progress;
@@ -57,10 +66,12 @@ player.addEventListener(`tick`, (e) => {
     outputToAudioElements(progress, ...time);
 });
 player.addEventListener(`stop`, () => {
-    playLabelElement.innerHTML = `▶`;
+    playLabelElement.removeChild(stopIconElement);
+    playLabelElement.appendChild(playIconElement);
 });
 player.addEventListener(`end`, () => {
-    playLabelElement.innerHTML = `▶`;
+    playLabelElement.removeChild(stopIconElement);
+    playLabelElement.appendChild(playIconElement);
 });
 player.addEventListener(`unload`, (e) => {
     audioTitleElement.innerHTML = player.isTitle() ? `Artist - Title` : ``;
@@ -82,7 +93,13 @@ const playListener = () => {
 playInputElement.addEventListener(`click`, playListener);
 playInputElement.addEventListener(`touchstart`, playListener);
 
-const modes = new Map([[`🔁`, current], [`⏭️`, next], [`⏮️`, previous]]);
+const modes = new Map(
+    [
+        [repeatIconElement, current],
+        [forwardIconElement, next],
+        [previousIconElement, previous]
+    ]
+);
 let iterator = modes.entries();
 iterator.next(); //need to skip
 const modeListener = () => {
@@ -92,11 +109,12 @@ const modeListener = () => {
          mode = iterator.next();
      }
      player.setSelectionMode(mode.value[1]);
-     modeLabelElement.innerHTML = mode.value[0];
+     modeLabelElement.removeChild(modeLabelElement.firstElementChild);
+     modeLabelElement.appendChild(mode.value[0]);
 }
 modeInputElement.addEventListener(`click`, modeListener);
 modeInputElement.addEventListener(`touchstart`, modeListener);
-player.setSelectionMode(modes.get(modeLabelElement.innerHTML));
+player.setSelectionMode(modes.get(modeLabelElement.firstElementChild));
 
 audioElement.addEventListener(`input`, () => {
     const percentage = audioInputElement.value;

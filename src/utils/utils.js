@@ -7,37 +7,37 @@ export function promisify() {
     return [promise, resolve, reject];
 }
 
-function check(current, array) {
+function check(index, array) {
     if (array.constructor !== Array) {
         throwError({array});
     }
 
-    if (typeof current !== `number`) {
-        throwError({current});
+    if (typeof index !== `number`) {
+        throwError({index});
     }
 }
 
-export function current(current, array) {
-    check(current, array);
-    if (current < 0 || current >= array.length) {
-        throwError({current});
+export function current(index, array) {
+    check(index, array);
+    if (index < 0 || index >= array.length) {
+        throwError({current: index});
     }
-    return array[current];
+    return array[index];
 }
 
-export function next(current, array) {
-    check(current, array);
-    if (current < array.length - 1) {
-        return array[current + 1];
+export function next(index, array) {
+    check(index, array);
+    if (index < array.length - 1) {
+        return array[index + 1];
     } else {
         return array[0];
     }
 }
 
-export function previous(current, array) {
-    check(current, array);
-    if (current > 0) {
-        return array[current - 1];
+export function previous(index, array) {
+    check(index, array);
+    if (index > 0) {
+        return array[index - 1];
     } else {
         return array[array.length - 1];
     }
