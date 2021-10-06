@@ -5,42 +5,51 @@ const MAX_PERCENT = 100;
 
 export class Progress {
 
-    constructor(direction, progressStep = 1, percent = direction ? 0 : 100) {
-        if (direction != null && typeof direction === `boolean`) {
-            this._direction = direction
+    constructor(start = MIN_PERCENT, end = MAX_PERCENT, step = 1) {
+        if (typeof start === `number` && (start >= MIN_PERCENT && start <= MAX_PERCENT)) {
+            this._start = start;
         } else {
-            throwError({direction});
+            throwError({start});
         }
 
-        if (typeof percent === `number` && (percent >= MIN_PERCENT && percent <= MAX_PERCENT)) {
-            this._percent = percent;
+        if (typeof end === `number` && (end >= MIN_PERCENT && end <= MAX_PERCENT)) {
+            this._end = end;
         } else {
-            throwError({percent});
+            throwError({end});
         }
 
-        if (progressStep != null && typeof progressStep === `number` && (progressStep > MIN_PERCENT && percent <= MAX_PERCENT)) {
-            this._progressStep = progressStep;
+        if (this._end > this._start) {
+            this._operation = this.#increment;
+            this._percent = this._start;
+            this._min = this._start;
+            this._max = this._end;
         } else {
-            throwError({progressStep});
+            this._operation = this.#decrement;
+            this._percent = this._end;
+            this._min = this._end;
+            this._max = this._start;
         }
 
-        this._operation = this._direction ? this.#increment : this.#decrement;
+        if (typeof step === `number` && (step > MIN_PERCENT && step <= MAX_PERCENT)) {
+            this._step = step;
+        } else {
+            throwError({step});
+        }
     }
 
-    get() {
-        return this._percent;
+    #increment() {
+        if (this._max - this._percent > this._step) {
+            this._percent = this._percent + this._step;
+        } else {
+            this._percent = this._max;
+        }
     }
 
-    set(percent) {
-        if (percent != null && typeof percent === `number` && (percent >= MIN_PERCENT && percent <= MAX_PERCENT)) {
-            const remainder = percent % this._progressStep;
-            if (this._progressStep > remainder) {
-                this._percent = percent - remainder + this._progressStep;
-            } else {
-                this._percent = percent - remainder;
-            }
+    #decrement() {
+        if (this._min > this._percent - this._step) {
+            this._percent = this._percent - this._step;
         } else {
-            throwError({percent});
+            this._percent = this._min;
         }
     }
 
@@ -48,19 +57,20 @@ export class Progress {
         return this._operation();
     }
 
-    #increment() {
-        if (MAX_PERCENT - this._percent > this._progressStep) {
-            this._percent = this._percent + this._progressStep;
-        } else {
-            this._percent = MAX_PERCENT;
-        }
+    get() {
+        return this._percent;
     }
 
-    #decrement() {
-        if (MIN_PERCENT > this._percent - this._progressStep) {
-            this._percent = this._percent - this._progressStep;
+    set(percent) {
+        if (typeof percent === `number` && (percent >= this._min && percent <= this._max)) {
+            const remainder = percent % this._step;
+            if (this._step > remainder) {
+                this._percent = percent - remainder + this._step;
+            } else {
+                this._percent = percent - remainder;
+            }
         } else {
-            this._percent = MIN_PERCENT;
+            throwError({percent});
         }
     }
 }

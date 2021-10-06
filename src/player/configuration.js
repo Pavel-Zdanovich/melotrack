@@ -29,25 +29,32 @@ const volumeBarElement = volumeSliderElement.firstElementChild;
 const volumeProgressElement = volumeBarElement.firstElementChild;
 const volumeInputElement = volumeSliderElement.lastElementChild;
 
-//volumeSliderElement.style.width = `${volumeElement.clientHeight}px`;
-
-const outputToAudioElements = (progress, hours, mins, secs, millis) => {
+const outputToAudioElements = (percentage, hours, mins, secs, millis) => {
     audioTimeElement.innerHTML = outputMinsAndSecs(hours, mins, secs, millis);
-    audioProgressElement.style.width = `${progress}%`;
-    audioInputElement.value = progress;
+    audioProgressElement.style.width = `${percentage}%`;
+    audioInputElement.value = percentage;
 };
 
-const player = new Player(outputToAudioElements);
+const player = new Player(); //TODO create modal button to create player for https://stackoverflow.com/questions/55026293/google-chrome-javascript-issue-in-getting-user-audio-the-audiocontext-was-not
 player.addEventListener(`load`, (e) => {
-    audioTitleElement.innerHTML = `${e.detail.artist} - ${e.detail.title}`;
-    outputToAudioElements(0, ...Timer.millisToTime(e.detail._duration));
+    const track = e.detail.track;
+    audioTitleElement.innerHTML = `${track.artist} - ${track.title}`;
+    const progress = e.detail.progress;
+    const time = e.detail.time;
+    outputToAudioElements(progress, ...time);
 });
 player.addEventListener(`play`, () => {
-    //console.log(`play`);
     playElement.innerHTML = `⏸`;
 });
+player.addEventListener(`tick`, (e) => {
+    const progress = e.detail.progress;
+    const time = e.detail.time;
+    outputToAudioElements(progress, ...time);
+});
 player.addEventListener(`stop`, () => {
-    //console.log(`stop`);
+    playElement.innerHTML = `▶`;
+});
+player.addEventListener(`end`, () => {
     playElement.innerHTML = `▶`;
 });
 
@@ -59,37 +66,30 @@ playElement.addEventListener(`click`, () => {
     }
 });
 
-let modeIndex = 0;
-const modes = [
-    {
-        icon: `🔁`,
-        select: current
-    },
-    {
-        icon: `⏭️`,
-        select: next
-    },
-    {
-        icon: `⏮️`,
-        select: previous
-    }
-];
+const modes = new Map([[`🔁`, current], [`⏭️`, next], [`⏮️`, previous]]);
+let iterator = modes.entries();
+iterator.next(); //need to skip
 modeElement.addEventListener(`click`, () => {
-    modeIndex++;
-    if (modeIndex === 3) {
-        modeIndex = 0;
+    let mode = iterator.next();
+    if (mode.done) {
+        iterator = modes.entries();
+        mode = iterator.next();
     }
-    const mode = modes[modeIndex];
-    player.setSelectionMode(mode.select);
-    modeElement.innerHTML = mode.icon;
+    player.setSelectionMode(mode.value[1]);
+    modeElement.innerHTML = mode.value[0];
 });
-player.setSelectionMode(modes[modeIndex].select);
+player.setSelectionMode(modes.get(modeElement.innerHTML));
 
 audioElement.addEventListener(`input`, () => {
     const percentage = audioInputElement.value;
-    const time = player.getDuration() * percentage / 100;
-    player.setTime(time);
-    outputToAudioElements(percentage, ...Timer.millisToTime(time));
+    const track = player.get();
+    const millis = track.getDuration() * (percentage / 100);
+    player.setTime(millis);
+    if (!player.isPlaying()) {
+        const progress = percentage;
+        const time = Timer.millisToTime(millis);
+        outputToAudioElements(progress, ...time);
+    }
 });
 
 volumeElement.addEventListener(`input`, () => {
@@ -98,6 +98,8 @@ volumeElement.addEventListener(`input`, () => {
     volumeProgressElement.style.width = `${percentage}%`;
     volumeValueElement.innerHTML = percentage;
 });
+volumeInputElement.value = 50;
+volumeElement.dispatchEvent(new Event('input'));
 
 export {player};
 

@@ -13,6 +13,7 @@ const theadElement = tableElement.children[1];
 const tbodyElement = tableElement.children[2];
 
 const theadRowElement = theadElement.children[0];
+const theadCellElement = theadRowElement.children[0];
 
 const exampleRowElement = tbodyElement.children[0];
 const exampleCellElement = exampleRowElement.children[0];
@@ -22,144 +23,139 @@ const signElement = labelElement.children[1];
 const upperElement = signElement.children[0];
 const lowerElement = signElement.children[1];
 
-const createLabelElement = (id) => {
-    const label = document.createElement(`label`);
-    label.htmlFor = id;
-    return label;
-};
-
-const createInputElement = (id) => {
-    const input = document.createElement(`input`);
-    input.id = id;
-    input.type = `text`;
-    return input;
-};
-
-//initialization
-let tracks = [
-    new Track(`melotrack1`, `Melotrack`, `1`, `./audio/melotrack1.mp3`),
-    new Track(`melotrack2`, `Melotrack`, `2`, `./audio/melotrack2.mp3`)
-];
-
-tracks.forEach(track => loader.load(track));
-loader.get(`./audio/melotrack1.mp3`).then(track => player.set(track));
-
-player.addEventListener(`end`, (e) => {
-    const selectNext = player.getSelectionMode();
-    const current = e.detail;
-    const index = tracks.indexOf(current);
-    const next = selectNext(index, tracks);
-    loader.get(next.url).then(track => player.set(track));
-});
-
 const map = [[]]; //map[row][col] - [[thr, th1, th2], [tbr1, td1, td2], [tbr2, td1, td2], ..., [tbr10, td1, td2]]
 
 let currentRowIndex;
 let currentColIndex;
 
-map[0][0] = theadRowElement;
+const color = `gray`;
+const border = `var(--border-color)`;
 
-const theadRect = theadRowElement.getBoundingClientRect();
-const tbodyRect = tbodyElement.getBoundingClientRect();
-const height = theadRect.height + tbodyRect.height;
-const width = theadRect.width;
+let requestId;
+let touchEnd = false;
+tbodyElement.addEventListener(`touchend`, () => {
+    touchEnd = true;
+    tbodyElement.scrollBy(1, 0);
+})
 
-const stretchFor = (rowElement, cols) => {
-    if (width / cols <= 300 || mobile) {
-        rowElement.style.width = cols + `00%`;
+const scrollWidth = exampleRowElement.getBoundingClientRect().width;
+const threshold = theadCellElement.getBoundingClientRect().width;
+
+let prevScroll = 0;
+let scrollBy = 0;
+let direction;
+tbodyElement.addEventListener(`scroll`, () => {
+    const currentScroll = tbodyElement.scrollLeft - prevScroll;
+    prevScroll = tbodyElement.scrollLeft;
+    if (!direction) {
+        direction = currentScroll > 0 ? `>` : `<`;
     }
-};
 
-const isCol = (element) => {
-    const tagName = element ? element.tagName : element;
-    return tagName === `TH` || tagName === `LABEL` || tagName === `svg` || tagName === `path` || tagName === `DIV` || tagName === `INPUT`; //TODO
-}
+    const colIndex = Math.trunc(tbodyElement.scrollLeft / scrollWidth);
 
-const scrollTo = (colIndex) => {
-    const colElement = map[1][colIndex].getBoundingClientRect();
-    tbodyElement.scrollTo((colIndex - 1) * colElement.width, 0);
-};
+    const left = colIndex * scrollWidth;
+    const right = left + scrollWidth;
 
-const colEnter = (from, colIndex) => {
-    if (isCol(from)) {
-        if (currentColIndex !== colIndex) {
-            for (let rowIndex = 0; rowIndex <= tbodyElement.childElementCount; rowIndex++) {
-                map[rowIndex][currentColIndex].style.borderWidth = ``;
-                map[rowIndex][colIndex].style.borderWidth = `5px`;
-            }
-            scrollTo(colIndex);
-            currentColIndex = colIndex;
+    const diffLeft = tbodyElement.scrollLeft - left;
+    const diffRight = right - tbodyElement.scrollLeft;
+
+    if (direction === `>`) {
+        if (diffLeft < threshold) {
+            scrollBy = -1 * diffLeft;
+        } else {
+            scrollBy = diffRight;
         }
     } else {
-        for (let rowIndex = 0; rowIndex <= tbodyElement.childElementCount; rowIndex++) {
-            map[rowIndex][colIndex].style.borderWidth = `5px`;
+        if (diffRight < threshold) {
+            scrollBy = diffRight;
+        } else {
+            scrollBy = -1 * diffLeft;
         }
-        scrollTo(colIndex);
-        currentColIndex = colIndex;
     }
-};
 
-const colLeave = (to, colIndex) => {
-    if (!isCol(to)) {
-        for (let rowIndex = 0; rowIndex <= tbodyElement.childElementCount; rowIndex++) {
-            map[rowIndex][colIndex].style.borderWidth = ``;
+    if (touchEnd) {
+        touchEnd = false;
+
+        const start = performance.now();
+        const duration = 1000;
+        const callback = (time) => {
+            let progress = (time - start) / duration;
+            const x = progress * scrollBy;
+            if (Number.parseInt(scrollBy.toFixed(1)) !== 0) {
+                tbodyElement.scrollBy(x, 0);
+                requestId = requestAnimationFrame(callback);
+            } else {
+                cancelAnimationFrame(requestId);
+                requestId = undefined;
+                direction = undefined;
+            }
         }
-        currentColIndex = undefined;
+        requestId = requestAnimationFrame(callback);
     }
+});
+
+const colEnter = (colIndex) => {
+    //console.log(`Enter col ${colIndex}`);
+    for (let rowIndex = 0; rowIndex <= tbodyElement.childElementCount; rowIndex++) {
+        const array = map[rowIndex];
+        //const rowElement = array[0];
+        const cellElement = map[rowIndex][colIndex];
+        cellElement.style.backgroundColor = color;
+        if (colIndex === 1) {
+            cellElement.style.borderLeftColor = border;
+        } else if (colIndex === array.length - 1) {
+            cellElement.style.borderRightColor = border;
+        }
+    }
+    map[0][colIndex].style.borderTopColor = border;
+    if (colIndex === 1) {
+        theadElement.style.borderLeftColor = border;
+        tbodyElement.style.borderLeftColor = border;
+        tbodyElement.style.borderRightColor = border;
+    } else if (colIndex === map[0].length - 1) {
+        theadElement.style.borderRightColor = border;
+        tbodyElement.style.borderRightColor = border;
+    } else {
+        tbodyElement.style.borderLeftColor = border;
+        tbodyElement.style.borderRightColor = border;
+    }
+
+    let width = 0;
+    for (let index = 1; index <= colIndex - 1; index++) {
+        width = width + map[1][index].getBoundingClientRect().width;
+    }
+    tbodyElement.scrollTo(width + 0.5, 0);
+    currentColIndex = colIndex;
 };
 
-const fillCellsInRow = (rowIndex, cellEnter, cellLeave) => {
-    const array = map[rowIndex];
-    const rowElement = array[0];
-    for (let index = 0; index < rowElement.childElementCount; index++) {
-        const cellElement = rowElement.children[index];
-
-        const colIndex = index + 1;
-
-        map[rowIndex][colIndex] = cellElement;
-
-        cellElement.addEventListener(`focusin`, (e) => {
-            colEnter(e.relatedTarget, colIndex);
-            cellEnter(rowIndex, colIndex);
-        });
-        cellElement.addEventListener(`focusout`, (e) => {
-            colLeave(e.relatedTarget, colIndex);
-            cellLeave(rowIndex, colIndex);
-        });
+const colLeave = (colIndex) => {
+    //console.log(`Leave col ${colIndex}`);
+    for (let rowIndex = 0; rowIndex <= tbodyElement.childElementCount; rowIndex++) {
+        const cellElement = map[rowIndex][colIndex];
+        cellElement.style = ``;
     }
+    map[0][colIndex].style = ``;
+    theadElement.style = ``;
+    tbodyElement.style = ``;
+    currentColIndex = undefined;
 };
-
-fillCellsInRow(
-    0,
-    (rowIndex, colIndex) => {
-        const cellElement = map[rowIndex][colIndex];
-        cellElement.style.borderColor = `var(--border-color)`;
-        cellElement.style.borderStyle = `solid`;
-        cellElement.style.borderWidth = `5px`;
-    },
-    (rowIndex, colIndex) => {
-        const cellElement = map[rowIndex][colIndex];
-        cellElement.style.borderColor = ``;
-        cellElement.style.borderStyle = ``;
-        cellElement.style.borderWidth = ``;
-    },
-);
 
 const rowEnter = (rowIndex) => {
+    //console.log(`Enter row ${rowIndex}`);
     map[rowIndex][0].classList.add(`staved`);
     currentRowIndex = rowIndex;
-    const url = tracks[currentRowIndex].url;
+    const url = tracks[currentRowIndex].url; //TODO
     loader.get(url).then(track => player.set(track));
 };
 
 const rowLeave = (rowIndex) => {
+    //console.log(`Leave row ${rowIndex}`);
     map[rowIndex][0].classList.remove(`staved`);
     currentRowIndex = undefined;
 };
 
-labelElement.innerHTML = ``;
-
 const cellEnter = (rowIndex, colIndex) => {
+    //console.log(`Enter TD [${rowIndex}][${colIndex}]`);
     const label = map[rowIndex][colIndex].children[0];
     label.appendChild(clefElement);
     upperElement.innerHTML = rowIndex;
@@ -168,27 +164,122 @@ const cellEnter = (rowIndex, colIndex) => {
 };
 
 const cellLeave = (rowIndex, colIndex) => {
+    //console.log(`Leave TD [${rowIndex}][${colIndex}]`);
     const label = map[rowIndex][colIndex].children[0];
     label.innerHTML = ``;
 };
 
-for (let tbodyChildrenIndex = 0; tbodyChildrenIndex < tbodyElement.childElementCount; tbodyChildrenIndex++) {
-    const rowElement = tbodyElement.children[tbodyChildrenIndex];
+const isTable = (element) => {
+    const tagName = element ? element.tagName : element;
+    return tagName === `TH` || tagName === `TD` || tagName === `LABEL` || tagName === `svg` || tagName === `path` || tagName === `DIV` || tagName === `INPUT`; //TODO
+}
 
-    const rowIndex = tbodyChildrenIndex + 1;
+const addEventListeners = (rowIndex, colIndex, colEnter, colLeave, rowEnter, rowLeave, cellEnter, cellLeave) => {
+    const cellElement = map[rowIndex][colIndex];
+    cellElement.addEventListener(`focusin`, (e) => {
+        if (isTable(e.relatedTarget)) {
+            if (currentColIndex !== colIndex) {
+                colLeave(currentColIndex);
+                colEnter(colIndex);
+            }
+        } else {
+            colEnter(colIndex);
+        }
+        if (isTable(e.relatedTarget)) {
+            if (currentRowIndex !== rowIndex) {
+                rowLeave(currentRowIndex);
+                rowEnter(rowIndex);
+            }
+        } else {
+            rowEnter(rowIndex);
+        }
+        cellEnter(rowIndex, colIndex);
+    });
+    cellElement.addEventListener(`focusout`, (e) => {
+        cellLeave(rowIndex, colIndex);
+        if (!isTable(e.relatedTarget)) {
+            rowLeave(rowIndex);
+        }
+        if (!isTable(e.relatedTarget)) {
+            colLeave(colIndex);
+        }
+    });
+}
+
+const fillCellsInRow = (rowIndex, colEnter, colLeave, rowEnter, rowLeave, cellEnter, cellLeave) => {
+    const rowElement = map[rowIndex][0];
+
+    for (let index = 0; index < rowElement.childElementCount; index++) {
+        const cellElement = rowElement.children[index];
+
+        const colIndex = index + 1;
+
+        map[rowIndex][colIndex] = cellElement;
+
+        addEventListeners(rowIndex, colIndex, colEnter, colLeave, rowEnter, rowLeave, cellEnter, cellLeave);
+    }
+};
+
+//initialization
+map[0][0] = theadRowElement;
+
+fillCellsInRow(
+    0,
+    colEnter,
+    colLeave,
+    (rowIndex) => {
+        //console.log(`Enter row ${rowIndex}`);
+        currentRowIndex = rowIndex;
+    },
+    (rowIndex) => {
+        //console.log(`Leave row ${rowIndex}`);
+        currentRowIndex = undefined;
+    },
+    (rowIndex, colIndex) => {
+        //console.log(`Enter TH [${rowIndex}][${colIndex}]`);
+        const array = map[rowIndex];
+        //const rowElement = array[0];
+        const cellElement = array[colIndex];
+        if (colIndex === 1) {
+            cellElement.style.borderLeftColor = border;
+            theadElement.style.borderLeftColor = border;
+            tbodyElement.style.borderLeftColor = border;
+            tbodyElement.style.borderRightColor = border;
+        } else if (colIndex === array.length - 1) {
+            cellElement.style.borderRightColor = border;
+            theadElement.style.borderRightColor = border;
+            tbodyElement.style.borderRightColor = border;
+        }
+        cellElement.style.borderTopColor = border;
+
+    },
+    (rowIndex, colIndex) => {
+        //console.log(`Leave TH [${rowIndex}][${colIndex}]`);
+        const cellElement = map[rowIndex][colIndex];
+        cellElement.style = ``;
+        theadElement.style = ``;
+        tbodyElement.style = ``;
+    },
+);
+
+labelElement.innerHTML = ``;
+
+const stretchFor = (rowElement, cols) => {
+    if (scrollWidth / cols <= 300 || mobile) {
+        rowElement.style.width = (cols * 100) + `%`;
+    }
+};
+
+for (let index = 0; index < tbodyElement.childElementCount; index++) {
+    const rowElement = tbodyElement.children[index];
+
+    const rowIndex = index + 1;
 
     map[rowIndex] = [rowElement];
 
     stretchFor(rowElement, rowElement.childElementCount);
 
-    rowElement.addEventListener(`focusin`, () => {
-        rowEnter(rowIndex);
-    });
-    rowElement.addEventListener(`focusout`, () => {
-        rowLeave(rowIndex);
-    });
-
-    fillCellsInRow(rowIndex, cellEnter, cellLeave);
+    fillCellsInRow(rowIndex, colEnter, colLeave, rowEnter, rowLeave, cellEnter, cellLeave);
 }
 
 tableElement.addEventListener(`keydown`, (e) => {
@@ -235,6 +326,22 @@ tableElement.addEventListener(`keydown`, (e) => {
     inputElement.focus();
 });
 
+let tracks = [
+    new Track(`melotrack1`, `Melotrack`, `1`, `./audio/melotrack1.mp3`),
+    new Track(`melotrack2`, `Melotrack`, `2`, `./audio/melotrack2.mp3`)
+];
+
+tracks.forEach(track => loader.load(track));
+loader.get(`./audio/melotrack1.mp3`).then(track => player.set(track));
+
+player.addEventListener(`end`, (e) => {
+    const selectNext = player.getSelectionMode();
+    const current = e.detail;
+    const index = tracks.indexOf(current);
+    const next = selectNext(index, tracks);
+    loader.get(next.url).then(track => player.set(track));
+});
+
 onLoad.then((tour) => {
     tracks = tour.tracks;
 
@@ -257,21 +364,23 @@ onLoad.then((tour) => {
                 const key = tour.keys[keyIndex];
 
                 const colIndex = keyIndex + 1;
+                const rowIndex = 0;
 
-                let cellElement = map[0][colIndex];
+                const rowElement = map[rowIndex][0];
+
+                let cellElement = map[rowIndex][colIndex];
                 if (!cellElement) {
                     cellElement = document.createElement(`th`);
 
-                    map[0][colIndex] = cellElement;
+                    map[rowIndex][colIndex] = cellElement;
 
-                    cellElement.addEventListener(`focusin`, (e) => {
-                        colEnter(e.fromElement, colIndex);
-                    });
-                    cellElement.addEventListener(`focusout`, (e) => {
-                        colLeave(e.toElement, colIndex);
+                    addEventListeners(rowIndex, colIndex, colEnter, colLeave, () => {
+                    }, () => {
+                    }, () => {
+                    }, () => {
                     });
 
-                    map[0][0].appendChild(cellElement);
+                    rowElement.appendChild(cellElement);
                 }
 
                 cellElement.innerText = key.charAt(0).toUpperCase() + key.slice(1).toLowerCase();
@@ -295,13 +404,6 @@ onLoad.then((tour) => {
 
             stretchFor(rowElement, tour.keys.length);
 
-            rowElement.addEventListener(`focusin`, () => {
-                rowEnter(rowIndex);
-            });
-            rowElement.addEventListener(`focusout`, () => {
-                rowLeave(rowIndex);
-            });
-
             if (prevColsCount > tour.keys.length) {
                 const cells = map[rowIndex].splice(tour.tracks.length);
                 cells.forEach(cell => rowElement.removeChild(cell));
@@ -315,22 +417,18 @@ onLoad.then((tour) => {
                     if (!cellElement) {
                         const id = key + `_` + colIndex;
 
-                        const labelElement = createLabelElement(id);
+                        const labelElement = document.createElement(`label`);
+                        labelElement.htmlFor = id;
 
-                        const inputElement = createInputElement(id);
+                        const inputElement = document.createElement(`input`);
+                        inputElement.id = id;
+                        inputElement.type = `text`;
 
                         cellElement = document.createElement(`td`);
 
                         map[rowIndex][colIndex] = cellElement;
 
-                        cellElement.addEventListener(`focusin`, (e) => {
-                            colEnter(e.fromElement, colIndex);
-                            cellEnter(rowIndex, colIndex);
-                        });
-                        cellElement.addEventListener(`focusout`, (e) => {
-                            colLeave(e.toElement, colIndex);
-                            cellLeave(rowIndex, colIndex);
-                        });
+                        addEventListeners(rowIndex, colIndex, colEnter, colLeave, rowEnter, rowLeave, cellEnter, cellLeave);
 
                         cellElement.appendChild(labelElement);
                         cellElement.appendChild(inputElement);

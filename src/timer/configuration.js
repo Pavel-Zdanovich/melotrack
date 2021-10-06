@@ -10,8 +10,13 @@ const outputToElement = (hours, mins, secs, millis) => {
 
 const timer = onLoad
     .then((tour) => {
+        const timer = new Timer(tour.time);
+        timer.addEventListener(`tick`, (e) => {
+            const time = e.detail;
+            outputToElement(...time);
+        });
         outputToElement(...Timer.millisToTime(tour.time));
-        return new Timer(outputToElement, tour.time);
+        return timer;
     });
 
 timerElement.addEventListener(`click`, () => {

@@ -4,31 +4,31 @@ import {Track} from "./track.js";
 export class Tour {
 
     constructor(title, description, time, background, border, keys, tracks) {
-        if (title != null && typeof title === `string`) {
+        if (typeof title === `string`) {
             this.title = title;
         } else {
             throwError({title});
         }
 
-        if (description != null && typeof description === `string`) {
+        if (typeof description === `string`) {
             this.description = description;
         } else {
             throwError({description});
         }
 
-        if (time != null && typeof time === `number`) {
+        if (typeof time === `number`) {
             this.time = time;
         } else {
             throwError({time});
         }
 
-        if (background != null && typeof background === `string`) {
+        if (typeof background === `string`) {
             this.background = background;
         } else {
             throwError({background});
         }
 
-        if (border != null && typeof border === `string`) {
+        if (typeof border === `string`) {
             this.border = border;
         } else {
             throwError({border});
