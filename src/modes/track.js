@@ -12,30 +12,23 @@ const randomColor = () => {
 };
 
 const CORS = `https://cors-anywhere.herokuapp.com/`;
-const URL = `https://api.deezer.com/track/`;
+const TRACK = `https://api.deezer.com/track/`;
 
-export const random = async () => {
+export const track = (data, markProgressBy) => {
     const tracks = [];
-
-    let counter = 0;
-    let attempts = 0;
-
-    while (counter < 10 && attempts < 20) {
-        const id = 10000000 + Math.floor(Math.random() * 1000000);
-
-        console.log(`Try fetch ${CORS + URL + id}`);
-
-        fetch(CORS + URL + id)
-            .then(response => response.json())
+    for (let i = 0; i < 10; i++) {
+        const id = data.tracks[Math.floor(Math.random() * 1000000)];
+        fetch(CORS + TRACK + id)
+            .then(response => {
+                markProgressBy(5);
+                return response.json();
+            })
             .then(json => {
+                markProgressBy(5);
                 const track = Track.parse(json);
                 tracks.push(track);
-                counter++;
             })
             .catch(error => console.error(error));
-
-        attempts++;
     }
-
     return new Tour(`Random`, `Guess random artists and titles.`, 60000, randomColor(), randomColor(), [`artist`, `title`], tracks);
 };

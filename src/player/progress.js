@@ -1,7 +1,7 @@
 import {throwError} from "../utils/utils.js";
 
-const MIN_PERCENT = 0;
-const MAX_PERCENT = 100;
+export const MIN_PERCENT = 0;
+export const MAX_PERCENT = 100;
 
 export class Progress {
 

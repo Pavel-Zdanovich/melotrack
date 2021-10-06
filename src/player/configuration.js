@@ -32,6 +32,7 @@ const volumeBarElement = volumeSliderElement.firstElementChild;
 const volumeProgressElement = volumeBarElement.firstElementChild;
 const volumeInputElement = volumeSliderElement.lastElementChild;
 
+let duration;
 const outputToAudioElements = (percentage, hours, mins, secs, millis) => {
     audioTimeElement.innerHTML = `${outputMinsAndSecs(hours, mins, secs, millis)} / ${duration}`;
     audioProgressElement.style.width = `${percentage}%`;
@@ -39,10 +40,9 @@ const outputToAudioElements = (percentage, hours, mins, secs, millis) => {
 };
 
 const player = new Player(); //TODO create modal button to create player for https://stackoverflow.com/questions/55026293/google-chrome-javascript-issue-in-getting-user-audio-the-audiocontext-was-not
-let duration;
 player.addEventListener(`load`, (e) => {
     const track = e.detail.track;
-    audioTitleElement.innerHTML = `${track.artist} - ${track.title}`;
+    audioTitleElement.innerHTML = player.isTitle() ? `${track.artist} - ${track.title}` : ``;
     duration = outputMinsAndSecs(...Timer.millisToTime(track.getDuration()));
     const progress = e.detail.progress;
     const time = e.detail.time;
@@ -63,7 +63,7 @@ player.addEventListener(`end`, () => {
     playLabelElement.innerHTML = `▶`;
 });
 player.addEventListener(`unload`, (e) => {
-    audioTitleElement.innerHTML = `Artist - Title`;
+    audioTitleElement.innerHTML = player.isTitle() ? `Artist - Title` : ``;
     duration = `00:00`;
     outputToAudioElements(0, 0, 0, 0, 0);
 });

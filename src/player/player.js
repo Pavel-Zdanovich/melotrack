@@ -190,6 +190,18 @@ export class Player extends EventTarget {
         }
     }
 
+    isTitle() {
+        return this._titleMode;
+    }
+
+    setTitleMode(titleMode) {
+        if (typeof titleMode === `boolean`) {
+            this._titleMode = titleMode;
+        } else {
+            throwError({titleMode});
+        }
+    }
+
     getSelectionMode() {
         return this._selectionMode;
     }

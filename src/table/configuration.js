@@ -6,6 +6,7 @@ import {Track} from "../entities/track.js";
 import {Validator} from "./validator.js";
 
 const tableElement = document.body.children[2];
+const footerElement = document.body.children[4];
 
 const captionElement = tableElement.children[0];
 const theadElement = tableElement.children[1];
@@ -93,6 +94,8 @@ const rowEnter = (rowIndex) => {
     const track = tracks[currentRowIndex - 1];
     if (track) {
         loader.get(track.url).then(track => player.load(track));
+    } else {
+        player.unload();
     }
 };
 
@@ -266,7 +269,8 @@ player.addEventListener(`end`, (e) => {
 
 let keys = [`artist`, `title`];
 
-timer.addEventListener(`end`, () => {
+const check = () => {
+    player.setTitleMode(true);
     for (let rowIndex = 1; rowIndex < map.length; rowIndex++) {
         for (let colIndex = 1; colIndex < map[0].length; colIndex++) {
             const cellElement = map[rowIndex][colIndex];
@@ -279,7 +283,9 @@ timer.addEventListener(`end`, () => {
             inputElement.disabled = true;
         }
     }
-});
+};
+
+timer.addEventListener(`end`, check);
 
 tableElement.addEventListener(`keydown`, (e) => {
     switch (e.code) {
@@ -373,7 +379,7 @@ tbodyElement.addEventListener(`scroll`, () => {
         const start = performance.now();
         const duration = 1000;
         const callback = (time) => {
-            let progress = (time - start) / duration;
+            const progress = (time - start) / duration;
             let x = progress * scroll;
             if (Math.abs(x) < 0.8) { //dead zone
                 x = Math.sign(x) * 0.8;
@@ -407,7 +413,9 @@ const output = (direction, left, right, diffLeft, diffRight) => {
         ${scrolls.slice(45)}
         E: ${touchEnd} ID: ${requestId}
     `;
-}
+};
+
+footerElement.addEventListener(`click`, check);
 
 document.addEventListener(`tour`, (e) => {
     const tour = e.detail;
@@ -420,6 +428,8 @@ document.addEventListener(`tour`, (e) => {
             loader.load(track);
         }
     });
+
+    player.setTitleMode(false);
 
     timer.load(tour.time);
 

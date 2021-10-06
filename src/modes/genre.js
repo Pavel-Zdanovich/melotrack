@@ -1,11 +1,11 @@
 import {Tour} from "../entities/tour.js";
 
 const CORS = `https://cors-anywhere.herokuapp.com/`;
-const PLAYLIST = `https://api.deezer.com/playlist/`;
+const PLAYLIST = `https://api.deezer.com/genre/`;
 
-export const playlist = (data, markProgressBy) => {
+export const genre = (data, markProgressBy) => {
     markProgressBy(15);
-    const id = data.playlists[Math.floor(Math.random() * 150)];
+    const id = 10000000 + Math.floor(Math.random() * 1000000);
 
     return fetch(CORS + PLAYLIST + id)
         .then(response => {

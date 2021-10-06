@@ -3,13 +3,16 @@ function check(current, array) {
         throwError({array});
     }
 
-    if (typeof current !== `number` || current < 0 || current >= array.length) {
+    if (typeof current !== `number`) {
         throwError({current});
     }
 }
 
 export function current(current, array) {
     check(current, array);
+    if (current < 0 || current >= array.length) {
+        throwError({current});
+    }
     return array[current];
 }
 

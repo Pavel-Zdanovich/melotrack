@@ -11,6 +11,46 @@
     width: 100%;
 }
 
+.spinner {
+    border-radius: 50%;
+    border-width: calc(var(--border-width));
+    border-style: solid;
+    border-color: var(--other-color);
+}
+
+.absoluted {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 10%;
+}
+
+.spinner circle {
+    stroke-dasharray: 0.855, 306.945; /*1° - 0.855*/
+    stroke-dashoffset: 76.95;
+    animation-name: rotation;
+    animation-duration: 3s;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+    transform-origin: center;
+}
+
+@keyframes rotation {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(359deg);
+    }
+}
+
+.spinner text {
+    text-anchor: middle;
+    dominant-baseline: middle;
+    stroke-width: 1px;
+}
+
 .bordered {
     border: calc(var(--border-width)) solid var(--border-color);
 }
@@ -41,7 +81,7 @@ html {
     --border-color: black;
     color: var(--border-color);
 
-    --other-color: rgba(0,0,0,0.5);
+    --other-color: rgba(0, 0, 0, 0.5);
 
     --border-width: 1px;
 
@@ -202,18 +242,20 @@ input[type=range] {
     position: fixed;
     opacity: 0;
 }
+
 input[type=range]::-webkit-slider-runnable-track {
     height: 60px;
 }
+
 input[type=range]::-moz-range-track {
     height: 60px;
 }
+
 input[type=range]::-ms-track {
     height: 60px;
 }
 
-.volume input[type=range][orient=vertical]
-{
+.volume input[type=range][orient=vertical] {
     writing-mode: bt-lr; /* IE */
     -webkit-appearance: slider-vertical; /* Chromium */
     height: 100%;
@@ -359,7 +401,6 @@ tbody {
     border-right-style: solid;
     border-right-color: var(--background-color);
 }
-
 
 
 .signature {
