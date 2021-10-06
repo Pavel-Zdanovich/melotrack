@@ -9,14 +9,14 @@ const modes = [
 ];
 
 let index = 0;
-const indexElement = document.body.children[2].children[0];
-const outputIndex = () => {
-    indexElement.innerHTML = indexElement.innerHTML + `${index + 1}/${modes.length}`;
-};
+const indexElement = document.body.children[0].children[0];
+indexElement.addEventListener(`click`, () => {
+    load(modes[index]);
+});
 
 const load = (mode) => {
-    outputIndex();
     mode().then(tour => {
+        indexElement.innerHTML = tour.title + ` [${index + 1}/${modes.length}]`;
         console.log(tour);
         document.dispatchEvent(new CustomEvent(`tour`, {detail: tour}));
         document.documentElement.style.setProperty(`--background-color`, tour.background);
@@ -51,12 +51,6 @@ leftElement.addEventListener(`click`, () => {
 });
 rightElement.addEventListener(`click`, () => {
     load(next());
-});
-
-const clefElement = document.body.children[4].children[1];
-
-clefElement.addEventListener(`click`, () => {
-    load(modes[index]);
 });
 
 console.log(`app loaded`);

@@ -25,7 +25,7 @@ export const artist = async () => {
                     .catch(error => console.error(error));
             }
 
-            return new Tour(`Artist: ${artist.name}`, `Guess the titles by "${artist.name}".`, 60000, `black`, `white`, [`title`], tracks);
+            return new Tour(`Artist`, `Guess the titles by "${artist.name}".`, 60000, `black`, `white`, [`title`], tracks);
         })
         .catch(error => console.error(error));
 };

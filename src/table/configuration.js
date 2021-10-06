@@ -132,9 +132,19 @@ const isTable = (element) => {
     } else if (element.tagName === `THEAD` || element.tagName === `TBODY`) {
         return true;
     } else {
-        isTable(element.parentElement);
+        return isTable(element.parentElement);
     }
-}
+};
+
+const isPlayer = (element) => {
+    if (!element) {
+        return false;
+    } else if (element.classList.contains(`player`)) {
+        return true;
+    } else {
+        return isPlayer(element.parentElement);
+    }
+};
 
 const addEventListeners = (rowIndex, colIndex, colEnter, colLeave, colLeaveEnter, rowEnter, rowLeave, rowLeaveEnter, cellEnter, cellLeave) => {
     const cellElement = map[rowIndex][colIndex];
@@ -143,28 +153,23 @@ const addEventListeners = (rowIndex, colIndex, colEnter, colLeave, colLeaveEnter
             if (currentColIndex !== colIndex) {
                 colLeaveEnter(currentColIndex, colIndex);
             }
-        } else {
-            colEnter(colIndex);
-        }
-        if (isTable(e.relatedTarget)) {
             if (currentRowIndex !== rowIndex) {
                 rowLeaveEnter(currentRowIndex, rowIndex);
             }
         } else {
+            colEnter(colIndex);
             rowEnter(rowIndex);
         }
         cellEnter(rowIndex, colIndex);
     });
     cellElement.addEventListener(`focusout`, (e) => {
         cellLeave(rowIndex, colIndex);
-        if (!isTable(e.relatedTarget)) {
+        if (!isTable(e.relatedTarget) && !isPlayer(e.relatedTarget)) {
             rowLeave(rowIndex);
-        }
-        if (!isTable(e.relatedTarget)) {
             colLeave(colIndex);
         }
     });
-}
+};
 
 const fillCellsInRow = (rowIndex, colEnter, colLeave, colLeaveEnter, rowEnter, rowLeave, rowLeaveEnter, cellEnter, cellLeave) => {
     const rowElement = map[rowIndex][0];
@@ -332,8 +337,10 @@ let prevScroll = 0;
 let scroll = 0;
 let direction;
 let requestId;
+let scrolls = [];
 tbodyElement.addEventListener(`scroll`, () => {
     const currentScroll = tbodyElement.scrollLeft - prevScroll;
+    scrolls.push(currentScroll);
     prevScroll = tbodyElement.scrollLeft;
     if (!direction) {
         direction = currentScroll > 0 ? `>` : `<`;
@@ -379,10 +386,28 @@ tbodyElement.addEventListener(`scroll`, () => {
                 requestId = undefined;
                 direction = undefined;
             }
+            //output(direction, left, right, diffLeft, diffRight);
         }
         requestId = window.requestAnimationFrame(callback);
     }
+    //output(direction, left, right, diffLeft, diffRight);
 });
+
+captionElement.addEventListener(`click`, () => {
+    //output(false, 0, 0);
+});
+
+const output = (direction, left, right, diffLeft, diffRight) => {
+    captionElement.innerText = `
+        ${left} <= ${tbodyElement.scrollLeft} > ${right}
+           ${diffLeft} ? ${threshold} ? ${diffRight}
+        ${scrolls.slice(0, 15)}
+        ${scrolls.slice(15, 30)}
+        ${scrolls.slice(30, 45)}
+        ${scrolls.slice(45)}
+        E: ${touchEnd} ID: ${requestId}
+    `;
+}
 
 document.addEventListener(`tour`, (e) => {
     const tour = e.detail;

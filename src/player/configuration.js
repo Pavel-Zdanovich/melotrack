@@ -5,8 +5,10 @@ import {Player} from "./player.js";
 const playerElement = document.body.children[0].children[1];
 
 const controlsElement = playerElement.children[0];
-const playElement = controlsElement.children[0];
-const modeElement = controlsElement.children[1];
+const playLabelElement = controlsElement.children[0];
+const playInputElement = controlsElement.children[1];
+const modeLabelElement = controlsElement.children[2];
+const modeInputElement = controlsElement.children[3];
 
 const audioElement = playerElement.children[1];
 
@@ -31,21 +33,23 @@ const volumeProgressElement = volumeBarElement.firstElementChild;
 const volumeInputElement = volumeSliderElement.lastElementChild;
 
 const outputToAudioElements = (percentage, hours, mins, secs, millis) => {
-    audioTimeElement.innerHTML = outputMinsAndSecs(hours, mins, secs, millis);
+    audioTimeElement.innerHTML = `${outputMinsAndSecs(hours, mins, secs, millis)} / ${duration}`;
     audioProgressElement.style.width = `${percentage}%`;
     audioInputElement.value = percentage;
 };
 
 const player = new Player(); //TODO create modal button to create player for https://stackoverflow.com/questions/55026293/google-chrome-javascript-issue-in-getting-user-audio-the-audiocontext-was-not
+let duration;
 player.addEventListener(`load`, (e) => {
     const track = e.detail.track;
     audioTitleElement.innerHTML = `${track.artist} - ${track.title}`;
+    duration = outputMinsAndSecs(...Timer.millisToTime(track.getDuration()));
     const progress = e.detail.progress;
     const time = e.detail.time;
     outputToAudioElements(progress, ...time);
 });
 player.addEventListener(`play`, () => {
-    playElement.innerHTML = `⏸`;
+    playLabelElement.innerHTML = `⏸`;
 });
 player.addEventListener(`tick`, (e) => {
     const progress = e.detail.progress;
@@ -53,37 +57,46 @@ player.addEventListener(`tick`, (e) => {
     outputToAudioElements(progress, ...time);
 });
 player.addEventListener(`stop`, () => {
-    playElement.innerHTML = `▶`;
+    playLabelElement.innerHTML = `▶`;
 });
 player.addEventListener(`end`, () => {
-    playElement.innerHTML = `▶`;
+    playLabelElement.innerHTML = `▶`;
 });
 player.addEventListener(`unload`, (e) => {
     audioTitleElement.innerHTML = `Artist - Title`;
+    duration = `00:00`;
     outputToAudioElements(0, 0, 0, 0, 0);
 });
 
-playElement.addEventListener(`click`, () => {
+const playListener = () => {
+    if (!player.get()) {
+        return;
+    }
+
     if (player.isPlaying()) {
         player.stop();
     } else {
         player.play();
     }
-});
+};
+playInputElement.addEventListener(`click`, playListener);
+playInputElement.addEventListener(`touchstart`, playListener);
 
 const modes = new Map([[`🔁`, current], [`⏭️`, next], [`⏮️`, previous]]);
 let iterator = modes.entries();
 iterator.next(); //need to skip
-modeElement.addEventListener(`click`, () => {
-    let mode = iterator.next();
-    if (mode.done) {
-        iterator = modes.entries();
-        mode = iterator.next();
-    }
-    player.setSelectionMode(mode.value[1]);
-    modeElement.innerHTML = mode.value[0];
-});
-player.setSelectionMode(modes.get(modeElement.innerHTML));
+const modeListener = () => {
+     let mode = iterator.next();
+     if (mode.done) {
+         iterator = modes.entries();
+         mode = iterator.next();
+     }
+     player.setSelectionMode(mode.value[1]);
+     modeLabelElement.innerHTML = mode.value[0];
+}
+modeInputElement.addEventListener(`click`, modeListener);
+modeInputElement.addEventListener(`touchstart`, modeListener);
+player.setSelectionMode(modes.get(modeLabelElement.innerHTML));
 
 audioElement.addEventListener(`input`, () => {
     const percentage = audioInputElement.value;

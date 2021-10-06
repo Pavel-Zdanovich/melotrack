@@ -8,6 +8,6 @@ export const playlist = async () => {
 
     return fetch(CORS + PLAYLIST + id)
         .then(response => response.json())
-        .then(playlist => new Tour(`Playlist: ${playlist.title}`, `Guess the artists and titles from playlist "${playlist.title}".`, 60000, `yellow`, `green`, [`artist`, `title`], playlist.tracks.data))
+        .then(playlist => new Tour(`Playlist`, `Guess the artists and titles from playlist "${playlist.title}".`, 60000, `yellow`, `green`, [`artist`, `title`], playlist.tracks.data))
         .catch(error => console.error(error));
 };

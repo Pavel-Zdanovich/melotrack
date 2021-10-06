@@ -109,13 +109,26 @@ header {
     flex-direction: column;
     justify-content: center;
     flex-basis: 10%;
+    position: relative;
 }
 
-.controls * {
+.controls label {
     display: flex;
     align-items: center;
     justify-content: center;
     height: 100%;
+}
+
+.controls :nth-child(2) {
+    position: absolute;
+    height: 50%;
+    top: 0;
+}
+
+.controls :nth-child(4) {
+    position: absolute;
+    height: 50%;
+    bottom: 0;
 }
 
 .controls :first-child {
