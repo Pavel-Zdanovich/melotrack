@@ -22,6 +22,7 @@ while (counter < 10) {
             }
         })
         .catch(error => console.error(error));
+    counter++;
 }
 let tour = new Tour(`Random`, `Try to guess :D`, 60000, [`author`, `title`], tracks);
 
