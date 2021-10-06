@@ -1,5 +1,4 @@
 import {tour} from "../script.js";
-
 import {outputHoursMinsAndSecs} from "../utils/utils.js";
 import {Timer} from "./timer.js";
 

@@ -26,5 +26,47 @@ export class Track {
         } else {
             throwError({url});
         }
+
+        this._buffer = null;
+        this._start = 0;
+        this._end = 0;
+        this._direction = true;
+        this._duration = 0;
+    }
+
+    getBuffer() {
+        return this._buffer;
+    }
+
+    setBuffer(buffer) {
+        if (buffer instanceof AudioBuffer) {
+            this._buffer = buffer;
+            this._start = 0;
+            this._end = Math.trunc(buffer.duration * 1000);
+            this._direction = true;
+            this._duration = this._end;
+        } else {
+            throwError({buffer});
+        }
+    }
+
+    getDirection() {
+        return this._direction;
+    }
+
+    getStart() {
+        return this._start;
+    }
+
+    getEnd() {
+        return this._end;
+    }
+
+    getDuration() {
+        return this._duration;
+    }
+
+    toString() {
+        return `${this.artist} - ${this.title}`;
     }
 }

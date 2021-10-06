@@ -21,7 +21,7 @@ let volumeInfoElement = volumeBarElement.firstElementChild;
 let volumeIconElement = volumeInfoElement.lastElementChild;
 let volumeProgressElement = volumeBarElement.lastElementChild;
 
-let outputToElement = (progress, hours, mins, secs, millis) => {
+let outputToAudioElements = (progress, hours, mins, secs, millis) => {
     audioInfoElement.innerHTML = outputMinsAndSecs(hours, mins, secs, millis);
     audioProgressElement.style.width = progress + `%`;
 };
@@ -37,7 +37,7 @@ let onStopped = () => {
     playElement.innerHTML = `▶`;
 }
 
-let player = new Player(outputToElement, onLoad, onPlayed, onStopped);
+let player = new Player(outputToAudioElements, onLoad, onPlayed, onStopped);
 
 playElement.addEventListener(`click`, () => {
     if (player.isPlaying()) {
@@ -54,7 +54,7 @@ audioBarElement.addEventListener(`click`, (e) => {
 
         let percent = ((e.clientX - audioBarRect.left) / audioBarRect.width);
         let time = player.getDuration() * percent;
-        outputToElement(percent * 100, ...Timer.millisToTime(time));
+        outputToAudioElements(percent * 100, ...Timer.millisToTime(time));
         player.setTime(time);
     }
 }, false);
@@ -77,18 +77,24 @@ previousElement.addEventListener(`click`, () => {
     playerElement.replaceChild(repeatElement, previousElement);
 }, false);
 
+let outputToVolumeElement = (percent) => {
+    volumeInfoElement.innerHTML = percent;
+    volumeInfoElement.appendChild(volumeIconElement);
+    volumeProgressElement.style.height = percent + `%`;
+    volumeProgressElement.style.bottom = percent + `%`;
+}
+
 let volumeBarRect = volumeBarElement.getBoundingClientRect();
 volumeBarElement.addEventListener(`click`, (e) => {
     if (e.clientX >= volumeBarRect.left && e.clientX <= volumeBarRect.right &&
         e.clientY >= volumeBarRect.top && e.clientY <= volumeBarRect.bottom) {
 
         let percent = Math.trunc(((volumeBarRect.bottom - e.clientY) / volumeBarRect.height) * 100);
-        volumeInfoElement.innerHTML = percent;
-        volumeInfoElement.appendChild(volumeIconElement);
-        volumeProgressElement.style.height = percent + `%`;
-        volumeProgressElement.style.bottom = percent + `%`;
+        outputToVolumeElement(percent);
         player.setVolume(percent / 100);
     }
 }, false);
+
+outputToVolumeElement(Math.trunc(player.getVolume() * 100));
 
 export {player};

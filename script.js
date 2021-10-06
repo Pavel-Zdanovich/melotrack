@@ -6,10 +6,12 @@ let counter = 0;
 let attempts = 0;
 while (counter < 10 && attempts < 20) {
     let id = 10000000 + Math.floor(Math.random() * 1000000);
+    let cors = `https://cors-anywhere.herokuapp.com/`;
     let url = `https://api.deezer.com/track/${id}`;
-    console.log(`Try fetch ${url}`);
 
-    await fetch(`https://cors-anywhere.herokuapp.com/${url}`)
+    console.log(`Try fetch ${cors + url}`);
+
+    await fetch(cors + url)
         .then(response => {
             if (response.ok) {
                 return response.json();

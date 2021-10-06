@@ -56,17 +56,20 @@ let gray = `#BDBDBD`;
 let grayer = `#7E7E7E`;
 let grayest = `#636363`;
 
-let addRowEventListener = (key, row) => {
+let rowMouseEnter;
+let rowMouseLeave;
+
+let addRowEventListener = (url, row) => {
     if (row == null || !(row instanceof HTMLTableRowElement)) {
         throw new Error(`Not row!`);
     }
 
     row.addEventListener(`mouseenter`, () => {
-        rowMouseEnter(key);
+        rowMouseEnter(url);
         row.style.backgroundColor = gray;
     });
     row.addEventListener(`mouseleave`, () => {
-        rowMouseLeave(key);
+        rowMouseLeave(url);
         row.removeAttribute(`style`);
     });
 };
@@ -92,8 +95,6 @@ let map = new Map();
 
 let colMouseEnter;
 let colMouseLeave;
-let rowMouseEnter;
-let rowMouseLeave;
 
 let theadRow = createRow();
 theadElement.appendChild(theadRow);
@@ -142,27 +143,20 @@ colMouseLeave = (key) => {
     });
 };
 
-rowMouseEnter = (key) => {
-    let value = loader.get(key);
-    if (value instanceof Promise) {
-        value.then(buffer => {
-            console.log(`${key} BUFFERED`);
-            return player.decode(buffer);
-        }).then(buffer => {
-            console.log(`${key} DECODED`);
-            player.set(key, buffer);
-            loader.set(key, buffer);
-        });
-    } else if (value instanceof AudioBuffer) {
-        player.set(key, value);
-    } else {
-        throw new Error(`Illegal value: ${value}`);
-    }
+rowMouseEnter = (url) => {
+    player.set(loader.get(url));
 };
-rowMouseLeave = (key) => {
-    if (player.isPlaying()) {
-        console.log(`Do I need stop ${key}?`);
-    }
+rowMouseLeave = (url) => {
+};
+
+player._onEnded = (url) => {
+    console.log(`Current ${url} ended!`);
+
+    let track = loader.next(url); //loader.get(url) - repeat, loader.previous(url) - previous
+
+    player.set(track);
+
+    console.log(`Load next ${track.url}`);
 };
 
 let table = new Table(tour);
@@ -179,5 +173,6 @@ footerElement.addEventListener(`click`, () => {
             let expected = table.get(col, Number.parseInt(row));
             let result = table.similarity(expected, actual);
             console.log(`${col}_${row} '${actual}' = '${expected}' on ${result * 100}%`);
+            input.value = expected;
         });
 });

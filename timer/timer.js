@@ -157,18 +157,24 @@ export class Timer {
     }
 
     start() {
-        this._interval = setInterval(
-            () => {
-                let keepOn = this.#countdown();
-                if (keepOn) {
-                    this._operation();
-                } else {
-                    this.stop();
-                    this.#finalize();
-                }
-                this._callback(this._hours, this._mins, this._secs, this._millis);
-            },
-            this._stepInMillis);
+        if (!this.isTicking()) {
+            this._interval = setInterval( //TODO problem https://stackoverflow.com/questions/42124448/how-does-webaudio-timing-work-is-using-setinterval-a-bad-solution
+                () => {
+                    console.log(`Timer ${this._interval} ticked`);
+                    let keepOn = this.#countdown();
+                    if (keepOn) {
+                        this._operation();
+                    } else {
+                        this.stop();
+                        this.#finalize();
+                    }
+                    this._callback(this._hours, this._mins, this._secs, this._millis);
+                },
+                this._stepInMillis);
+            console.log(`Timer ${this._interval} started!`);
+        } else {
+            console.log(`Timer ${this._interval} has already started!`);
+        }
     }
 
     #countdown() {
@@ -181,8 +187,13 @@ export class Timer {
     }
 
     stop() {
-        clearInterval(this._interval);
-        this._interval = null;
+        if (this.isTicking()) {
+            console.log(`Timer ${this._interval} stopped`);
+            clearInterval(this._interval);
+            this._interval = null;
+        } else {
+            console.log(`Timer has already stopped!`);
+        }
     }
 
     isTicking() {

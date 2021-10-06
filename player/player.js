@@ -1,14 +1,16 @@
 import {throwError} from "../utils/utils.js";
 import {Progress} from "./progress.js";
 import {Timer} from "../timer/timer.js";
+import {Track} from "../entities/track.js";
 
 const MIN = 0;
 const MAX_VOLUME = 1;
 const DEFAULT_VOLUME = 0.1;
+const COEFFICIENT = 5;
 
 export class Player {
 
-    constructor(callback, onLoad, onPlayed, onStopped) {
+    constructor(callback, onLoaded, onPlayed, onStopped, onEnded) {
         if (callback != null && typeof callback === `function`) {
             this._callback = callback;
         } else {
@@ -29,83 +31,87 @@ export class Player {
         this._node = this._gain;
         this._node.connect(this._context.destination);
 
-        this.#setDefault();
+        this.stop(); //stop the created context because it is running at start
+        this.setVolume(DEFAULT_VOLUME);
 
-        if (onPlayed != null && typeof onPlayed === `function`) {
-            this._load = onLoad;
+        if (onLoaded != null && typeof onLoaded === `function`) {
+            this._onLoaded = onLoaded;
         }
 
         if (onPlayed != null && typeof onPlayed === `function`) {
+            this._onPlayed = onPlayed;
             let play = this._play;
             this._play = () => {
-                let promise = new Promise(() => console.log(`Source not loaded!`));
-                if (this._source != null) {
-                    onPlayed();
-                    promise = play();
+                if (this._source == null) {
+                    return new Promise(() => console.log(`Source not loaded!`));
                 }
-                return promise;
-            };
+                return play().then(this._onPlayed);
+            }
         }
 
         if (onStopped != null && typeof onStopped === `function`) {
             this._onStopped = onStopped;
             let stop = this._stop;
-            this._stop = () => {
-                onStopped();
-                return stop();
-            };
+            this._stop = () => stop().then(this._onStopped);
         }
-    }
 
-    #setDefault() {
-        this.stop();
-        this.setVolume(DEFAULT_VOLUME);
+        if (onEnded != null && typeof onEnded === `function`) {
+            this._onEnded = onEnded;
+        } else {
+            this._onEnded = () => {
+                this._source = null;
+            }
+        }
     }
 
     #createBufferSource(buffer) {
         if (this._source != null) {
             this._source.disconnect(this._node);
         }
-        this._source = this._context.createBufferSource();
+
+        this._source = this._context.createBufferSource(); //because AudioBufferSourceNode is not reusable
 
         this._source.buffer = buffer;
         this._source.connect(this._node);
-        this._source.onended = this._onStopped;
+        this._source.onended = () => {  //called once
+            this.stop();
+            this._onEnded(this._track.url);
+        };
     }
 
-    #start(offset = 0, duration = this._buffer.duration, timeout = 0) {
+    #start(offset = 0, duration = this.getDuration(), timeout = 0) {
         let state = this._context.state;
-        this._source.start(timeout, offset, duration); //TODO check duration according to rewind
+        this._source.start(timeout, offset, duration);
         if (state === `suspended`) {
-            this._context.suspend();
+            this.stop();
         }
     }
 
     #createProgressAndTimer(direction, duration, start, end) {
-        let coefficient = 5;
+        let progressStep = 1 / COEFFICIENT;
+        this._progress = new Progress(direction, progressStep);
 
-        let percent = direction ? 0 : 100;
-        this._progress = new Progress(percent); //TODO try to make part of timer/timer prototype
-
-        let progressStep = 1 / coefficient;
-        let operation = direction ? () => this._progress.increment(progressStep) : () => this._progress.decrement(progressStep);
         let timerCallback = (hours, mins, secs, millis) => {
-            operation();
+            this._progress.make();
             this._callback(this._progress.get(), hours, mins, secs, millis);
         };
 
-        let timerStep = duration / (100 * coefficient);
-        this._timer = new Timer(timerCallback, start, end, timerStep); //TODO timer don't stop due to lost context
+        let timerStep = duration / (100 * COEFFICIENT);
+        this._timer = new Timer(timerCallback, start, end, timerStep);
 
         let play = this._play;
         this._play = () => {
-            this._timer.start();
+            if (!this._timer.isTicking()) {
+                this._timer.start();
+            }
             return play();
         };
 
         let stop = this._stop;
         this._stop = () => {
-            this._timer.stop();
+            if (this._timer.isTicking()) { //because the timer works separately and stops at the end
+                this._timer.stop();
+            }
             return stop();
         };
     }
@@ -114,44 +120,31 @@ export class Player {
         return this._context.decodeAudioData(promise);
     }
 
-    set(name, buffer, start = 0, end = Math.trunc(buffer.duration * 1000)) {
-        if (buffer instanceof AudioBuffer) {
-            this._buffer = buffer;
+    set(track) {
+        if (track instanceof Track) {
+            this._track = track;
         } else {
-            throwError({buffer});
+            throwError({track});
         }
 
-        if (start != null && typeof start === `number`) {
-            console.log(`Start: ${start}`);
-            this._start = start;
-        } else {
-            throwError({start});
+        let playingOnSet = this.isPlaying();
+        if (playingOnSet) {
+            this.stop();
         }
 
-        if (end != null && typeof end === `number`) {
-            console.log(`End: ${end}`);
-            this._end = end;
-        } else {
-            throwError({end});
+        this.#createBufferSource(this._track.getBuffer());
+        this.#start(this._track.getStart(), this._track.getDuration());
+        this.#createProgressAndTimer(this._track.getDirection(), this._track.getDuration(), this._track.getStart(), this._track.getEnd());
+
+        this._onLoaded(this._track.toString(), this._track.getDuration()); //TODO replace with promise
+
+        if (playingOnSet) {
+            this.play();
         }
-
-        this._direction = end > start;
-        if (!this._direction) {
-            this._buffer = buffer.reverse();
-            this._start = end;
-            this._end = start;
-        }
-        this._duration = this._end - this._start;
-
-        this.#createBufferSource(this._buffer);
-        this.#start(this._start, this._duration);
-        this.#createProgressAndTimer(this._direction, this._duration, this._start, this._end);
-
-        this._load(name, this._duration);
     }
 
     play() {
-        return this._play();
+        return this._play(); //TODO repeat or deny
     }
 
     stop() {
@@ -175,16 +168,10 @@ export class Player {
     }
 
     getDuration() {
-        return this._duration;
+        return this._track.getDuration();
     }
 
     setDuration(duration, direction = true) {
-        if (duration != null && typeof duration === `number` && (duration >= MIN && duration <= this._buffer.duration)) {
-            this._duration = duration;
-        } else {
-            throwError({duration});
-        }
-
         //TODO increase duration according to direction
     }
 
@@ -193,12 +180,13 @@ export class Player {
     }
 
     setTime(newTime) {
-        if (newTime != null && typeof newTime === `number` && (newTime >= MIN && newTime <= this._duration)) {
+        if (newTime != null && typeof newTime === `number` && (newTime >= MIN && newTime <= this.getDuration())) {
             let start = Math.trunc(newTime) / 1000;
-            this.#createBufferSource(this._buffer);
-            this.#start(start, this._duration);
 
-            let percent = newTime / this._duration;
+            this.#createBufferSource(this._track.getBuffer());
+            this.#start(start, this.getDuration());
+
+            let percent = newTime / this.getDuration();
             this._progress.set(percent * 100);
 
             this._timer.set(...Timer.millisToTime(newTime));
