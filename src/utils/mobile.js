@@ -64,7 +64,7 @@ document.addEventListener(`readystatechange`, () => {
                 //document.body.children[2].children[0].innerText = document.body.children[2].children[0].innerText + `\tResize from ${height} to ${window.innerHeight}, key=${keyboard}`;
 
                 if (screenState !== fullscreen) {
-                    document.body.children[2].children[0].innerText = document.body.children[2].children[0].innerText + `\tFullscreen ${fullscreen}\n`;
+                    //document.body.children[2].children[0].innerText = document.body.children[2].children[0].innerText + `\tFullscreen ${fullscreen}\n`;
                     screenState = fullscreen;
                     height = window.innerHeight;
                     width = window.innerWidth;
@@ -81,7 +81,7 @@ document.addEventListener(`readystatechange`, () => {
                 if (resizePercentage > 0.3) {
                     if (window.innerHeight < height) {
                         if (!keyboard) {
-                            document.body.children[2].children[0].innerText = document.body.children[2].children[0].innerText + `\tKeyboard on\n`;
+                            //document.body.children[2].children[0].innerText = document.body.children[2].children[0].innerText + `\tKeyboard on\n`;
                             onKeyboardOpened();
                             keyboard = true;
                             return;
@@ -94,7 +94,7 @@ document.addEventListener(`readystatechange`, () => {
                 }
 
                 if (keyboard) {
-                    document.body.children[2].children[0].innerText = document.body.children[2].children[0].innerText + `\tKeyboard off\n`;
+                    //document.body.children[2].children[0].innerText = document.body.children[2].children[0].innerText + `\tKeyboard off\n`;
                     onKeyboardClosed();
                     keyboard = false;
                 }
