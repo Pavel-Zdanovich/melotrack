@@ -1,23 +1,39 @@
+import "https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js";
+import "https://e-cdn-files.dzcdn.net/js/min/dz.js";
+
+DZ.init({
+    appId: '509082',
+    channelUrl: 'http://melotrack/channel.html',
+    player: {
+        onload: (response) => {
+            console.log('DZ.player is ready', response);
+        }
+    }
+});
+
+DZ.ready((sdk_options) => {
+    console.log('DZ SDK is ready', sdk_options);
+});
+
+const data = await fetch("data.json").then(response => response.json());
+
 import {album} from "./modes/album.js";
 import {artist} from "./modes/artist.js";
 import {chart} from "./modes/chart.js";
-import {genre} from "./modes/genre.js";
 import {playlist} from "./modes/playlist.js";
 import {radio} from "./modes/radio.js";
 import {track} from "./modes/track.js";
 import {next, previous} from "./utils/utils.js";
 
-const data = await fetch("data.json").then(response => response.json());
+const modes = [
+    album, artist, chart, playlist, radio, track
+];
 
 const spinnerElement = document.body.lastElementChild;
 const circleElement = spinnerElement.firstElementChild;
 const percent = 3.078;
 const textElement = spinnerElement.lastElementChild;
 document.body.removeChild(spinnerElement);
-
-const modes = [
-    album, artist, chart, playlist, radio, track
-];
 
 let index = -1;
 const indexElement = document.body.children[0].children[0];
@@ -29,7 +45,7 @@ const load = (mode) => {
     let passed = 0;
     let percentage = 0;
     let goal = 0;
-    mode(data, (step, duration = 2000) => {
+    mode(DZ, data, (step, duration = 2000) => {
         const start = performance.now();
 
         goal = goal + step;
@@ -38,12 +54,9 @@ const load = (mode) => {
             window.cancelAnimationFrame(requestId);
             passed = percentage;
             step = goal - passed;
-            //console.log(`${passed} + ${step} = cancel [${start.toFixed()} ${requestId}]`);
         }
 
         const output = (percentage) => {
-            //console.log(`${passed} + ${step} = ${percentage} [${start.toFixed()} ${requestId}]`);
-
             circleElement.style.strokeDasharray = `${percent * percentage}, ${percent * (100 - percentage)}`;
             textElement.innerHTML = `${percentage.toFixed(1)}%`;
         };
@@ -74,17 +87,17 @@ const load = (mode) => {
         document.dispatchEvent(new CustomEvent(`tour`, {detail: tour}));
         document.documentElement.style.setProperty(`--background-color`, tour.background);
         document.documentElement.style.setProperty(`--border-color`, tour.border);
-    }).catch(error => console.error(error));
+    });
 };
 
 const leftElement = document.body.children[1];
 const rightElement = document.body.children[3];
 
 leftElement.addEventListener(`click`, () => {
-    load(previous(index, modes));
+    load(previous(index--, modes));
 });
 rightElement.addEventListener(`click`, () => {
-    load(next(index, modes));
+    load(next(index++, modes));
 });
 
 console.log(`app loaded`);

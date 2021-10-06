@@ -34,13 +34,13 @@ export class Tour {
             throwError({border});
         }
 
-        if (keys != null && keys instanceof Array) {
+        if (keys != null && keys instanceof Array && typeof keys[0] === 'string') {
             this.keys = keys;
         } else {
             throwError({keys});
         }
 
-        if (tracks != null && tracks instanceof Array) {
+        if (tracks != null && tracks instanceof Array && tracks[0] instanceof Track) {
             this.tracks = tracks;
         } else {
             throwError({tracks});

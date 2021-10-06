@@ -1,26 +1,20 @@
 import {Tour} from "../entities/tour.js";
+import {Track} from "../entities/track.js";
 
-const CORS = `https://cors-anywhere.herokuapp.com/`;
-const RADIO = `https://api.deezer.com/radio/`;
-
-export const radio = (data, markProgressBy) => {
+export const radio = (DZ, data, markProgressBy) => {
     markProgressBy(15);
-    const id = data.radios[Math.floor(Math.random() * 150)];
-
-    let title;
-    return fetch(CORS + RADIO + id)
-        .then(response => {
-            markProgressBy(15);
-            return response.json();
-        })
-        .then(radio => {
-            markProgressBy(20);
-            title = radio.title;
-            return fetch(CORS + radio.tracklist);
-        })
-        .then(tracklist => {
+    const id = data.radios[Math.floor(Math.random() * data.radios.length)];  //TODO get a unique set
+    let outsideResolve, outsideReject;
+    const promise = new Promise((resolve, reject) => {
+        outsideResolve = resolve;
+        outsideReject = reject;
+    });
+    DZ.api(`/radio/${id}`, (radio) => {
+        markProgressBy(35);
+        DZ.api(`/radio/${id}/tracks`, (tracks) => {
             markProgressBy(50);
-            return new Tour(`Radio`, `Guess the artists and titles from radio "${title}".`, 60000, `yellow`, `green`, [`artist`, `title`], tracklist.data);
-        })
-        .catch(error => console.error(error));
+            outsideResolve(new Tour(`Radio`, `Guess the artists and titles from radio "${radio.title}".`, 60000, `orange`, `blue`, [`artist`, `title`], tracks.data.map(json => Track.parse(json))));
+        });
+    });
+    return promise;
 };

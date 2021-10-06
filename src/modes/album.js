@@ -1,22 +1,17 @@
 import {Tour} from "../entities/tour.js";
 import {Track} from "../entities/track.js";
 
-const CORS = `https://cors-anywhere.herokuapp.com/`;
-const ALBUM = `https://api.deezer.com/album/`;
-
-export const album = (data, markProgressBy) => {
+export const album = (DZ, data, markProgressBy) => {
     markProgressBy(15);
-    const id = data.albums[Math.floor(Math.random() * 139)];
-    return fetch(CORS + ALBUM + id)
-        .then(response => {
-            markProgressBy(25);
-            return response.json();
-        })
-        .then(album => {
-            markProgressBy(25);
-            const tracks = album.tracks.data.splice(0, 10).map(track => Track.parse(track));
-            markProgressBy(35);
-            return new Tour(`Album`, `Guess the titles from album "${album.title}".`, 60000, `white`, `black`, [`title`], tracks);
-        })
-        .catch(error => console.error(error));
+    const id = data.albums[Math.floor(Math.random() * data.albums.length)];  //TODO get a unique set
+    let outsideResolve, outsideReject;
+    const promise = new Promise((resolve, reject) => {
+        outsideResolve = resolve;
+        outsideReject = reject;
+    });
+    DZ.api(`/album/${id}`, (album) => {
+        markProgressBy(85);
+        outsideResolve(new Tour(`Album`, `Guess the titles from album "${album.title}".`, 60000, `black`, `white`, [`title`], album.tracks.data.map(json => Track.parse(json))));
+    });
+    return promise;
 };

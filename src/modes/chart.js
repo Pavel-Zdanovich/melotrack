@@ -1,19 +1,16 @@
 import {Tour} from "../entities/tour.js";
+import {Track} from "../entities/track.js";
 
-const CORS = `https://cors-anywhere.herokuapp.com/`;
-const CHART = `https://api.deezer.com/chart`;
-
-export const chart = (data, markProgressBy) => {
-    return fetch(CORS + CHART)
-        .then(response => {
-            markProgressBy(25);
-            return response.json();
-        })
-        .then(json => {
-            markProgressBy(25);
-            const tracks = json.tracks.data;
-            markProgressBy(50);
-            return new Tour(`Chart`, `Guess the artists and titles from chart.`, 60000, `red`, `blue`, [`artist`, `title`], tracks);
-        })
-        .catch(error => console.error(error));
+export const chart = (DZ, data, markProgressBy) => {
+    markProgressBy(15);
+    let outsideResolve, outsideReject;
+    const promise = new Promise((resolve, reject) => {
+        outsideResolve = resolve;
+        outsideReject = reject;
+    });
+    DZ.api(`/chart`, (chart) => {
+        markProgressBy(85);
+        outsideResolve(new Tour(`Chart`, `Guess the artists and titles from chart.`, 60000, `purple`, `yellow`, [`artist`, `title`], chart.tracks.data.map(json => Track.parse(json))));
+    });
+    return promise;
 };

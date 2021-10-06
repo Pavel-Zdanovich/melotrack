@@ -1,5 +1,5 @@
-import {Track} from "../entities/track.js";
 import {Tour} from "../entities/tour.js";
+import {Track} from "../entities/track.js";
 
 const letters = '0123456789ABCDEF';
 
@@ -11,24 +11,28 @@ const randomColor = () => {
     return color;
 };
 
-const CORS = `https://cors-anywhere.herokuapp.com/`;
-const TRACK = `https://api.deezer.com/track/`;
-
-export const track = (data, markProgressBy) => {
+export const track = (DZ, data, markProgressBy) => {
     const tracks = [];
     for (let i = 0; i < 10; i++) {
-        const id = data.tracks[Math.floor(Math.random() * 1000000)];
-        fetch(CORS + TRACK + id)
-            .then(response => {
-                markProgressBy(5);
-                return response.json();
+        const id = data.tracks[Math.floor(Math.random() * data.tracks.length)]; //TODO get a unique set
+        tracks.push(
+            new Promise((resolve) => {
+                DZ.api(`/track/${id}`, (track) => {
+                    markProgressBy(10);
+                    resolve(Track.parse(track));
+                });
             })
-            .then(json => {
-                markProgressBy(5);
-                const track = Track.parse(json);
-                tracks.push(track);
-            })
-            .catch(error => console.error(error));
+        );
+
     }
-    return new Tour(`Random`, `Guess random artists and titles.`, 60000, randomColor(), randomColor(), [`artist`, `title`], tracks);
+    let outsideResolve, outsideReject;
+    const promise = new Promise((resolve, reject) => {
+        outsideResolve = resolve;
+        outsideReject = reject;
+    });
+    Promise.all(tracks).then((tracks) => {
+        console.log(tracks);
+        outsideResolve(new Tour(`Random`, `Guess random artists and titles.`, 60000, randomColor(), randomColor(), [`artist`, `title`], tracks));
+    });
+    return promise;
 };
