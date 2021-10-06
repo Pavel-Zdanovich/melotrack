@@ -48,13 +48,18 @@ header {
     flex-shrink: 0.22084;
 }
 
-.info {
+.time {
 
 }
 
 .progress {
+    position: relative;
     background-color: gray;
+    opacity: 0.5;
+    bottom: 100%;
+    height: 100%;
     margin: 0;
+    z-index: 1;
 }
 
 .dropdown {
@@ -75,10 +80,6 @@ header {
 }
 
 .language {
-
-}
-
-main {
 
 }
 
@@ -133,7 +134,7 @@ footer {
 
 @media (max-device-width: 480px) {
     * {
-        background-color: red;
+        /*background-color: red;*/
         font-size: 36px;
     }
 
@@ -184,14 +185,14 @@ footer {
 
 @media (min-device-width: 480px) and (max-device-width: 768px) {
     * {
-        background-color: yellow;
+        /*background-color: yellow;*/
         font-size: 27px;
     }
 }
 
 @media (min-device-width: 768px) {
     * {
-        background-color: green;
+        /*background-color: green;*/
         font-size: 27px;
     }
 }

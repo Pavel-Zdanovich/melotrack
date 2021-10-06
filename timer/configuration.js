@@ -1,5 +1,7 @@
-let {outputFullTime, outputHoursAndMins, outputMinsAndSecs} = await import(`../utils/utils.js`);
-let {Timer} = await import(`./timer.js`);
+import {tour} from "../script.js";
+
+import {outputFullTime, outputHoursAndMins, outputMinsAndSecs} from "../utils/utils.js";
+import {Timer} from "./timer.js";
 
 let timerElement = null;
 
@@ -14,9 +16,9 @@ let outputToElement = (hours, mins, secs, millis) => {
     timerElement.innerText = outputFullTime(hours, mins, secs, millis);
 };
 
-let timer = new Timer(outputToElement, 60000);
+let timer = new Timer(outputToElement, tour.time);
 
-outputToElement(...Timer.millisToTime(0));
+outputToElement(...Timer.millisToTime(tour.time));
 
 timerElement.addEventListener(`click`, () => {
     if (timer.isTicking()) {

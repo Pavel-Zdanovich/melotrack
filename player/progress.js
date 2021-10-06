@@ -1,4 +1,4 @@
-let {throwError} = await import(`../utils/utils.js`);
+import {throwError} from "../utils/utils.js";
 
 const MIN_PERCENT = 0;
 const MAX_PERCENT = 100;
@@ -33,6 +33,19 @@ export class Progress {
                 this._percent = this._percent + value;
             } else {
                 this._percent = MAX_PERCENT;
+            }
+            //console.log(`Percent: ${this._percent}`);
+        } else {
+            throwError({value});
+        }
+    }
+
+    decrement(value) {
+        if (value != null && typeof value === `number`) {
+            if (MIN_PERCENT > this._percent - value) {
+                this._percent = this._percent - value;
+            } else {
+                this._percent = MIN_PERCENT;
             }
             //console.log(`Percent: ${this._percent}`);
         } else {

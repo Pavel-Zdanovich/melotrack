@@ -1,6 +1,6 @@
-let {outputMinsAndSecs, outputMinsSecsAndMillis} = await import(`../utils/utils.js`);
-let {Timer} = await import(`../timer/timer.js`);
-let {Player} = await import(`./player.js`);
+import {outputMinsAndSecs, outputMinsSecsAndMillis} from "../utils/utils.js";
+import {Timer} from "../timer/timer.js";
+import {Player} from "./player.js";
 
 let playerElement = null;
 
@@ -13,25 +13,37 @@ if (elements.length === 1) {
 
 let playElement = playerElement.children[0];
 let barElement = playerElement.children[1];
-let timeElement = barElement.firstElementChild;
 let progressElement = barElement.lastElementChild;
 let dropdownElement = playerElement.children[2];
 
 progressElement.style.width = `0%`;
 let outputToElement = (progress, hours, mins, secs, millis) => {
-    progressElement.innerHTML = outputMinsSecsAndMillis(hours, mins, secs, millis);
+    barElement.innerHTML = outputMinsAndSecs(hours, mins, secs, millis);
+    barElement.appendChild(progressElement);
     progressElement.style.width = progress + `%`;
 };
-
-let player = new Player(outputToElement, 'nirvana_-_smells-like-teen-spirit.mp3');
-
 outputToElement(0, ...Timer.millisToTime(0));
+
+let onLoad = (name, duration) => {
+    barElement.innerHTML = outputMinsAndSecs(...Timer.millisToTime(duration));
+    barElement.appendChild(progressElement);
+}
+let onPlayed = () => {
+    //console.log(`onPlayed()`);
+    playElement.innerHTML = `⏸`;
+}
+let onStopped = () => {
+    //console.log(`onStopped()`);
+    playElement.innerHTML = `▷`;
+}
+
+let player = new Player(outputToElement, onLoad, onPlayed, onStopped);
 
 playElement.addEventListener(`click`, () => {
     if (player.isPlaying()) {
-        player.stop().then(() => playElement.innerHTML = `▷`);
+        player.stop();//.then(() => console.log(`player.stop()`));
     } else {
-        player.play().then(() => playElement.innerHTML = `⏸`);
+        player.play();//.then(() => console.log(`player.play()`));
     }
 }, false);
 
@@ -39,8 +51,11 @@ let barRect = barElement.getBoundingClientRect();
 barElement.addEventListener(`click`, (e) => {
     if (e.clientX >= barRect.left && e.clientX <= barRect.right &&
         e.clientY >= barRect.top && e.clientY <= barRect.bottom) {
+
         let percent = ((e.clientX - barRect.left) / barRect.width);
-        player.setTime(player.getDuration() * percent);
+        let time = player.getDuration() * percent;
+        outputToElement(percent * 100, ...Timer.millisToTime(time));
+        player.setTime(time);
     }
 }, false);
 
@@ -52,9 +67,7 @@ volumeElement.setAttribute(`class`, `volume`);
 volumeElement.innerText = `🔈`;
 
 dropdownElement.addEventListener(`click`, () => {
-    outputToElement(...Timer.millisToTime(0));
-    player.load(`progmathist_-_bsuir.mp3`).then(() => player.next());
-    /*if (playerElement.lastChild === volumeElement) {
+    if (playerElement.lastChild === volumeElement) {
         dropdownElement.innerHTML = `▽`;
         playerElement.setAttribute(`class`, `player`);
         playerElement.removeChild(element);
@@ -64,5 +77,7 @@ dropdownElement.addEventListener(`click`, () => {
         playerElement.setAttribute(`class`, `player open-player`);
         playerElement.appendChild(element);
         playerElement.appendChild(volumeElement);
-    }*/
+    }
 }, false);
+
+export {player};

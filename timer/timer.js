@@ -1,4 +1,4 @@
-let {throwError} = await import(`../utils/utils.js`);
+import {throwError} from "../utils/utils.js";
 
 const MILLIS_IN_SEC = 1000;
 const SECS_IN_MIN = 60;
@@ -37,11 +37,11 @@ export class Timer {
         this._direction = end > start;
         //console.log(`Direction: ${this._direction}`);
         this._operation = this._direction ? this.#increment : this.#decrement;
-        this._time = Math.abs(start - end);
+        this._time = this._direction ? end - start : start - end; //TODO check performance vs Math.abs(end - start)
         //console.log(`Time: ${this._time}`);
 
         if (step != null && typeof step === `number` && (step > MIN_TIME && step <= MILLIS_IN_DAY)) {
-            this._stepInMillis = step;
+            this._stepInMillis = Math.trunc(step);
             //console.log(`Step in millis: ${step}`);
 
             if (step >= MILLIS_IN_SEC && step < MILLIS_IN_MIN) {
