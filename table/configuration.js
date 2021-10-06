@@ -3,10 +3,11 @@ import {loader} from "../loader/configuration.js";
 import {player} from "../player/configuration.js";
 import {Table} from "./table.js";
 
-let element = document.body.children[1];
+let mainElement = document.body.children[1];
+let footerElement = document.body.children[2];
 
-let formElement = element.children[0];
-let tableElement = element.children[1];
+let formElement = mainElement.children[0];
+let tableElement = mainElement.children[1];
 
 let captionElement = tableElement.children[0];
 let colgroupElement = tableElement.children[1];
@@ -149,18 +150,7 @@ rowMouseEnter = (url) => {
 rowMouseLeave = (url) => {
 };
 
-player._onEnded = (url) => {
-    console.log(`Current ${url} ended!`);
-
-    let track = loader.next(url); //loader.get(url) - repeat, loader.previous(url) - previous
-
-    player.set(track);
-
-    console.log(`Load next ${track.url}`);
-};
-
 let table = new Table(tour);
-let footerElement = document.body.children[2];
 footerElement.addEventListener(`click`, () => {
     Array.from(map.values())
         .flatMap(value => value)

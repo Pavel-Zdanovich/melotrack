@@ -1,6 +1,7 @@
 import {outputMinsAndSecs} from "../utils/utils.js";
 import {Timer} from "../timer/timer.js";
 import {Player} from "./player.js";
+import {loader} from "../loader/configuration.js";
 
 let playerElement = null;
 
@@ -36,8 +37,17 @@ let onPlayed = () => {
 let onStopped = () => {
     playElement.innerHTML = `▶`;
 }
+let onEnded = (url) => {
+    console.log(`Current ${url} ended!`);
 
-let player = new Player(outputToAudioElements, onLoad, onPlayed, onStopped);
+    let track = loader.next(url); //loader.get(url) - repeat, loader.previous(url) - previous
+
+    player.set(track);
+
+    console.log(`Load next ${track.url}`);
+}
+
+let player = new Player(outputToAudioElements, onLoad, onPlayed, onStopped, onEnded);
 
 playElement.addEventListener(`click`, () => {
     if (player.isPlaying()) {
