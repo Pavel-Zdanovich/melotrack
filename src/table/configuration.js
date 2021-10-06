@@ -2,6 +2,7 @@ import {loader} from "../loader/configuration.js";
 import {player} from "../player/configuration.js";
 import {timer} from "../timer/configuration.js";
 import {mobile} from "../utils/mobile.js";
+import {Tour} from "../entities/tour.js";
 import {Track} from "../entities/track.js";
 import {Validator} from "./validator.js";
 
@@ -9,69 +10,82 @@ const tableElement = document.body.children[2];
 const footerElement = document.body.children[4];
 
 const captionElement = tableElement.children[0];
-const theadElement = tableElement.children[1];
-const tbodyElement = tableElement.children[2];
+const headElement = tableElement.children[1];
+const bodyElement = tableElement.children[2];
 
-const theadRowElement = theadElement.children[0];
-const theadCellElement = theadRowElement.children[0];
+const headRowElement = headElement.children[0];
+const headCellElement = headRowElement.children[0];
 
-const exampleRowElement = tbodyElement.children[0];
+const exampleRowElement = bodyElement.children[0];
 const exampleCellElement = exampleRowElement.children[0];
 const labelElement = exampleCellElement.children[0];
 const clefElement = labelElement.children[0];
 const signElement = labelElement.children[1];
+labelElement.innerHTML = ``;
 const upperElement = signElement.children[0];
 const lowerElement = signElement.children[1];
+
+let tour = new Tour(
+    `Melotrack`,
+    captionElement.innerText,
+    0,
+    document.documentElement.style.getPropertyValue(`--background-color`),
+    document.documentElement.style.getPropertyValue(`--border-color`),
+    [...headRowElement.children].map(cellElement => cellElement.innerText.toLowerCase()),
+    [
+        new Track(`melotrack1`, `Melotrack`, `1`, `./audio/melotrack1.mp3`),
+        new Track(`melotrack2`, `Melotrack`, `2`, `./audio/melotrack2.mp3`)
+    ]
+);
+
+tour.tracks.forEach(track => loader.load(track));
 
 const map = [[]]; //map[row][col] - [[thr, th1, th2], [tbr1, td1, td2], [tbr2, td1, td2], ..., [tbr10, td1, td2]]
 
 let currentRowIndex;
 let currentColIndex;
 
-const border = `var(--border-color)`;
+
 
 const colEnter = (colIndex) => {
-    //console.log(`Enter col ${colIndex}`);
-    for (let rowIndex = 0; rowIndex <= tbodyElement.childElementCount; rowIndex++) {
+    for (let rowIndex = 0; rowIndex <= bodyElement.childElementCount; rowIndex++) {
         const array = map[rowIndex];
-        //const rowElement = array[0];
         const cellElement = map[rowIndex][colIndex];
         if (colIndex === 1) {
-            cellElement.style.borderLeftColor = border;
+            cellElement.style.borderLeftColor = tour.border;
         } else if (colIndex === array.length - 1) {
-            cellElement.style.borderRightColor = border;
+            cellElement.style.borderRightColor = tour.border;
         }
     }
-    map[0][colIndex].style.borderTopColor = border;
+    map[0][colIndex].style.borderTopColor = tour.border;
     if (colIndex === 1) {
-        theadElement.style.borderLeftColor = border;
-        tbodyElement.style.borderLeftColor = border;
-        tbodyElement.style.borderRightColor = border;
+        headElement.style.borderLeftColor = tour.border;
+        bodyElement.style.borderLeftColor = tour.border;
+        bodyElement.style.borderRightColor = tour.border;
     } else if (colIndex === map[0].length - 1) {
-        theadElement.style.borderRightColor = border;
-        tbodyElement.style.borderRightColor = border;
+        headElement.style.borderRightColor = tour.border;
+        bodyElement.style.borderRightColor = tour.border;
     } else {
-        tbodyElement.style.borderLeftColor = border;
-        tbodyElement.style.borderRightColor = border;
+        bodyElement.style.borderLeftColor = tour.border;
+        bodyElement.style.borderRightColor = tour.border;
     }
 
     let width = 0;
     for (let index = 1; index <= colIndex - 1; index++) {
         width = width + map[1][index].getBoundingClientRect().width;
     }
-    tbodyElement.scrollTo(width + 0.5, 0);
+    bodyElement.scrollTo(width + 0.5, 0);
     currentColIndex = colIndex;
 };
 
 const colLeave = (colIndex) => {
-    //console.log(`Leave col ${colIndex}`);
-    for (let rowIndex = 0; rowIndex <= tbodyElement.childElementCount; rowIndex++) {
+    for (let rowIndex = 0; rowIndex <= bodyElement.childElementCount; rowIndex++) {
         const cellElement = map[rowIndex][colIndex];
         cellElement.style = ``;
     }
     map[0][colIndex].style = ``;
-    theadElement.style = ``;
-    tbodyElement.style = ``;
+    headElement.style = ``;
+    bodyElement.style = ``;
     currentColIndex = undefined;
 };
 
@@ -80,18 +94,52 @@ const colLeaveEnter = (prevColIndex, nextColIndex) => {
     colEnter(nextColIndex);
 };
 
-let tracks = [
-    new Track(`melotrack1`, `Melotrack`, `1`, `./audio/melotrack1.mp3`),
-    new Track(`melotrack2`, `Melotrack`, `2`, `./audio/melotrack2.mp3`)
-];
 
-tracks.forEach(track => loader.load(track));
 
-const rowEnter = (rowIndex) => {
-    //console.log(`Enter row ${rowIndex}`);
+const headRowEnter = (rowIndex) => {
+    currentRowIndex = rowIndex;
+};
+
+const headRowLeave = (rowIndex) => {
+    currentRowIndex = undefined;
+};
+
+const headRowLeaveEnter = (prevRowIndex, nextRowIndex) => {
+    currentRowIndex = nextRowIndex;
+};
+
+
+
+const headCellEnter = (rowIndex, colIndex) => {
+    const array = map[rowIndex];
+    const cellElement = array[colIndex];
+    if (colIndex === 1) {
+        cellElement.style.borderLeftColor = tour.border;
+        headElement.style.borderLeftColor = tour.border;
+        bodyElement.style.borderLeftColor = tour.border;
+        bodyElement.style.borderRightColor = tour.border;
+    } else if (colIndex === array.length - 1) {
+        cellElement.style.borderRightColor = tour.border;
+        headElement.style.borderRightColor = tour.border;
+        bodyElement.style.borderRightColor = tour.border;
+    }
+    cellElement.style.borderTopColor = tour.border;
+
+};
+
+const headCellLeave = (rowIndex, colIndex) => {
+    const cellElement = map[rowIndex][colIndex];
+    cellElement.style = ``;
+    headElement.style = ``;
+    bodyElement.style = ``;
+};
+
+
+
+const bodyRowEnter = (rowIndex) => {
     map[rowIndex][0].classList.add(`staved`);
     currentRowIndex = rowIndex;
-    const track = tracks[currentRowIndex - 1];
+    const track = tour.tracks[currentRowIndex - 1];
     if (track) {
         loader.get(track.url).then(track => player.load(track));
     } else {
@@ -99,35 +147,33 @@ const rowEnter = (rowIndex) => {
     }
 };
 
-const rowLeave = (rowIndex) => {
-    //console.log(`Leave row ${rowIndex}`);
+const bodyRowLeave = (rowIndex) => {
     map[rowIndex][0].classList.remove(`staved`);
     player.unload();
     currentRowIndex = undefined;
 };
 
-const rowLeaveEnter = (prevRowIndex, nextRowIndex) => {
-    //console.log(`Leave row ${prevRowIndex}`);
+const bodyRowLeaveEnter = (prevRowIndex, nextRowIndex) => {
     map[prevRowIndex][0].classList.remove(`staved`);
-    rowEnter(nextRowIndex);
+    bodyRowEnter(nextRowIndex);
 };
 
-const cellEnter = (rowIndex, colIndex) => {
-    //console.log(`Enter TD [${rowIndex}][${colIndex}]`);
+
+
+const bodyCellEnter = (rowIndex, colIndex) => {
     const label = map[rowIndex][colIndex].children[0];
     label.appendChild(clefElement);
     upperElement.innerHTML = rowIndex;
-    lowerElement.innerHTML = tbodyElement.childElementCount;
+    lowerElement.innerHTML = bodyElement.childElementCount;
     label.appendChild(signElement);
 };
 
-labelElement.innerHTML = ``;
-
-const cellLeave = (rowIndex, colIndex) => {
-    //console.log(`Leave TD [${rowIndex}][${colIndex}]`);
+const bodyCellLeave = (rowIndex, colIndex) => {
     const label = map[rowIndex][colIndex].children[0];
     label.innerHTML = ``;
 };
+
+
 
 const isTable = (element) => {
     if (!element) {
@@ -188,65 +234,22 @@ const fillCellsInRow = (rowIndex, colEnter, colLeave, colLeaveEnter, rowEnter, r
     }
 };
 
+map[0][0] = headRowElement; //initialization
 
-
-map[0][0] = theadRowElement; //initialization
-
-fillCellsInRow(
-    0,
-    colEnter,
-    colLeave,
-    colLeaveEnter,
-    (rowIndex) => {
-        //console.log(`Enter row ${rowIndex}`);
-        currentRowIndex = rowIndex;
-    },
-    (rowIndex) => {
-        //console.log(`Leave row ${rowIndex}`);
-        currentRowIndex = undefined;
-    },
-    (prevRowIndex, nextRowIndex) => {
-        //console.log(`Leave row ${prevRowIndex}`);
-        //console.log(`Enter row ${nextRowIndex}`);
-        currentRowIndex = nextRowIndex;
-    },
-    (rowIndex, colIndex) => {
-        //console.log(`Enter TH [${rowIndex}][${colIndex}]`);
-        const array = map[rowIndex];
-        //const rowElement = array[0];
-        const cellElement = array[colIndex];
-        if (colIndex === 1) {
-            cellElement.style.borderLeftColor = border;
-            theadElement.style.borderLeftColor = border;
-            tbodyElement.style.borderLeftColor = border;
-            tbodyElement.style.borderRightColor = border;
-        } else if (colIndex === array.length - 1) {
-            cellElement.style.borderRightColor = border;
-            theadElement.style.borderRightColor = border;
-            tbodyElement.style.borderRightColor = border;
-        }
-        cellElement.style.borderTopColor = border;
-
-    },
-    (rowIndex, colIndex) => {
-        //console.log(`Leave TH [${rowIndex}][${colIndex}]`);
-        const cellElement = map[rowIndex][colIndex];
-        cellElement.style = ``;
-        theadElement.style = ``;
-        tbodyElement.style = ``;
-    },
-);
+fillCellsInRow(0, colEnter, colLeave, colLeaveEnter, headRowEnter, headRowLeave, headRowLeaveEnter, headCellEnter, headCellLeave);
 
 const scrollWidth = exampleRowElement.getBoundingClientRect().width;
 
 const stretchFor = (rowElement, cols) => {
     if (scrollWidth / cols <= 300 || mobile) {
         rowElement.style.width = (cols * 100) + `%`;
+    } else {
+        rowElement.style.width = ``;
     }
 };
 
-for (let index = 0; index < tbodyElement.childElementCount; index++) {
-    const rowElement = tbodyElement.children[index];
+for (let index = 0; index < bodyElement.childElementCount; index++) {
+    const rowElement = bodyElement.children[index];
 
     const rowIndex = index + 1;
 
@@ -254,32 +257,32 @@ for (let index = 0; index < tbodyElement.childElementCount; index++) {
 
     stretchFor(rowElement, rowElement.childElementCount);
 
-    fillCellsInRow(rowIndex, colEnter, colLeave, colLeaveEnter, rowEnter, rowLeave, rowLeaveEnter, cellEnter, cellLeave);
+    fillCellsInRow(rowIndex, colEnter, colLeave, colLeaveEnter, bodyRowEnter, bodyRowLeave, bodyRowLeaveEnter, bodyCellEnter, bodyCellLeave);
 }
 
 
 
 player.addEventListener(`end`, (e) => {
     const current = e.detail;
-    const index = tracks.indexOf(current);
+    const index = tour.tracks.indexOf(current);
     const selectNext = player.getSelectionMode();
-    const next = selectNext(index, tracks);
+    const next = selectNext(index, tour.tracks);
     loader.get(next.url).then(track => player.load(track));
 });
-
-let keys = [`artist`, `title`];
 
 const check = () => {
     player.setTitleMode(true);
     for (let rowIndex = 1; rowIndex < map.length; rowIndex++) {
+        const track = tour.tracks[rowIndex - 1];
         for (let colIndex = 1; colIndex < map[0].length; colIndex++) {
             const cellElement = map[rowIndex][colIndex];
             const inputElement = cellElement.lastElementChild;
-            const expected = tracks[rowIndex];
+            const key = tour.keys[colIndex - 1];
+            const expected = track[key];
             const actual = inputElement.value;
             const result = Validator.similarity(expected, actual);
             console.log(`${rowIndex}_${colIndex} '${actual}' = '${expected}' on ${result * 100}%`);
-            inputElement.value = expected[keys[colIndex - 1]];
+            inputElement.value = expected;
             inputElement.disabled = true;
         }
     }
@@ -332,33 +335,33 @@ tableElement.addEventListener(`keydown`, (e) => {
 });
 
 let touchEnd = false;
-tbodyElement.addEventListener(`touchend`, () => {
+bodyElement.addEventListener(`touchend`, () => {
     touchEnd = true;
-    tbodyElement.scrollBy(1, 0);
+    bodyElement.scrollBy(1, 0);
 })
 
-const threshold = theadCellElement.getBoundingClientRect().width;
+const threshold = headCellElement.getBoundingClientRect().width;
 
 let prevScroll = 0;
 let scroll = 0;
 let direction;
 let requestId;
 let scrolls = [];
-tbodyElement.addEventListener(`scroll`, () => {
-    const currentScroll = tbodyElement.scrollLeft - prevScroll;
+bodyElement.addEventListener(`scroll`, () => {
+    const currentScroll = bodyElement.scrollLeft - prevScroll;
     scrolls.push(currentScroll);
-    prevScroll = tbodyElement.scrollLeft;
+    prevScroll = bodyElement.scrollLeft;
     if (!direction) {
         direction = currentScroll > 0 ? `>` : `<`;
     }
 
-    const colIndex = Math.trunc(tbodyElement.scrollLeft / scrollWidth);
+    const colIndex = Math.trunc(bodyElement.scrollLeft / scrollWidth);
 
     const left = colIndex * scrollWidth;
     const right = left + scrollWidth;
 
-    const diffLeft = tbodyElement.scrollLeft - left;
-    const diffRight = right - tbodyElement.scrollLeft;
+    const diffLeft = bodyElement.scrollLeft - left;
+    const diffRight = right - bodyElement.scrollLeft;
 
     if (direction === `>`) {
         if (diffLeft < threshold) {
@@ -379,13 +382,13 @@ tbodyElement.addEventListener(`scroll`, () => {
         const start = performance.now();
         const duration = 1000;
         const callback = (time) => {
-            const progress = (time - start) / duration;
+            const progress = Math.abs(time - start) / duration;
             let x = progress * scroll;
             if (Math.abs(x) < 0.8) { //dead zone
                 x = Math.sign(x) * 0.8;
             }
             if (Number.parseInt(scroll.toFixed(1)) !== 0) {
-                tbodyElement.scrollBy(x, 0); //recursion: progress increases linearly, scroll  decreases exponentially
+                bodyElement.scrollBy(x, 0); //recursion: progress increases linearly, scroll  decreases exponentially
                 requestId = window.requestAnimationFrame(callback);
             } else {
                 //window.cancelAnimationFrame(requestId);
@@ -399,31 +402,10 @@ tbodyElement.addEventListener(`scroll`, () => {
     //output(direction, left, right, diffLeft, diffRight);
 });
 
-captionElement.addEventListener(`click`, () => {
-    //output(false, 0, 0);
-});
-
-const output = (direction, left, right, diffLeft, diffRight) => {
-    captionElement.innerText = `
-        ${left} <= ${tbodyElement.scrollLeft} > ${right}
-           ${diffLeft} ? ${threshold} ? ${diffRight}
-        ${scrolls.slice(0, 15)}
-        ${scrolls.slice(15, 30)}
-        ${scrolls.slice(30, 45)}
-        ${scrolls.slice(45)}
-        E: ${touchEnd} ID: ${requestId}
-    `;
-};
-
-footerElement.addEventListener(`click`, check);
-
 document.addEventListener(`tour`, (e) => {
-    const tour = e.detail;
+    tour = e.detail;
 
-    keys = tour.keys;
-    tracks = tour.tracks;
-
-    tracks.forEach(track => {
+    tour.tracks.forEach(track => {
         if (!loader.get(track.url)) {
             loader.load(track);
         }
@@ -432,97 +414,99 @@ document.addEventListener(`tour`, (e) => {
     player.setTitleMode(false);
 
     timer.load(tour.time);
+    if (!timer.isTicking()) {
+        timer.start();
+    }
 
     captionElement.innerText = tour.description;
 
-    const prevRowsCount = map.length - 1; // - thead
-    const prevColsCount = map[0].length - 1; // - tr
+    const prevRowsCount = map.length - 1;
+    const prevColsCount = map[0].length - 1;
 
-    if (prevRowsCount > tracks.length) {
-        const arrays = map.splice(tracks.length);
-        arrays.map(array => array[0]).forEach(row => tbodyElement.removeChild(row));
+    if (prevRowsCount === tour.tracks.length) {
+        //nothing
+    } else if (prevRowsCount > tour.tracks.length) {
+        const rows = map.splice(tour.tracks.length + 1);
+        rows.map(array => array[0]).forEach(rowElement => bodyElement.removeChild(rowElement));
     } else {
-        if (prevColsCount > keys.length) {
-            const cells = map[0].splice(tracks.length);
-            cells.forEach(cell => map[0][0].removeChild(cell));
-        } else {
-            for (let keyIndex = 0; keyIndex < keys.length; keyIndex++) {
-                const key = keys[keyIndex];
-
-                const colIndex = keyIndex + 1;
-                const rowIndex = 0;
-
-                const rowElement = map[rowIndex][0];
-
-                let cellElement = map[rowIndex][colIndex];
-                if (!cellElement) {
-                    cellElement = document.createElement(`th`);
-
-                    map[rowIndex][colIndex] = cellElement;
-
-                    addEventListeners(rowIndex, colIndex, colEnter, colLeave, () => {
-                    }, () => {
-                    }, () => {
-                    }, () => {
-                    });
-
-                    rowElement.appendChild(cellElement);
-                }
-
-                cellElement.innerText = key.charAt(0).toUpperCase() + key.slice(1).toLowerCase();
-            }
-        }
-
-        for (let trackIndex = 0; trackIndex < tracks.length; trackIndex++) {
-            const rowIndex = trackIndex + 1;
-
+        for (let rowIndex = 1; rowIndex <= tour.tracks.length; rowIndex++) {
             const array = map[rowIndex];
 
             let rowElement;
-
             if (array) {
                 rowElement = array[0];
             } else {
                 rowElement = document.createElement(`tr`);
                 map[rowIndex] = [rowElement];
-                tbodyElement.appendChild(rowElement);
+                bodyElement.appendChild(rowElement);
+            }
+        }
+    }
+
+    if (prevColsCount > tour.keys.length) {
+        map.forEach(array => {
+            const cells = array.splice(tour.keys.length + 1);
+            const rowElement = array[0];
+            cells.forEach(cellElement => rowElement.removeChild(cellElement));
+        });
+    }
+
+    for (let colIndex = 1; colIndex <= tour.keys.length; colIndex++) {
+        const rowIndex = 0;
+
+        const array = map[rowIndex];
+
+        const rowElement = array[0];
+
+        let headCellElement = array[colIndex];
+        if (!headCellElement) {
+            headCellElement = document.createElement(`th`);
+            headCellElement.tabIndex = -1;
+
+            array[colIndex] = headCellElement;
+
+            addEventListeners(rowIndex, colIndex, colEnter, colLeave, colLeaveEnter, headRowEnter, headRowLeave, headRowLeaveEnter, headCellEnter, headCellLeave);
+
+            rowElement.appendChild(headCellElement);
+        }
+
+        const key = tour.keys[colIndex - 1];
+        headCellElement.innerText = key.charAt(0).toUpperCase() + key.slice(1).toLowerCase();
+
+        for (let rowIndex = 1; rowIndex <= tour.tracks.length; rowIndex++) {
+            const array = map[rowIndex];
+
+            const rowElement = array[0];
+
+            let bodyCellElement = array[colIndex];
+            let labelElement;
+            let inputElement;
+            if (!bodyCellElement) {
+                bodyCellElement = document.createElement(`td`);
+                labelElement = document.createElement(`label`);
+                inputElement = document.createElement(`input`);
+                inputElement.type = `text`;
+                inputElement.autocomplete = `off`;
+
+                array[colIndex] = bodyCellElement;
+
+                addEventListeners(rowIndex, colIndex, colEnter, colLeave, colLeaveEnter, bodyRowEnter, bodyRowLeave, bodyRowLeaveEnter, bodyCellEnter, bodyCellLeave);
+
+                bodyCellElement.appendChild(labelElement);
+                bodyCellElement.appendChild(inputElement);
+                rowElement.appendChild(bodyCellElement);
             }
 
-            stretchFor(rowElement, keys.length);
+            const id = key + `_` + colIndex;
 
-            if (prevColsCount > keys.length) {
-                const cells = map[rowIndex].splice(tracks.length);
-                cells.forEach(cell => rowElement.removeChild(cell));
-            } else {
-                for (let keyIndex = 0; keyIndex < keys.length; keyIndex++) {
-                    const key = keys[keyIndex];
+            labelElement = bodyCellElement.children[0];
+            labelElement.htmlFor = id;
 
-                    const colIndex = keyIndex + 1;
+            inputElement = bodyCellElement.children[1];
+            inputElement.id = id;
+            inputElement.value = ``;
 
-                    let cellElement = map[rowIndex][colIndex];
-                    if (!cellElement) {
-                        const id = key + `_` + colIndex;
-
-                        const labelElement = document.createElement(`label`);
-                        labelElement.htmlFor = id;
-
-                        const inputElement = document.createElement(`input`);
-                        inputElement.id = id;
-                        inputElement.type = `text`;
-
-                        cellElement = document.createElement(`td`);
-
-                        map[rowIndex][colIndex] = cellElement;
-
-                        addEventListeners(rowIndex, colIndex, colEnter, colLeave, rowEnter, rowLeave, cellEnter, cellLeave);
-
-                        cellElement.appendChild(labelElement);
-                        cellElement.appendChild(inputElement);
-
-                        rowElement.appendChild(cellElement);
-                    }
-                }
-            }
+            stretchFor(rowElement, tour.keys.length);
         }
     }
 });

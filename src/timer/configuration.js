@@ -17,14 +17,6 @@ timer.addEventListener(`tick`, (e) => {
     outputToElement(...time);
 });
 
-timerElement.addEventListener(`click`, () => {
-    if (timer.isTicking()) {
-        timer.stop();
-    } else {
-        timer.start();
-    }
-});
-
 export {timer};
 
 console.log(`timer loaded`);

@@ -75,10 +75,8 @@
 }
 
 html {
-    --background-color: white;
     background-color: var(--background-color);
 
-    --border-color: black;
     color: var(--border-color);
 
     --other-color: rgba(0, 0, 0, 0.5);
@@ -274,6 +272,14 @@ input[type=range]::-ms-track {
     left: 2.5%;
 }
 
+.right {
+    right: 2.5%;
+}
+
+.left svg, .right svg {
+    stroke-width: 3%;
+}
+
 table {
     height: 120%;
     display: flex;
@@ -413,16 +419,13 @@ tbody {
 input {
     background: none;
     border: none;
+    color: var(--border-color);
 }
 
 input:focus {
     outline: none !important;
     border: none;
     box-shadow: none;
-}
-
-.right {
-    right: 2.5%;
 }
 
 footer {
@@ -465,7 +468,7 @@ rect {
     width: 95%;
 }
 
-@media (max-device-width: 480px) {
+@media (max-width: 480px) {
     * {
         /*font-size: 36px;*/
     }
@@ -486,6 +489,10 @@ rect {
         width: 10%;
     }
 
+    .logo svg {
+        stroke-width: 3%;
+    }
+
     .timer {
         grid-area: timer;
     }
@@ -503,19 +510,23 @@ rect {
     }
 
     .clef {
-        width: 20%;
+        width: 30%;
+    }
+
+    .clef svg {
+        stroke-width: 3%;
     }
 
     .icon {
-        width: 20%;
+        width: 15%;
     }
 
-    svg {
+    .icon svg {
         stroke-width: 5%;
     }
 }
 
-@media (min-device-width: 480px) and (max-device-width: 768px) {
+@media (min-width: 480px) and (max-width: 768px) {
     * {
         /*font-size: 14px;*/
     }
@@ -524,20 +535,28 @@ rect {
         width: 30%;
     }
 
+    .logo svg {
+        stroke-width: 3.5%;
+    }
+
     .clef {
-        width: 15%;
+        width: 20%;
+    }
+
+    .clef svg {
+        stroke-width: 3%;
     }
 
     .icon {
         width: 15%;
     }
 
-    svg {
-        stroke-width: 3.75%;
+    .icon svg {
+        stroke-width: 4%;
     }
 }
 
-@media (min-device-width: 768px) {
+@media (min-width: 768px) and (max-width: 1056px) {
     * {
         /*font-size: 18px;*/
     }
@@ -546,15 +565,65 @@ rect {
         width: 35%;
     }
 
+    .logo svg {
+        stroke-width: 3.5%;
+    }
+
     .clef {
         width: 20%;
+    }
+
+    .clef svg {
+        stroke-width: 2.5%;
     }
 
     .icon {
         width: 10%;
     }
 
-    svg {
+    .icon svg {
+        stroke-width: 3.5%;
+    }
+}
+
+@media (min-width: 1056px) {
+    * {
+        /*font-size: 18px;*/
+    }
+
+    .logo {
+        width: 27.5%;
+    }
+
+    .logo svg {
         stroke-width: 2.5%;
+    }
+
+    .side {
+        width: 3%;
+    }
+
+    .left {
+        left: 4%;
+    }
+
+    .right {
+        right: 4%;
+    }
+
+    .clef {
+        width: 12.5%;
+    }
+
+    .clef svg {
+        stroke-width: 2.5%;
+    }
+
+    .icon {
+        width: 7.5%;
+    }
+
+    .icon svg {
+        stroke-width: 3.5%;
     }
 }

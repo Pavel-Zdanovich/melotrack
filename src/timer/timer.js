@@ -167,6 +167,7 @@ export class Timer extends EventTarget {
                         clearInterval(this._interval);
                         this._interval = null;
                         [this._hours, this._mins, this._secs, this._millis] = Timer.millisToTime(this._end);
+                        this.dispatchEvent(new CustomEvent(`tick`, {detail: [this._hours, this._mins, this._secs, this._millis]}));
                         this.dispatchEvent(new CustomEvent(`end`, {detail: [this._hours, this._mins, this._secs, this._millis]}));
                     }
                 },

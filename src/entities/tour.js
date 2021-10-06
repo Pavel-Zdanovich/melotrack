@@ -46,12 +46,4 @@ export class Tour {
             throwError({tracks});
         }
     }
-
-    static parse(json) {
-        if (json == null) {
-            throwError({json});
-        }
-
-        return new Tour(json.title, json.description, json.time, json.keys, json.tracks.map(track => Track.parse(track)));
-    }
 }

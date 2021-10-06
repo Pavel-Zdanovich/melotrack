@@ -1,5 +1,6 @@
 import {Tour} from "../entities/tour.js";
 import {Track} from "../entities/track.js";
+import {spinner} from "../utils/spinner.js";
 
 const letters = '0123456789ABCDEF';
 
@@ -11,28 +12,43 @@ const randomColor = () => {
     return color;
 };
 
-export const track = (DZ, data, markProgressBy) => {
+export const track = (DZ, data) => {
+    spinner.start();
+    const ids = [];
     const tracks = [];
     for (let i = 0; i < 10; i++) {
-        const id = data.tracks[Math.floor(Math.random() * data.tracks.length)]; //TODO get a unique set
+        let id = data.tracks[Math.floor(Math.random() * data.tracks.length)];
+        while (ids.includes(id)) {
+            id = data.tracks[Math.floor(Math.random() * data.tracks.length)];
+        }
+        ids.push(id);
         tracks.push(
             new Promise((resolve) => {
                 DZ.api(`/track/${id}`, (track) => {
-                    markProgressBy(10);
+                    spinner.markProgressBy(10);
                     resolve(Track.parse(track));
                 });
             })
         );
-
     }
     let outsideResolve, outsideReject;
     const promise = new Promise((resolve, reject) => {
         outsideResolve = resolve;
         outsideReject = reject;
     });
+    promise.then(() => spinner.stop());
     Promise.all(tracks).then((tracks) => {
-        console.log(tracks);
-        outsideResolve(new Tour(`Random`, `Guess random artists and titles.`, 60000, randomColor(), randomColor(), [`artist`, `title`], tracks));
+        outsideResolve(
+            new Tour(
+                `Random`,
+                `Guess random artists and titles.`,
+                60000,
+                randomColor(),
+                randomColor(),
+                [`artist`, `title`],
+                tracks
+            )
+        );
     });
     return promise;
 };

@@ -1,3 +1,12 @@
+export function promisify() {
+    let resolve, reject;
+    const promise = new Promise((innerResolve, innerReject) => {
+        resolve = innerResolve;
+        reject = innerReject;
+    });
+    return [promise, resolve, reject];
+}
+
 function check(current, array) {
     if (array.constructor !== Array) {
         throwError({array});
