@@ -1,9 +1,9 @@
-let {throwError} = await import(`../utils/utils.js`);
+import {throwError} from "../utils/utils.js";
 
 export class Track {
 
     constructor(id, artist, title, url) {
-        if (id != null && typeof id === `number`) {
+        if (id != null && typeof id === `string`) {
             this.id = id;
         } else {
             throwError({id});
@@ -32,6 +32,14 @@ export class Track {
         this._end = 0;
         this._direction = true;
         this._duration = 0;
+    }
+
+    static parse(json) {
+        if (json == null) {
+            throwError({json});
+        }
+
+        return new Track(json.id.toString(), json.artist.name, json.title, json.preview);
     }
 
     getBuffer() {

@@ -1,16 +1,9 @@
-import {outputMinsAndSecs} from "../utils/utils.js";
+import {getElementByClass, outputMinsAndSecs} from "../utils/utils.js";
 import {Timer} from "../timer/timer.js";
 import {Player} from "./player.js";
 import {loader} from "../loader/configuration.js";
 
-let playerElement = null;
-
-let elements = document.getElementsByClassName(`player`);
-if (elements.length === 1) {
-    playerElement = elements.item(0);
-} else {
-    throw new Error(`Can't find player`);
-}
+let playerElement = getElementByClass(`player`);
 
 let playElement = playerElement.children[0];
 let controlsElement = playerElement.children[1];
@@ -107,4 +100,4 @@ volumeBarElement.addEventListener(`click`, (e) => {
 
 outputToVolumeElement(Math.trunc(player.getVolume() * 100));
 
-export {player};
+export {player, playerElement};

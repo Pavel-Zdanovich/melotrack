@@ -1,41 +1,40 @@
-import {Track} from "./entities/track.js";
-import {Tour} from "./entities/tour.js";
+"use strict";
 
-let tracks = [];
-let counter = 0;
-let attempts = 0;
-while (counter < 10 && attempts < 20) {
-    let id = 10000000 + Math.floor(Math.random() * 1000000);
-    let cors = `https://cors-anywhere.herokuapp.com/`;
-    let url = `https://api.deezer.com/track/${id}`;
+import {random, loadTour} from "./src/app.js";
 
-    console.log(`Try fetch ${cors + url}`);
+const tours = [
+    random(),
+    await fetch(`data/tour1.json`).then(response => response.json()),
+    await fetch(`data/tour2.json`).then(response => response.json())
+];
 
-    await fetch(cors + url)
-        .then(response => {
-            if (response.ok) {
-                return response.json();
-            } else {
-                console.error(`Response: ${response.status}`);
-            }
-        })
-        .then(body => {
-            if (!body.error && body.preview) {
-                let track = new Track(id, body.artist.name, body.title, body.preview);
-                tracks.push(track);
-                counter++;
-            }
-        })
-        .catch(error => console.error(error));
+let index;
 
-    attempts++;
+const load = (tour) => {
+    console.log(tour);
+    loadTour(tour);
+    //document.documentElement.style.setProperty(`--background-color`, tour.background);
+    //document.documentElement.style.setProperty(`--border-color`, tour.border);
 }
 
-let tour = new Tour(`Random`, `Try to guess :D`, 60000, [`artist`, `title`], tracks);
+const prev = document.body.children[1];
+const next = document.body.children[3];
 
-export {tour};
+prev.addEventListener(`click`, () => {
+    if (index > 0) {
+        index--;
+    } else {
+        index = tours.length;
+    }
+    load(tours[index]);
+});
+next.addEventListener(`click`, () => {
+    if (index <= tours.length - 2) {
+        index++;
+    } else {
+        index = 0;
+    }
+    load(tours[index]);
+});
 
-import("./timer/configuration.js");
-import("./player/configuration.js");
-import("./loader/configuration.js");
-import("./table/configuration.js");
+console.log(`script loaded`);

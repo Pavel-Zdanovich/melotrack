@@ -1,3 +1,12 @@
+export function getElementByClass(className) {
+    let elements = document.getElementsByClassName(className);
+    if (elements.length === 1) {
+        return elements.item(0);
+    } else {
+        throw new Error(`Can't find ${className}`);
+    }
+}
+
 export function throwError(variable) {
     let name = Object.keys(variable)[0];
     let value = variable[name];

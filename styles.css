@@ -1,11 +1,4 @@
 * {
-    --background-color: white;
-    background-color: var(--background-color);
-
-    --border-color: black;
-    /*border: 1px solid var(--border-color);*/
-    color: var(--border-color);
-
     text-align: center; /*horizontal center*/
     /*font-weight: 300;*/
     /*font-size: 15px;*/
@@ -43,6 +36,13 @@
 }
 
 html {
+    --background-color: white;
+    background-color: var(--background-color);
+
+    --border-color: black;
+    /*border: 1px solid var(--border-color);*/
+    color: var(--border-color);
+
     height: 100%;
 }
 
@@ -71,6 +71,7 @@ body {
 header {
     display: flex;
     height: 10%;
+    background-color: var(--background-color);
 }
 
 .heading {
@@ -250,6 +251,7 @@ footer {
     display: flex;
     bottom: 0;
     height: 10%;
+    background-color: var(--background-color);
 }
 
 .copyright {
