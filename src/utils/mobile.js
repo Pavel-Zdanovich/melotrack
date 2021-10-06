@@ -40,7 +40,7 @@ document.addEventListener(`dblclick`, () => {
     }
 });
 
-window.addEventListener(`load`,() => {
+window.addEventListener(`load`, () => {
     setTimeout(() => {
         //document.body.children[2].children[0].innerText = document.body.children[2].children[0].innerText + `\tScroll`;
         window.scrollTo(0, 1);
@@ -61,7 +61,7 @@ document.addEventListener(`readystatechange`, () => {
             );
         } else {
             window.addEventListener(`resize`, () => {
-                //document.body.children[2].children[0].innerText = document.body.children[2].children[0].innerText + `\tResize from ${height} to ${window.innerHeight}, key=${keyboard}`;
+                //document.body.children[2].children[0].innerText = document.body.children[2].children[0].innerText + `\tResize from ${height} to ${window.innerHeight}`;
 
                 if (screenState !== fullscreen) {
                     //document.body.children[2].children[0].innerText = document.body.children[2].children[0].innerText + `\tFullscreen ${fullscreen}\n`;
@@ -82,6 +82,7 @@ document.addEventListener(`readystatechange`, () => {
                     if (window.innerHeight < height) {
                         if (!keyboard) {
                             //document.body.children[2].children[0].innerText = document.body.children[2].children[0].innerText + `\tKeyboard on\n`;
+                            changeViewport(height, width);
                             onKeyboardOpened();
                             keyboard = true;
                             return;
@@ -91,6 +92,11 @@ document.addEventListener(`readystatechange`, () => {
                     } else {
                         return;
                     }
+                }
+
+                if (resizePercentage > 0) {
+                    //document.body.children[2].children[0].innerText = document.body.children[2].children[0].innerText + `\tAddress bar\n`;
+                    changeViewport(window.innerHeight, window.innerWidth);
                 }
 
                 if (keyboard) {
@@ -103,11 +109,15 @@ document.addEventListener(`readystatechange`, () => {
     }
 });
 
-let footerElement = document.body.children[4];
+const viewport = document.querySelector(`meta[name=viewport]`);
+
+const changeViewport = (height, width) => {
+    viewport.setAttribute(`content`, `height=${height}, width=${width}, initial-scale=1.0`);
+};
+
+const footerElement = document.body.children[4];
 
 const onKeyboardOpened = () => {
-    const viewport = document.querySelector(`meta[name=viewport]`);
-    viewport.setAttribute(`content`, `height=${height}, width=${window.innerWidth}, initial-scale=1.0`);
     footerElement.classList.remove(`fixed`);
 };
 
