@@ -1,5 +1,5 @@
 import {Track} from "./entities/track.js";
-import {Tour} from "./entities/tour";
+import {Tour} from "./entities/tour.js";
 
 /*let json = await fetch(`data/tour1.json`).then(response => response.json());
 let tour = Object.setPrototypeOf(json, Tour.prototype);
