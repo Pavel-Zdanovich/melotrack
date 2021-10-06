@@ -4,16 +4,17 @@ import {tours, loadTour} from "./src/app.js";
 
 let index = 0;
 
-const indexElement = document.body.children[4].children[1];
+const indexElement = document.body.children[2].children[0];
+
 const output = () => {
-    indexElement.innerHTML = `${index + 1}/${tours.length}`;
+    indexElement.innerHTML = indexElement.innerHTML + `${index + 1}/${tours.length}`;
 }
 
-output();
-
-const load = async (tour) => {
+const load = async (get) => {
     output();
-    loadTour(await tour());
+    let tour = await get();
+    console.log(tour);
+    loadTour(tour);
     document.documentElement.style.setProperty(`--background-color`, tour.background);
     document.documentElement.style.setProperty(`--border-color`, tour.border);
 }
@@ -37,14 +38,20 @@ const next = () => {
     return tours[index];
 }
 
-const prevElement = document.body.children[1];
-const nextElement = document.body.children[3];
+const leftElement = document.body.children[1];
+const rightElement = document.body.children[3];
 
-prevElement.addEventListener(`click`, () => {
+leftElement.addEventListener(`click`, () => {
     load(prev());
 });
-nextElement.addEventListener(`click`, () => {
+rightElement.addEventListener(`click`, () => {
     load(next());
+});
+
+const clefElement = document.body.children[4].children[1];
+
+clefElement.addEventListener(`click`, () => {
+    load(tours[index]);
 });
 
 console.log(`script loaded`);

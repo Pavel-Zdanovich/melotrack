@@ -10,13 +10,13 @@ export const tours = [
 
 export let loadTour;
 
-export const whenLoaded = new Promise((resolve) => {
+export const onLoad = new Promise((resolve) => {
     loadTour = resolve;
 });
 
 console.log(`promise`);
 
-import("./utils/mobile.js");
+import("./utils/mobile.js").then(() => console.log(`mobile`));
 import("./loader/configuration.js").then(() => console.log(`loader loaded`));
 import("./player/configuration.js").then(() => console.log(`player loaded`));
 import("./table/configuration.js").then(() => console.log(`table loaded`));
