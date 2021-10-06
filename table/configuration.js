@@ -6,22 +6,20 @@ import {Table} from "./table.js";
 let mainElement = document.body.children[1];
 let footerElement = document.body.children[2];
 
-let formElement = mainElement.children[0];
-let tableElement = mainElement.children[1];
+let tableElement = mainElement.children[0];
 
 let captionElement = tableElement.children[0];
-let colgroupElement = tableElement.children[1];
-let theadElement = tableElement.children[2];
-let tbodyElement = tableElement.children[3];
+let theadElement = tableElement.children[1];
+let tbodyElement = tableElement.children[2];
 
-let createCol = (name) => {
-    let col = document.createElement(`col`);
-    col.setAttribute(`class`, `${name}_col`);
-    return col;
-};
+let createRow = (classType) => {
+    let row = document.createElement(`tr`);
 
-let createRow = () => {
-    return document.createElement(`tr`);
+    if (classType != null && typeof classType === `string`) {
+        row.setAttribute(`class`, classType);
+    }
+
+    return row;
 };
 
 let createCell = (cellType, classType, inner) => {
@@ -91,7 +89,6 @@ let addCellEventListener = (key, cell) => {
 };
 
 captionElement.innerText = tour.description;
-colgroupElement.innerHTML = ``;
 theadElement.innerHTML = ``;
 tbodyElement.innerHTML = ``;
 
@@ -100,13 +97,10 @@ let map = new Map();
 let colMouseEnter;
 let colMouseLeave;
 
-let theadRow = createRow();
+let theadRow = createRow(`thr`);
 theadElement.appendChild(theadRow);
 
 tour.keys.forEach((key, index, array) => {
-    let col = createCol(key);
-    colgroupElement.appendChild(col);
-
     let classType = (index >= 0 && index < array.length - 1) ? `tc` : undefined;
 
     let cell = createCell(`th`, classType,key.charAt(0).toUpperCase() + key.slice(1));
@@ -122,11 +116,11 @@ tour.keys.forEach((key, index, array) => {
 });
 
 tour.tracks.forEach(track => {
-    let row = createRow();
+    let row = createRow(`tbr`);
     addRowEventListener(track.url, row);
 
     tour.keys.forEach((key, index, array) => {
-        let classType = (index >= 0 && index < array.length - 1) ? `tc` : undefined;
+        let classType = (index >= 0 && index < array.length - 1) ? `tc centralized` : `centralized`;
         let cell = createCell(`td`, classType, createInput(key, track.id));
         addCellEventListener(key, cell);
         row.appendChild(cell);
