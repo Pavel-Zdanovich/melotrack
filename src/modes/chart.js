@@ -6,7 +6,7 @@ const CHART = `https://api.deezer.com/chart`;
 export const chart = async () => {
     console.log(`Try fetch ${CORS + CHART}`);
 
-    let tracks = await fetch(CORS + CHART)
+    const tracks = await fetch(CORS + CHART)
         .then(response => response.json())
         .then(json => json.tracks.data)
         .catch(error => console.error(error));

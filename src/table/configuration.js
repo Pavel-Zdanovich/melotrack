@@ -1,3 +1,4 @@
+import {Track} from "../entities/track.js";
 import {onLoad} from "../app.js";
 import {mobile} from "../utils/mobile.js";
 import {loader} from "../loader/configuration.js";
@@ -22,19 +23,34 @@ const upperElement = signElement.children[0];
 const lowerElement = signElement.children[1];
 
 const createLabelElement = (id) => {
-    let label = document.createElement(`label`);
+    const label = document.createElement(`label`);
     label.htmlFor = id;
     return label;
 };
 
 const createInputElement = (id) => {
-    let input = document.createElement(`input`);
+    const input = document.createElement(`input`);
     input.id = id;
     input.type = `text`;
     return input;
 };
 
 //initialization
+let tracks = [
+    new Track(`melotrack1`, `Melotrack`, `1`, `./audio/melotrack1.mp3`),
+    new Track(`melotrack2`, `Melotrack`, `2`, `./audio/melotrack2.mp3`)
+];
+
+tracks.forEach(track => loader.load(track));
+loader.get(`./audio/melotrack1.mp3`).then(track => player.set(track));
+
+player.addEventListener(`end`, (e) => {
+    const selectNext = player.getSelectionMode();
+    const current = e.detail;
+    const index = tracks.indexOf(current);
+    const next = selectNext(index, tracks);
+    loader.get(next.url).then(track => player.set(track));
+});
 
 const map = [[]]; //map[row][col] - [[thr, th1, th2], [tbr1, td1, td2], [tbr2, td1, td2], ..., [tbr10, td1, td2]]
 
@@ -49,7 +65,6 @@ const height = theadRect.height + tbodyRect.height;
 const width = theadRect.width;
 
 const stretchFor = (rowElement, cols) => {
-    //console.log(`${width}/${cols} = ${width/cols}`);
     if (width / cols <= 300 || mobile) {
         rowElement.style.width = cols + `00%`;
     }
@@ -62,16 +77,12 @@ const isCol = (element) => {
 
 const scrollTo = (colIndex) => {
     const colElement = map[1][colIndex].getBoundingClientRect();
-    //console.group(`Scroll`, colElement, (colIndex - 1) * colElement.width);
-    //console.groupEnd();
     tbodyElement.scrollTo((colIndex - 1) * colElement.width, 0);
 };
 
 const colEnter = (from, colIndex) => {
     if (isCol(from)) {
         if (currentColIndex !== colIndex) {
-            console.log(`Leave col ${currentColIndex}`);
-            console.log(`Enter col ${colIndex}`);
             for (let rowIndex = 0; rowIndex <= tbodyElement.childElementCount; rowIndex++) {
                 map[rowIndex][currentColIndex].style.borderWidth = ``;
                 map[rowIndex][colIndex].style.borderWidth = `5px`;
@@ -80,7 +91,6 @@ const colEnter = (from, colIndex) => {
             currentColIndex = colIndex;
         }
     } else {
-        console.log(`Enter col ${colIndex}`);
         for (let rowIndex = 0; rowIndex <= tbodyElement.childElementCount; rowIndex++) {
             map[rowIndex][colIndex].style.borderWidth = `5px`;
         }
@@ -91,7 +101,6 @@ const colEnter = (from, colIndex) => {
 
 const colLeave = (to, colIndex) => {
     if (!isCol(to)) {
-        console.log(`Leave col ${colIndex}`);
         for (let rowIndex = 0; rowIndex <= tbodyElement.childElementCount; rowIndex++) {
             map[rowIndex][colIndex].style.borderWidth = ``;
         }
@@ -123,14 +132,12 @@ const fillCellsInRow = (rowIndex, cellEnter, cellLeave) => {
 fillCellsInRow(
     0,
     (rowIndex, colIndex) => {
-        console.log(`Enter TH [${rowIndex}][${colIndex}]`);
         const cellElement = map[rowIndex][colIndex];
         cellElement.style.borderColor = `var(--border-color)`;
         cellElement.style.borderStyle = `solid`;
         cellElement.style.borderWidth = `5px`;
     },
     (rowIndex, colIndex) => {
-        console.log(`Leave TH [${rowIndex}][${colIndex}]`);
         const cellElement = map[rowIndex][colIndex];
         cellElement.style.borderColor = ``;
         cellElement.style.borderStyle = ``;
@@ -138,17 +145,14 @@ fillCellsInRow(
     },
 );
 
-const rowEnter = (rowIndex, url) => {
-    //console.log(`Enter row ${rowIndex}`);
+const rowEnter = (rowIndex) => {
     map[rowIndex][0].classList.add(`staved`);
-    if (url) {
-        player.set(loader.get(url));
-    }
     currentRowIndex = rowIndex;
+    const url = tracks[currentRowIndex].url;
+    loader.get(url).then(track => player.set(track));
 };
 
 const rowLeave = (rowIndex) => {
-    //console.log(`Leave row ${rowIndex}`);
     map[rowIndex][0].classList.remove(`staved`);
     currentRowIndex = undefined;
 };
@@ -156,7 +160,6 @@ const rowLeave = (rowIndex) => {
 labelElement.innerHTML = ``;
 
 const cellEnter = (rowIndex, colIndex) => {
-    //console.log(`Enter TD [${rowIndex}][${colIndex}]`);
     const label = map[rowIndex][colIndex].children[0];
     label.appendChild(clefElement);
     upperElement.innerHTML = rowIndex;
@@ -165,7 +168,6 @@ const cellEnter = (rowIndex, colIndex) => {
 };
 
 const cellLeave = (rowIndex, colIndex) => {
-    //console.log(`Leave TD [${rowIndex}][${colIndex}]`);
     const label = map[rowIndex][colIndex].children[0];
     label.innerHTML = ``;
 };
@@ -190,9 +192,6 @@ for (let tbodyChildrenIndex = 0; tbodyChildrenIndex < tbodyElement.childElementC
 }
 
 tableElement.addEventListener(`keydown`, (e) => {
-    const previousRow = currentRowIndex;
-    const previousCol = currentColIndex;
-
     switch (e.code) {
         case `ArrowUp`: {
             if (currentRowIndex === 1) {
@@ -231,14 +230,16 @@ tableElement.addEventListener(`keydown`, (e) => {
         }
     }
 
-    console.log(`Previous: [${previousRow}, ${previousCol}]. Current: [${currentRowIndex}, ${currentColIndex}]`);
-
     const cellElement = map[currentRowIndex][currentColIndex];
     const inputElement = cellElement.lastElementChild;
     inputElement.focus();
 });
 
 onLoad.then((tour) => {
+    tracks = tour.tracks;
+
+    tracks.forEach(track => loader.load(track));
+
     captionElement.innerText = tour.description;
 
     const prevRowsCount = map.length - 1; // - thead
@@ -278,8 +279,6 @@ onLoad.then((tour) => {
         }
 
         for (let trackIndex = 0; trackIndex < tour.tracks.length; trackIndex++) {
-            const track = tour.tracks[trackIndex];
-
             const rowIndex = trackIndex + 1;
 
             const array = map[rowIndex];
@@ -297,7 +296,7 @@ onLoad.then((tour) => {
             stretchFor(rowElement, tour.keys.length);
 
             rowElement.addEventListener(`focusin`, () => {
-                rowEnter(rowIndex, track.url);
+                rowEnter(rowIndex);
             });
             rowElement.addEventListener(`focusout`, () => {
                 rowLeave(rowIndex);
@@ -342,21 +341,22 @@ onLoad.then((tour) => {
             }
         }
     }
-
-    const validator = new Validator();
-
-    footerElement.addEventListener(`click`, () => {
-        console.log(`Footer clicked!`);
-        for (let rowIndex = 1; rowIndex < map.length; rowIndex++) {
-            for (let colIndex = 1; colIndex < map[0].length; colIndex++) {
-                const cellElement = map[rowIndex][colIndex];
-                const inputElement = cellElement.lastElementChild;
-                const expected = tour.tracks[rowIndex];
-                const actual = inputElement.value;
-                const result = validator.similarity(expected, actual);
-                console.log(`${rowIndex}_${colIndex} '${actual}' = '${expected}' on ${result * 100}%`);
-                inputElement.value = expected;
-            }
-        }
-    });
 });
+
+const validator = new Validator();
+
+footerElement.addEventListener(`click`, () => {
+    for (let rowIndex = 1; rowIndex < map.length; rowIndex++) {
+        for (let colIndex = 1; colIndex < map[0].length; colIndex++) {
+            const cellElement = map[rowIndex][colIndex];
+            const inputElement = cellElement.lastElementChild;
+            const expected = tour.tracks[rowIndex];
+            const actual = inputElement.value;
+            const result = validator.similarity(expected, actual);
+            console.log(`${rowIndex}_${colIndex} '${actual}' = '${expected}' on ${result * 100}%`);
+            inputElement.value = expected;
+        }
+    }
+});
+
+console.log(`table loaded`);

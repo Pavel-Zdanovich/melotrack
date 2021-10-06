@@ -8,13 +8,13 @@ const TRACK = `https://api.deezer.com/track/`;
 export const album = async () => {
     const items = [`6394998`];
 
-    let id = items[Math.floor(Math.random() * items.length)];
+    const id = items[Math.floor(Math.random() * items.length)];
 
     console.log(`Try fetch ${CORS + ALBUM + id}`);
 
-    let album = await fetch(CORS + ALBUM + id).then(response => response.json()).catch(error => console.error(error));
+    const album = await fetch(CORS + ALBUM + id).then(response => response.json()).catch(error => console.error(error));
 
-    let tracks = album.tracks.data.map(track => Track.parse(track));
+    const tracks = album.tracks.data.map(track => Track.parse(track));
 
     return new Tour(`Album: ${album.title}`, `Guess the titles from album "${album.title}".`, 60000, `white`, `black`, [`title`], tracks);
 };

@@ -145,14 +145,14 @@ export class Timer {
     }
 
     static millisToTime(time) {
-        let fractionalHours = time / (MILLIS_IN_HOUR);
-        let hours = Math.trunc(fractionalHours);
-        let fractionalMins = (fractionalHours - hours) * MINS_IN_HOUR;
-        let mins = Math.trunc(fractionalMins);
-        let fractionalSecs = (fractionalMins - mins) * SECS_IN_MIN;
-        let secs = Math.trunc(fractionalSecs);
-        let fractionalMillis = (fractionalSecs - secs) * MILLIS_IN_SEC;
-        let millis = Math.trunc(fractionalMillis);
+        const fractionalHours = time / (MILLIS_IN_HOUR);
+        const hours = Math.trunc(fractionalHours);
+        const fractionalMins = (fractionalHours - hours) * MINS_IN_HOUR;
+        const mins = Math.trunc(fractionalMins);
+        const fractionalSecs = (fractionalMins - mins) * SECS_IN_MIN;
+        const secs = Math.trunc(fractionalSecs);
+        const fractionalMillis = (fractionalSecs - secs) * MILLIS_IN_SEC;
+        const millis = Math.trunc(fractionalMillis);
         return [hours, mins, secs, millis];
     }
 
@@ -161,7 +161,7 @@ export class Timer {
             this._interval = setInterval( //TODO problem https://stackoverflow.com/questions/42124448/how-does-webaudio-timing-work-is-using-setinterval-a-bad-solution
                 () => {
                     console.log(`Timer ${this._interval} ticked`);
-                    let keepOn = this.#countdown();
+                    const keepOn = this.#countdown();
                     if (keepOn) {
                         this._operation();
                     } else {

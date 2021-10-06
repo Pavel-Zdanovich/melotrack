@@ -7,7 +7,7 @@ export class Validator {
             longer = actual;
             shorter = expected;
         }
-        let longerLength = longer.length;
+        const longerLength = longer.length;
         if (longerLength === 0) {
             return 1.0;
         }
@@ -18,7 +18,7 @@ export class Validator {
         string1 = string1.toLowerCase();
         string2 = string2.toLowerCase();
 
-        let costs = [];
+        const costs = [];
         for (let i = 0; i <= string1.length; i++) {
             let lastValue = i;
             for (let j = 0; j <= string2.length; j++) {

@@ -9,48 +9,10 @@
     overflow: hidden;
 
     width: 100%;
-
-    /*border: 1px solid var(--border-color);*/
-}
-
-.loader {
-    border: 16px solid #f3f3f3;
-    border-radius: 50%;
-    border-top: 16px solid #3498db;
-    width: 120px;
-    height: 120px;
-    -webkit-animation: spin 2s linear infinite; /* Safari */
-    animation: spin 2s linear infinite;
-}
-
-/* Safari */
-@-webkit-keyframes spin {
-    0% { -webkit-transform: rotate(0deg); }
-    100% { -webkit-transform: rotate(360deg); }
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-html {
-    --background-color: white;
-    background-color: var(--background-color);
-
-    --border-color: black;
-    color: var(--border-color);
-
-    height: 100%;
-}
-
-body {
-    height: 100%;
-    overflow: auto;
 }
 
 .bordered {
-    border: 1px solid var(--border-color);
+    border: calc(var(--border-width)) solid var(--border-color);
 }
 
 .staved {
@@ -62,15 +24,34 @@ body {
     z-index: 1;
 }
 
+.centralized {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+html {
+    --background-color: white;
+    background-color: var(--background-color);
+
+    --border-color: black;
+    color: var(--border-color);
+
+    --border-width: 1px;
+
+    height: 100%;
+}
+
+body {
+    height: 100%;
+    overflow: auto;
+}
+
 header {
     display: flex;
     /*height: 10%;*/
     min-height: 10%;
     background-color: var(--background-color);
-}
-
-.heading {
-    /*height: 100%;*/
 }
 
 .title {
@@ -94,70 +75,85 @@ header {
     flex-shrink: 0.2847;
     display: grid;
     grid-template-areas:
-            "play audio-bar volume-bar"
-            "controls audio-bar volume-bar";
+            "play audio volume"
+            "mode audio volume";
     grid-template-columns: 10% 80% 10%;
-}
-
-.centralized {
-    display: flex;
-    align-items: center;
-    justify-content: center;
 }
 
 .play {
     grid-area: play;
 }
 
-.controls {
-    grid-area: controls;
+.mode {
+    grid-area: mode;
 }
 
-.audio-bar {
-    grid-area: audio-bar;
-    /*flex-shrink: 0.22084;*/
-}
-
-.audio-info {
-    height: 100%;
-}
-
-.audio-progress {
-    position: relative;
-    background-color: var(--border-color);
-    opacity: 0.5;
-    bottom: 100%;
-    height: 100%;
-    margin: 0;
-}
-
-.volume-bar {
-    grid-area: volume-bar;
-}
-
-.volume-info {
-    height: 100%;
-    display: flex;
-    justify-content: flex-end;
-    flex-direction: column;
-}
-
-.volume-progress {
-    position: relative;
-    background-color: var(--border-color);
-    opacity: 0.5;
-    bottom: 100%;
-    height: 100%;
-    width: 50%;
+.audio {
+    grid-area: audio;
 }
 
 .volume {
-    transform: rotate(90deg);
-    width: auto;
+    grid-area: volume;
 }
 
-.timer {
-    /*height: 100%;*/
+.audio label {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 100%;
+}
+
+.volume label {
+    display: flex;
+    justify-content: flex-end;
+    flex-direction: column;
+    height: 100%;
+}
+
+.slider {
+    display: flex;
+}
+
+.bar {
+
+}
+
+.progress {
+    height: 100%;
+    margin-left: 0;
+    background-color: var(--border-color);
+    opacity: 0.5;
+}
+
+input[type=range] {
+    position: fixed;
+    opacity: 0;
+}
+input[type=range]::-webkit-slider-runnable-track {
+    height: 60px;
+}
+input[type=range]::-moz-range-track {
+    height: 60px;
+}
+input[type=range]::-ms-track {
+    height: 60px;
+}
+
+.audio .slider {
+    -webkit-transform: translateY(-100%);
+    -ms-transform: translateY(-100%);
+    transform: translateY(-100%);
+    height: 100%;
+}
+
+.volume .slider {
+    -webkit-transform: rotate(-90deg);
+    -ms-transform: rotate(-90deg);
+    transform: rotate(-90deg);
+    -webkit-transform-origin: 0 0;
+    -ms-transform-origin: 0 0;
+    transform-origin: 0 0;
+    height: 110%;
 }
 
 .side {
@@ -203,14 +199,13 @@ tr {
 }
 
 th, td {
-    border-bottom-width: 2px;
+    border-bottom-width: calc(var(--border-width) * 2);
     border-bottom-style: solid;
     border-bottom-color: var(--border-color);
-    /*background: none;*/
 }
 
 tr > :not(tr :last-child) {
-    border-right-width: 2px;
+    border-right-width: calc(var(--border-width) * 2);
     border-right-style: solid;
     border-right-color: var(--border-color);
 }
@@ -229,7 +224,7 @@ td * {
     height: 100%;
 }
 
-label {
+td label {
     display: flex;
     width: 15%;
 }
@@ -348,7 +343,7 @@ rect {
 
 @media (min-device-width: 480px) and (max-device-width: 768px) {
     * {
-        font-size: 14px;
+        /*font-size: 14px;*/
     }
 
     .logo {
@@ -366,7 +361,7 @@ rect {
 
 @media (min-device-width: 768px) {
     * {
-        font-size: 18px;
+        /*font-size: 18px;*/
     }
 
     .logo {

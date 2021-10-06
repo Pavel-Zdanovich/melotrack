@@ -65,17 +65,30 @@
     </div>
     <div class="player bordered">
         <div class="play bordered centralized">▶</div>
-        <div class="controls bordered centralized">🔁</div>
-        <div class="audio-bar bordered">
-            <div class="audio-info centralized">Artist - Title<br>00:00</div>
-            <div class="audio-progress"></div>
-        </div>
-        <div class="volume-bar bordered">
-            <div class="volume-info">
-                <div>100</div>
-                <div class="volume centralized">🕨</div>
+        <div class="mode bordered centralized">🔁</div>
+        <div class="audio bordered">
+            <label for="audio">
+                <div>Artist - Title</div>
+                <div>00:00</div>
+            </label>
+            <div class="slider">
+                <div class="bar">
+                    <div class="progress" style="width: 50%"></div>
+                </div>
+                <input id="audio" type="range"/>
             </div>
-            <div class="volume-progress"></div>
+        </div>
+        <div class="volume bordered">
+            <label for="volume">
+                <div>50</div>
+                <div>🔈</div>
+            </label>
+            <div class="slider">
+                <div class="bar">
+                    <div class="progress" style="width: 50%"></div>
+                </div>
+                <input id="volume" type="range"/>
+            </div>
         </div>
     </div>
     <div class="timer centralized staved">00:00:00</div>
@@ -91,9 +104,8 @@
 </div>
 <table>
     <caption>
-        Melotrack is a melo-intellectual game, the essence of which is to solve riddles encrypted in various ways that
-        are directly related to music. To play the game, you need allow the use of
-        <a href="https://cors-anywhere.herokuapp.com/corsdemo">third-party CORS</a>
+        Melotrack is a melo-intellectual game, the essence of which is to solve riddles encrypted in various ways that are directly related to music.
+        To play the game, you need allow the use of <a href="https://cors-anywhere.herokuapp.com/corsdemo">third-party CORS</a>.
     </caption>
     <thead>
     <tr>
@@ -471,16 +483,16 @@
         <div class="icon instagram">
             <a href="https://www.instagram.com/progmathist/">
                 <svg viewBox="0 0 100 100">
-                    <rect height="95%" width="95%" x="2.5%" y="2.5%" rx="25%" ry="25%"/>
-                    <circle r="25%" cx="50%" cy="50%"/>
-                    <circle r="1%" cx="80%" cy="20%"/>
+                    <rect height="95%" rx="25%" ry="25%" width="95%" x="2.5%" y="2.5%"/>
+                    <circle cx="50%" cy="50%" r="25%"/>
+                    <circle cx="80%" cy="20%" r="1%"/>
                 </svg>
             </a>
         </div>
         <div class="icon vkontakte">
             <a href="https://vk.com/id167418486">
                 <svg viewBox="0 0 100 100">
-                    <rect height="95%" width="95%" x="2.5%" y="2.5%" rx="25%" ry="25%"/>
+                    <rect height="95%" rx="25%" ry="25%" width="95%" x="2.5%" y="2.5%"/>
                     <path d="
                         m 77.5 35
                         c 0.417 -1.389 0 -2.411 -1.986 -2.411

@@ -33,7 +33,7 @@ export class Progress {
 
     set(percent) {
         if (percent != null && typeof percent === `number` && (percent >= MIN_PERCENT && percent <= MAX_PERCENT)) {
-            let remainder = percent % this._progressStep;
+            const remainder = percent % this._progressStep;
             if (this._progressStep > remainder) {
                 this._percent = percent - remainder + this._progressStep;
             } else {

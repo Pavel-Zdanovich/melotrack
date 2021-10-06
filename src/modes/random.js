@@ -15,20 +15,20 @@ const CORS = `https://cors-anywhere.herokuapp.com/`;
 const URL = `https://api.deezer.com/track/`;
 
 export const random = async () => {
-    let tracks = [];
+    const tracks = [];
 
     let counter = 0;
     let attempts = 0;
 
     while (counter < 10 && attempts < 20) {
-        let id = 10000000 + Math.floor(Math.random() * 1000000);
+        const id = 10000000 + Math.floor(Math.random() * 1000000);
 
         console.log(`Try fetch ${CORS + URL + id}`);
 
         fetch(CORS + URL + id)
             .then(response => response.json())
             .then(json => {
-                let track = Track.parse(json);
+                const track = Track.parse(json);
                 tracks.push(track);
                 counter++;
             })

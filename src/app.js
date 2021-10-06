@@ -4,20 +4,66 @@ import {chart} from "./modes/chart.js";
 import {playlist} from "./modes/playlist.js";
 import {random} from "./modes/random.js";
 
-export const tours = [
+const tours = [
     album, artist, chart, playlist, random
 ];
 
-export let loadTour;
+let loadTour;
 
-export const onLoad = new Promise((resolve) => {
+const onLoad = new Promise((resolve) => {
     loadTour = resolve;
 });
 
-console.log(`promise`);
+let index = 0;
+const indexElement = document.body.children[2].children[0];
+const outputIndex = () => {
+    indexElement.innerHTML = indexElement.innerHTML + `${index + 1}/${tours.length}`;
+};
 
-import("./utils/mobile.js").then(() => console.log(`mobile`));
-import("./loader/configuration.js").then(() => console.log(`loader loaded`));
-import("./player/configuration.js").then(() => console.log(`player loaded`));
-import("./table/configuration.js").then(() => console.log(`table loaded`));
-import("./timer/configuration.js").then(() => console.log(`timer loaded`));
+const load = async (get) => {
+    outputIndex();
+    const tour = await get();
+    console.log(tour);
+    loadTour(tour);
+    document.documentElement.style.setProperty(`--background-color`, tour.background);
+    document.documentElement.style.setProperty(`--border-color`, tour.border);
+};
+
+const prev = () => {
+    if (index > 0) {
+        index--;
+    } else {
+        index = tours.length;
+    }
+
+    return tours[index];
+};
+const next = () => {
+    if (index <= tours.length - 2) {
+        index++;
+    } else {
+        index = 0;
+    }
+
+    return tours[index];
+};
+
+const leftElement = document.body.children[1];
+const rightElement = document.body.children[3];
+
+leftElement.addEventListener(`click`, () => {
+    load(prev());
+});
+rightElement.addEventListener(`click`, () => {
+    load(next());
+});
+
+const clefElement = document.body.children[4].children[1];
+
+clefElement.addEventListener(`click`, () => {
+    load(tours[index]);
+});
+
+export {onLoad};
+
+console.log(`app loaded`);

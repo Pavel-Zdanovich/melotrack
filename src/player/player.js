@@ -5,12 +5,13 @@ import {Track} from "../entities/track.js";
 
 const MIN = 0;
 const MAX_VOLUME = 1;
-const DEFAULT_VOLUME = 0.1;
+const DEFAULT_VOLUME = 0.5;
 const COEFFICIENT = 5;
 
-export class Player {
+export class Player extends EventTarget {
 
-    constructor(callback, onLoaded, onPlayed, onStopped, onEnded) {
+    constructor(callback) {
+        super();
         if (callback != null && typeof callback === `function`) {
             this._callback = callback;
         } else {
@@ -21,10 +22,22 @@ export class Player {
 
         this._context.addEventListener(`statechange`, () => {
             console.log(`Context state: ${this._context.state}`);
-        }, false);
+        });
 
-        this._play = () => this._context.resume();
-        this._stop = () => this._context.suspend();
+        this._play = () => {
+            if (this._source == null) {
+                return new Promise(() => console.log(`Source not loaded!`));
+            }
+            return this._context.resume().then(() => {
+                this.dispatchEvent(new CustomEvent(`play`, {detail: this._track}));
+            });
+        };
+
+        this._stop = () => {
+            return this._context.suspend().then(() => {
+                this.dispatchEvent(new CustomEvent(`stop`, {detail: this._track}));
+            });
+        };
 
         this._gain = this._context.createGain();
 
@@ -33,35 +46,6 @@ export class Player {
 
         this.stop(); //stop the created context because it is running at start
         this.setVolume(DEFAULT_VOLUME);
-
-        if (onLoaded != null && typeof onLoaded === `function`) {
-            this._onLoaded = onLoaded;
-        }
-
-        if (onPlayed != null && typeof onPlayed === `function`) {
-            this._onPlayed = onPlayed;
-            let play = this._play;
-            this._play = () => {
-                if (this._source == null) {
-                    return new Promise(() => console.log(`Source not loaded!`));
-                }
-                return play().then(this._onPlayed);
-            }
-        }
-
-        if (onStopped != null && typeof onStopped === `function`) {
-            this._onStopped = onStopped;
-            let stop = this._stop;
-            this._stop = () => stop().then(this._onStopped);
-        }
-
-        if (onEnded != null && typeof onEnded === `function`) {
-            this._onEnded = onEnded;
-        } else {
-            this._onEnded = () => {
-                this._source = null;
-            }
-        }
     }
 
     #createBufferSource(buffer) {
@@ -74,13 +58,14 @@ export class Player {
         this._source.buffer = buffer;
         this._source.connect(this._node);
         this._source.onended = () => {  //called once
-            this.stop();
-            this._onEnded(this._track.url);
+            this.stop(); //TODO decide whether to call the stop event at the end
+            this._source = null;
+            this.dispatchEvent(new CustomEvent(`end`, {detail: this._track}));
         };
     }
 
     #start(offset = 0, duration = this.getDuration(), timeout = 0) {
-        let state = this._context.state;
+        const state = this._context.state;
         this._source.start(timeout, offset, duration);
         if (state === `suspended`) {
             this.stop();
@@ -88,7 +73,7 @@ export class Player {
     }
 
     #createProgressAndTimer(direction, duration, start, end) {
-        let progressStep = 1 / COEFFICIENT;
+        const progressStep = 1 / COEFFICIENT;
         this._progress = new Progress(direction, progressStep);
 
         let timerCallback = (hours, mins, secs, millis) => {
@@ -96,10 +81,10 @@ export class Player {
             this._callback(this._progress.get(), hours, mins, secs, millis);
         };
 
-        let timerStep = duration / (100 * COEFFICIENT);
+        const timerStep = duration / (100 * COEFFICIENT);
         this._timer = new Timer(timerCallback, start, end, timerStep);
 
-        let play = this._play;
+        const play = this._play;
         this._play = () => {
             if (!this._timer.isTicking()) {
                 this._timer.start();
@@ -107,7 +92,7 @@ export class Player {
             return play();
         };
 
-        let stop = this._stop;
+        const stop = this._stop;
         this._stop = () => {
             if (this._timer.isTicking()) { //because the timer works separately and stops at the end
                 this._timer.stop();
@@ -131,7 +116,7 @@ export class Player {
             throwError({track});
         }
 
-        let playingOnSet = this.isPlaying();
+        const playingOnSet = this.isPlaying();
         if (playingOnSet) {
             this.stop();
         }
@@ -140,7 +125,7 @@ export class Player {
         this.#start(this._track.getStart(), this._track.getDuration());
         this.#createProgressAndTimer(this._track.getDirection(), this._track.getDuration(), this._track.getStart(), this._track.getEnd());
 
-        this._onLoaded(this._track.toString(), this._track.getDuration()); //TODO replace with promise
+        this.dispatchEvent(new CustomEvent(`load`, {detail: this._track}));
 
         if (playingOnSet) {
             this.play();
@@ -185,12 +170,12 @@ export class Player {
 
     setTime(newTime) {
         if (newTime != null && typeof newTime === `number` && (newTime >= MIN && newTime <= this.getDuration())) {
-            let start = Math.trunc(newTime) / 1000;
+            const start = Math.trunc(newTime) / 1000;
 
             this.#createBufferSource(this._track.getBuffer());
             this.#start(start, this.getDuration());
 
-            let percent = newTime / this.getDuration();
+            const percent = newTime / this.getDuration();
             this._progress.set(percent * 100);
 
             this._timer.set(...Timer.millisToTime(newTime));
@@ -208,6 +193,18 @@ export class Player {
             this._source.playbackRate.value = rate;
         } else {
             throwError({rate});
+        }
+    }
+
+    getSelectionMode() {
+        return this._selectionMode;
+    }
+
+    setSelectionMode(selectionMode) {
+        if (typeof selectionMode === `function`) {
+            this._selectionMode = selectionMode;
+        } else {
+            throwError({selectionMode});
         }
     }
 }

@@ -1,46 +1,55 @@
-import {getElementByClass, outputMinsAndSecs} from "../utils/utils.js";
+import {current, next, previous, outputMinsAndSecs} from "../utils/utils.js";
 import {Timer} from "../timer/timer.js";
 import {Player} from "./player.js";
-import {loader} from "../loader/configuration.js";
 
-let playerElement = getElementByClass(`player`);
+const playerElement = document.body.children[0].children[1];
 
-let playElement = playerElement.children[0];
-let controlsElement = playerElement.children[1];
-let audioBarElement = playerElement.children[2];
-let audioInfoElement = audioBarElement.firstElementChild;
-let audioProgressElement = audioBarElement.lastElementChild;
-let volumeBarElement = playerElement.children[3];
-let volumeInfoElement = volumeBarElement.firstElementChild;
-let volumeIconElement = volumeInfoElement.lastElementChild;
-let volumeProgressElement = volumeBarElement.lastElementChild;
+const playElement = playerElement.children[0];
+const modeElement = playerElement.children[1];
 
-let outputToAudioElements = (progress, hours, mins, secs, millis) => {
-    audioInfoElement.innerHTML = outputMinsAndSecs(hours, mins, secs, millis);
-    audioProgressElement.style.width = progress + `%`;
+const audioElement = playerElement.children[2];
+
+const audioLabelElement = audioElement.firstElementChild;
+const audioTitleElement = audioLabelElement.firstElementChild;
+const audioTimeElement = audioLabelElement.lastElementChild;
+
+const audioSliderElement = audioElement.lastElementChild;
+const audioBarElement = audioSliderElement.firstElementChild;
+const audioProgressElement = audioBarElement.firstElementChild;
+const audioInputElement = audioSliderElement.lastElementChild;
+
+const volumeElement = playerElement.children[3];
+
+const volumeInfoElement = volumeElement.firstElementChild;
+const volumeValueElement = volumeInfoElement.firstElementChild;
+const volumeIconElement = volumeInfoElement.lastElementChild;
+
+const volumeSliderElement = volumeElement.lastElementChild;
+const volumeBarElement = volumeSliderElement.firstElementChild;
+const volumeProgressElement = volumeBarElement.firstElementChild;
+const volumeInputElement = volumeSliderElement.lastElementChild;
+
+//volumeSliderElement.style.width = `${volumeElement.clientHeight}px`;
+
+const outputToAudioElements = (progress, hours, mins, secs, millis) => {
+    audioTimeElement.innerHTML = outputMinsAndSecs(hours, mins, secs, millis);
+    audioProgressElement.style.width = `${progress}%`;
+    audioInputElement.value = progress;
 };
 
-let onLoad = (name, duration) => {
-    audioInfoElement.innerHTML = name + `<br>` + outputMinsAndSecs(...Timer.millisToTime(duration));
-    audioProgressElement.style.width = `0%`;
-}
-let onPlayed = () => {
+const player = new Player(outputToAudioElements);
+player.addEventListener(`load`, (e) => {
+    audioTitleElement.innerHTML = `${e.detail.artist} - ${e.detail.title}`;
+    outputToAudioElements(0, ...Timer.millisToTime(e.detail._duration));
+});
+player.addEventListener(`play`, () => {
+    //console.log(`play`);
     playElement.innerHTML = `⏸`;
-}
-let onStopped = () => {
+});
+player.addEventListener(`stop`, () => {
+    //console.log(`stop`);
     playElement.innerHTML = `▶`;
-}
-let onEnded = (url) => {
-    console.log(`Current ${url} ended!`);
-
-    let track = loader.next(url); //loader.get(url) - repeat, loader.previous(url) - previous
-
-    player.set(track);
-
-    console.log(`Load next ${track.url}`);
-}
-
-let player = new Player(outputToAudioElements, onLoad, onPlayed, onStopped, onEnded);
+});
 
 playElement.addEventListener(`click`, () => {
     if (player.isPlaying()) {
@@ -48,58 +57,48 @@ playElement.addEventListener(`click`, () => {
     } else {
         player.play();
     }
-}, false);
+});
 
-let audioBarRect = audioBarElement.getBoundingClientRect();
-audioBarElement.addEventListener(`click`, (e) => {
-    if (e.clientX >= audioBarRect.left && e.clientX <= audioBarRect.right &&
-        e.clientY >= audioBarRect.top && e.clientY <= audioBarRect.bottom) {
-
-        let percent = ((e.clientX - audioBarRect.left) / audioBarRect.width);
-        let time = player.getDuration() * percent;
-        outputToAudioElements(percent * 100, ...Timer.millisToTime(time));
-        player.setTime(time);
+let modeIndex = 0;
+const modes = [
+    {
+        icon: `🔁`,
+        select: current
+    },
+    {
+        icon: `⏭️`,
+        select: next
+    },
+    {
+        icon: `⏮️`,
+        select: previous
     }
-}, false);
-
-let repeatElement = controlsElement;
-let nextElement = document.createElement(`div`);
-nextElement.classList.add(`controls`);
-nextElement.classList.add(`centralized`);
-nextElement.innerHTML = `⏩`; //⏭
-let previousElement = document.createElement(`div`);
-previousElement.classList.add(`controls`);
-previousElement.classList.add(`centralized`);
-previousElement.innerHTML = `⏪`; //⏮
-
-repeatElement.addEventListener(`click`, () => {
-    playerElement.replaceChild(nextElement, repeatElement);
-}, false);
-nextElement.addEventListener(`click`, () => {
-    playerElement.replaceChild(previousElement, nextElement);
-}, false);
-previousElement.addEventListener(`click`, () => {
-    playerElement.replaceChild(repeatElement, previousElement);
-}, false);
-
-let outputToVolumeElement = (percent) => {
-    volumeInfoElement.innerHTML = percent;
-    volumeInfoElement.appendChild(volumeIconElement);
-    volumeProgressElement.style.height = percent + `%`;
-    volumeProgressElement.style.bottom = percent + `%`;
-}
-
-let volumeBarRect = volumeBarElement.getBoundingClientRect();
-volumeBarElement.addEventListener(`click`, (e) => {
-    if (e.clientX >= volumeBarRect.left && e.clientX <= volumeBarRect.right &&
-        e.clientY >= volumeBarRect.top && e.clientY <= volumeBarRect.bottom) {
-
-        let percent = Math.trunc(((volumeBarRect.bottom - e.clientY) / volumeBarRect.height) * 100);
-        outputToVolumeElement(percent);
-        player.setVolume(percent / 100);
+];
+modeElement.addEventListener(`click`, () => {
+    modeIndex++;
+    if (modeIndex === 3) {
+        modeIndex = 0;
     }
-}, false);
+    const mode = modes[modeIndex];
+    player.setSelectionMode(mode.select);
+    modeElement.innerHTML = mode.icon;
+});
+player.setSelectionMode(modes[modeIndex].select);
 
-outputToVolumeElement(Math.trunc(player.getVolume() * 100));
+audioElement.addEventListener(`input`, () => {
+    const percentage = audioInputElement.value;
+    const time = player.getDuration() * percentage / 100;
+    player.setTime(time);
+    outputToAudioElements(percentage, ...Timer.millisToTime(time));
+});
 
-export {player, playerElement};
+volumeElement.addEventListener(`input`, () => {
+    const percentage = volumeInputElement.value;
+    player.setVolume(percentage / 100);
+    volumeProgressElement.style.width = `${percentage}%`;
+    volumeValueElement.innerHTML = percentage;
+});
+
+export {player};
+
+console.log(`player loaded`);

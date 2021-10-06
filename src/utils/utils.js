@@ -1,15 +1,39 @@
-export function getElementByClass(className) {
-    let elements = document.getElementsByClassName(className);
-    if (elements.length === 1) {
-        return elements.item(0);
+function check(current, array) {
+    if (array.constructor !== Array) {
+        throwError({array});
+    }
+
+    if (typeof current !== `number` || current < 0 || current >= array.length) {
+        throwError({current});
+    }
+}
+
+export function current(current, array) {
+    check(current, array);
+    return array[current];
+}
+
+export function next(current, array) {
+    check(current, array);
+    if (current < array.length - 1) {
+        return array[current + 1];
     } else {
-        throw new Error(`Can't find ${className}`);
+        return array[0];
+    }
+}
+
+export function previous(current, array) {
+    check(current, array);
+    if (current > 0) {
+        return array[current - 1];
+    } else {
+        return array[array.length - 1];
     }
 }
 
 export function throwError(variable) {
-    let name = Object.keys(variable)[0];
-    let value = variable[name];
+    const name = Object.keys(variable)[0];
+    const value = variable[name];
     throw new Error(`Illegal ${name}: ${value}`);
 }
 

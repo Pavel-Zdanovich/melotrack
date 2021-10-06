@@ -19,7 +19,6 @@ if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
 
 let height = window.innerHeight;
 let width = window.innerWidth;
-//document.body.children[2].children[0].innerText = document.body.children[2].children[0].innerText + `${window.innerHeight}`;
 
 export {height, width, mobile, os};
 
@@ -42,10 +41,14 @@ document.addEventListener(`dblclick`, () => {
 
 window.addEventListener(`load`, () => {
     setTimeout(() => {
-        //document.body.children[2].children[0].innerText = document.body.children[2].children[0].innerText + `\tScroll`;
+        //mobileConsole(`\tScroll`);
         window.scrollTo(0, 1);
     }, 0);
 });
+
+const mobileConsole = (data) => {
+    document.body.children[2].children[0].innerText = document.body.children[2].children[0].innerText + data;
+};
 
 document.addEventListener(`readystatechange`, () => {
     if (mobile) {
@@ -61,10 +64,10 @@ document.addEventListener(`readystatechange`, () => {
             );
         } else {
             window.addEventListener(`resize`, () => {
-                //document.body.children[2].children[0].innerText = document.body.children[2].children[0].innerText + `\tResize from ${height} to ${window.innerHeight}`;
+                //mobileConsole(`\tResize from ${height} to ${window.innerHeight}`);
 
                 if (screenState !== fullscreen) {
-                    //document.body.children[2].children[0].innerText = document.body.children[2].children[0].innerText + `\tFullscreen ${fullscreen}\n`;
+                    //mobileConsole(`\tFullscreen ${fullscreen}\n`);
                     screenState = fullscreen;
                     height = window.innerHeight;
                     width = window.innerWidth;
@@ -81,7 +84,7 @@ document.addEventListener(`readystatechange`, () => {
                 if (resizePercentage > 0.3) {
                     if (window.innerHeight < height) {
                         if (!keyboard) {
-                            //document.body.children[2].children[0].innerText = document.body.children[2].children[0].innerText + `\tKeyboard on\n`;
+                            //mobileConsole(`\tKeyboard on\n`);
                             changeViewport(height, width);
                             onKeyboardOpened();
                             keyboard = true;
@@ -95,12 +98,12 @@ document.addEventListener(`readystatechange`, () => {
                 }
 
                 if (resizePercentage > 0) {
-                    //document.body.children[2].children[0].innerText = document.body.children[2].children[0].innerText + `\tAddress bar\n`;
+                    //mobileConsole(`\tAddress bar\n`);
                     changeViewport(window.innerHeight, window.innerWidth);
                 }
 
                 if (keyboard) {
-                    //document.body.children[2].children[0].innerText = document.body.children[2].children[0].innerText + `\tKeyboard off\n`;
+                    //mobileConsole(`\tKeyboard off\n`);
                     onKeyboardClosed();
                     keyboard = false;
                 }
@@ -124,3 +127,5 @@ const onKeyboardOpened = () => {
 const onKeyboardClosed = () => {
     footerElement.classList.add(`fixed`);
 };
+
+console.log(`mobile loaded`);
