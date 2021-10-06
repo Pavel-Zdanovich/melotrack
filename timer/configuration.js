@@ -1,6 +1,6 @@
 import {tour} from "../script.js";
 
-import {outputFullTime, outputHoursAndMins, outputMinsAndSecs} from "../utils/utils.js";
+import {outputHoursMinsAndSecs} from "../utils/utils.js";
 import {Timer} from "./timer.js";
 
 let timerElement = null;
@@ -13,7 +13,7 @@ if (elements.length === 1) {
 }
 
 let outputToElement = (hours, mins, secs, millis) => {
-    timerElement.innerText = outputFullTime(hours, mins, secs, millis);
+    timerElement.innerText = outputHoursMinsAndSecs(hours, mins, secs, millis);
 };
 
 let timer = new Timer(outputToElement, tour.time);

@@ -25,62 +25,89 @@ body {
 }
 
 header {
-    height: 10%;
+    position: sticky;
+    top: 0;
     display: flex;
-    align-items: center;
+    height: 10%;
 }
 
 .heading {
-
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
 }
 
 .player {
     flex-shrink: 0.2847;
+    display: grid;
+    grid-template-areas:
+            "play audio-bar volume-bar"
+            "controls audio-bar volume-bar";
+    grid-template-columns: 10% 80% 10%;
+}
+
+.centralized {
     display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .play {
     grid-area: play;
 }
 
-.bar {
-    grid-area: bar;
+.controls {
+    grid-area: controls;
+}
+
+.audio-bar {
+    grid-area: audio-bar;
     flex-shrink: 0.22084;
 }
 
-.time {
-
+.audio-info {
+    height: 100%;
 }
 
-.progress {
+.audio-progress {
     position: relative;
     background-color: gray;
     opacity: 0.5;
     bottom: 100%;
     height: 100%;
     margin: 0;
-    z-index: 1;
 }
 
-.dropdown {
-    grid-area: dropdown;
+.volume-bar {
+    grid-area: volume-bar;
 }
 
-.open-player {
-    position: absolute;
-    display: grid;
-    grid-template-areas:
-            "play bar dropdown"
-            "element bar volume";
-    grid-template-columns: 10% 80% 10%;
-    top: 10%;
-    left: 2.5%;
-    width: 95%;
-    height: 10%;
+.volume-info {
+    height: 100%;
+    display: flex;
+    justify-content: flex-end;
+    flex-direction: column;
 }
 
-.language {
+.volume-progress {
+    position: relative;
+    background-color: black;
+    opacity: 0.5;
+    bottom: 100%;
+    height: 100%;
+    width: 50%;
+}
 
+.volume {
+    transform: rotate(-90deg);
+    height: auto;
+    width: auto;
+}
+
+.timer {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
 }
 
 form {
@@ -126,6 +153,8 @@ input:focus {
 }
 
 footer {
+    position: sticky;
+    bottom: 0;
     height: 10%;
     display: flex;
     align-items: center;
@@ -143,43 +172,29 @@ footer {
     }
 
     header {
-        flex-wrap: wrap;
+        display: grid;
+        grid-template-areas:
+            "heading timer"
+            "player player";
+        grid-template-columns: 50% 50%;
     }
 
     .heading {
-        width: 49.5%;
+        grid-area: heading;
+        width: 100%;
+    }
+
+    .timer {
+        grid-area: timer;
+        width: 100%;
     }
 
     .player {
-        order: 3;
-    }
-
-    .language {
-        width: 49.5%;
-    }
-
-    .caption {
-
+        grid-area: player;
     }
 
     .table {
         width: 95%;
-    }
-
-    colgroup {
-        width: 5em;
-    }
-
-    .colgroup {
-        width: 5em;
-    }
-
-    col {
-        width: 5em;
-    }
-
-    .author_col {
-        width: 5em;
     }
 }
 

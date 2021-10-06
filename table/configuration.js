@@ -1,6 +1,7 @@
 import {tour} from "../script.js";
 import {loader} from "../loader/configuration.js";
 import {player} from "../player/configuration.js";
+import {Table} from "./table.js";
 
 let element = document.body.children[1];
 
@@ -9,7 +10,7 @@ let tableElement = element.children[1];
 
 let captionElement = tableElement.children[0];
 let colgroupElement = tableElement.children[1];
-let theadElement = tableElement.children[2].children[0];
+let theadElement = tableElement.children[2];
 let tbodyElement = tableElement.children[3];
 
 let createCol = (name) => {
@@ -40,11 +41,12 @@ let createCell = (cellType, classType, inner) => {
     return cell;
 };
 
-let createInput = (name) => {
+let createInput = (col, row) => {
     let label = document.createElement(`label`);
     let input = document.createElement(`input`);
     input.setAttribute(`form`, `form`);
-    input.setAttribute(`name`, name);
+    input.setAttribute(`id`, row);
+    input.setAttribute(`name`, col);
     input.setAttribute(`type`, `text`);
     label.appendChild(input);
     return label;
@@ -93,6 +95,9 @@ let colMouseLeave;
 let rowMouseEnter;
 let rowMouseLeave;
 
+let theadRow = createRow();
+theadElement.appendChild(theadRow);
+
 tour.keys.forEach((key, index, array) => {
     let col = createCol(key);
     colgroupElement.appendChild(col);
@@ -106,18 +111,18 @@ tour.keys.forEach((key, index, array) => {
     cell.addEventListener(`mouseleave`, () => {
         colMouseLeave(key);
     });
-    theadElement.appendChild(cell);
+    theadRow.appendChild(cell);
 
     map.set(key, [cell]);
 });
 
-tour.tracks.forEach((track, rowIndex) => {
+tour.tracks.forEach(track => {
     let row = createRow();
     addRowEventListener(track.url, row);
 
-    tour.keys.forEach((key, cellIndex, array) => {
-        let classType = (cellIndex >= 0 && cellIndex < array.length - 1) ? `tc` : undefined;
-        let cell = createCell(`td`, classType, createInput(`${key}_${rowIndex}`));
+    tour.keys.forEach((key, index, array) => {
+        let classType = (index >= 0 && index < array.length - 1) ? `tc` : undefined;
+        let cell = createCell(`td`, classType, createInput(key, track.id));
         addCellEventListener(key, cell);
         row.appendChild(cell);
         map.get(key).push(cell);
@@ -145,11 +150,11 @@ rowMouseEnter = (key) => {
             return player.decode(buffer);
         }).then(buffer => {
             console.log(`${key} DECODED`);
-            player.set(buffer);
+            player.set(key, buffer);
             loader.set(key, buffer);
         });
-    } else if (value instanceof ArrayBuffer) {
-        player.set(value);
+    } else if (value instanceof AudioBuffer) {
+        player.set(key, value);
     } else {
         throw new Error(`Illegal value: ${value}`);
     }
@@ -159,3 +164,20 @@ rowMouseLeave = (key) => {
         console.log(`Do I need stop ${key}?`);
     }
 };
+
+let table = new Table(tour);
+let footerElement = document.body.children[2];
+footerElement.addEventListener(`click`, () => {
+    Array.from(map.values())
+        .flatMap(value => value)
+        .filter(cell => `th` !== cell.tagName.toLowerCase())
+        .map(cell => cell.lastElementChild.lastElementChild)
+        .forEach(input => {
+            let col = input.getAttribute(`name`);
+            let row = input.getAttribute(`id`);
+            let actual = input.value;
+            let expected = table.get(col, row);
+            let result = table.similarity(expected, actual);
+            console.log(`${col}_${row} '${actual}' = '${expected}' on ${result * 100}%`);
+        });
+});

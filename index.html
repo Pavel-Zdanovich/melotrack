@@ -9,12 +9,16 @@
 <header>
     <div class="heading">Melotrack</div>
     <div class="player">
-        <div class="play">▷</div>
-        <div class="bar">
-            00:00.000
-            <div class="progress"></div>
+        <div class="play centralized">▶</div>
+        <div class="controls centralized">🔁</div>
+        <div class="audio-bar">
+            <div class="audio-info centralized">Author - Title<br>00:00</div>
+            <div class="audio-progress"></div>
         </div>
-        <div class="dropdown">▽</div>
+        <div class="volume-bar">
+            <div class="volume-info">100<div class="volume">🔈</div></div>
+            <div class="volume-progress"></div>
+        </div>
     </div>
     <div class="timer">Timer</div>
 </header>
@@ -22,10 +26,8 @@
     <form id="form" method="POST"></form>
     <table>
         <caption></caption>
-        <colgroup class="colgroup"></colgroup>
-        <thead>
-            <tr></tr>
-        </thead>
+        <colgroup></colgroup>
+        <thead></thead>
         <tbody></tbody>
     </table>
 </div>

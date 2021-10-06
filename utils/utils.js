@@ -40,6 +40,22 @@ export function outputHoursAndMins(hours, mins, secs, millis) {
     return `${hh}:${mm}`;
 }
 
+export function outputHoursMinsAndSecs(hours, mins, secs, millis) {
+    let hh = hours;
+    if (hours < 10) {
+        hh = `0` + hours;
+    }
+    let mm = mins;
+    if (mins < 10) {
+        mm = `0` + mins;
+    }
+    let ss = secs;
+    if (secs < 10) {
+        ss = `0` + secs;
+    }
+    return `${hh}:${mm}:${ss}`;
+}
+
 export function outputMinsAndSecs(hours, mins, secs, millis) {
     let mm = mins;
     if (mins < 10) {

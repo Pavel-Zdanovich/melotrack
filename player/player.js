@@ -118,7 +118,7 @@ export class Player {
         return this._context.decodeAudioData(promise);
     }
 
-    set(buffer, start = 0, end = Math.trunc(buffer.duration * 1000)) {
+    set(name, buffer, start = 0, end = Math.trunc(buffer.duration * 1000)) {
         if (buffer instanceof AudioBuffer) {
             this._buffer = buffer;
         } else {
@@ -151,7 +151,7 @@ export class Player {
         this.#start(this._start, this._duration);
         this.#createProgressAndTimer(this._direction, this._duration, this._start, this._end);
 
-        this._load(``, this._duration);
+        this._load(name, this._duration);
     }
 
     play() {
@@ -222,4 +222,12 @@ export class Player {
             throwError({rate});
         }
     }
+
+    addEventListener(type, listener, options) {
+        //TODO realize
+    };
+
+    removeEventListener(type, listener, options) {
+        //TODO realize
+    };
 }

@@ -1,4 +1,4 @@
-import {outputMinsAndSecs, outputMinsSecsAndMillis} from "../utils/utils.js";
+import {outputMinsAndSecs} from "../utils/utils.js";
 import {Timer} from "../timer/timer.js";
 import {Player} from "./player.js";
 
@@ -12,71 +12,82 @@ if (elements.length === 1) {
 }
 
 let playElement = playerElement.children[0];
-let barElement = playerElement.children[1];
-let progressElement = barElement.lastElementChild;
-let dropdownElement = playerElement.children[2];
+let controlsElement = playerElement.children[1];
+let audioBarElement = playerElement.children[2];
+let audioInfoElement = audioBarElement.firstElementChild;
+let audioProgressElement = audioBarElement.lastElementChild;
+let volumeBarElement = playerElement.children[3];
+let volumeInfoElement = volumeBarElement.firstElementChild;
+let volumeIconElement = volumeInfoElement.lastElementChild;
+let volumeProgressElement = volumeBarElement.lastElementChild;
 
-progressElement.style.width = `0%`;
 let outputToElement = (progress, hours, mins, secs, millis) => {
-    barElement.innerHTML = outputMinsAndSecs(hours, mins, secs, millis);
-    barElement.appendChild(progressElement);
-    progressElement.style.width = progress + `%`;
+    audioInfoElement.innerHTML = outputMinsAndSecs(hours, mins, secs, millis);
+    audioProgressElement.style.width = progress + `%`;
 };
-outputToElement(0, ...Timer.millisToTime(0));
 
 let onLoad = (name, duration) => {
-    barElement.innerHTML = outputMinsAndSecs(...Timer.millisToTime(duration));
-    barElement.appendChild(progressElement);
+    audioInfoElement.innerHTML = name + `<br>` + outputMinsAndSecs(...Timer.millisToTime(duration));
+    audioProgressElement.style.width = `0%`;
 }
 let onPlayed = () => {
-    //console.log(`onPlayed()`);
     playElement.innerHTML = `⏸`;
 }
 let onStopped = () => {
-    //console.log(`onStopped()`);
-    playElement.innerHTML = `▷`;
+    playElement.innerHTML = `▶`;
 }
 
 let player = new Player(outputToElement, onLoad, onPlayed, onStopped);
 
 playElement.addEventListener(`click`, () => {
     if (player.isPlaying()) {
-        player.stop();//.then(() => console.log(`player.stop()`));
+        player.stop();
     } else {
-        player.play();//.then(() => console.log(`player.play()`));
+        player.play();
     }
 }, false);
 
-let barRect = barElement.getBoundingClientRect();
-barElement.addEventListener(`click`, (e) => {
-    if (e.clientX >= barRect.left && e.clientX <= barRect.right &&
-        e.clientY >= barRect.top && e.clientY <= barRect.bottom) {
+let audioBarRect = audioBarElement.getBoundingClientRect();
+audioBarElement.addEventListener(`click`, (e) => {
+    if (e.clientX >= audioBarRect.left && e.clientX <= audioBarRect.right &&
+        e.clientY >= audioBarRect.top && e.clientY <= audioBarRect.bottom) {
 
-        let percent = ((e.clientX - barRect.left) / barRect.width);
+        let percent = ((e.clientX - audioBarRect.left) / audioBarRect.width);
         let time = player.getDuration() * percent;
         outputToElement(percent * 100, ...Timer.millisToTime(time));
         player.setTime(time);
     }
 }, false);
 
-let element = document.createElement(`div`);
-element.setAttribute(`class`, `element`);
-element.innerHTML = `💩`;
-let volumeElement = document.createElement(`div`);
-volumeElement.setAttribute(`class`, `volume`);
-volumeElement.innerText = `🔈`;
+let repeatElement = controlsElement;
+let nextElement = document.createElement(`div`);
+nextElement.setAttribute(`class`, `controls centralized`);
+nextElement.innerHTML = `⏩`; //⏭
+let previousElement = document.createElement(`div`);
+previousElement.setAttribute(`class`, `controls centralized`);
+previousElement.innerHTML = `⏪`; //⏮
 
-dropdownElement.addEventListener(`click`, () => {
-    if (playerElement.lastChild === volumeElement) {
-        dropdownElement.innerHTML = `▽`;
-        playerElement.setAttribute(`class`, `player`);
-        playerElement.removeChild(element);
-        playerElement.removeChild(volumeElement);
-    } else {
-        dropdownElement.innerHTML = `△`;
-        playerElement.setAttribute(`class`, `player open-player`);
-        playerElement.appendChild(element);
-        playerElement.appendChild(volumeElement);
+repeatElement.addEventListener(`click`, () => {
+    playerElement.replaceChild(nextElement, repeatElement);
+}, false);
+nextElement.addEventListener(`click`, () => {
+    playerElement.replaceChild(previousElement, nextElement);
+}, false);
+previousElement.addEventListener(`click`, () => {
+    playerElement.replaceChild(repeatElement, previousElement);
+}, false);
+
+let volumeBarRect = volumeBarElement.getBoundingClientRect();
+volumeBarElement.addEventListener(`click`, (e) => {
+    if (e.clientX >= volumeBarRect.left && e.clientX <= volumeBarRect.right &&
+        e.clientY >= volumeBarRect.top && e.clientY <= volumeBarRect.bottom) {
+
+        let percent = Math.trunc(((volumeBarRect.bottom - e.clientY) / volumeBarRect.height) * 100);
+        volumeInfoElement.innerHTML = percent;
+        volumeInfoElement.appendChild(volumeIconElement);
+        volumeProgressElement.style.height = percent + `%`;
+        volumeProgressElement.style.bottom = percent + `%`;
+        player.setVolume(percent / 100);
     }
 }, false);
 

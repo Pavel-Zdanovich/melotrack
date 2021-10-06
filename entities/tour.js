@@ -2,7 +2,7 @@ let {throwError} = await import(`../utils/utils.js`);
 
 export class Tour {
 
-    constructor(title, description, tracks) {
+    constructor(title, description, time, keys, tracks) {
         if (title != null && typeof title === `string`) {
             this.title = title;
         } else {
