@@ -1,5 +1,4 @@
-let {Timer} = await import(`../timer/timer.js`);
-let {throwError} = await import(`../utils.js`);
+let {throwError} = await import(`../utils/utils.js`);
 
 const MIN_PERCENT = 0;
 const MAX_PERCENT = 100;
@@ -7,7 +6,7 @@ const MAX_PERCENT = 100;
 export class Progress {
 
     constructor(percent = 0) {
-        if (percent != null && typeof percent === `number`) {
+        if (percent != null && typeof percent === `number` && (percent >= MIN_PERCENT && percent <= MAX_PERCENT)) {
             this._percent = percent;
             //console.log(`Percent: ${percent}`);
         } else {
@@ -20,7 +19,7 @@ export class Progress {
     }
 
     set(percent) {
-        if (percent != null && typeof percent === `number`) {
+        if (percent != null && typeof percent === `number` && (percent >= MIN_PERCENT && percent <= MAX_PERCENT)) {
             this._percent = percent;
             //console.log(`Percent: ${percent}`);
         } else {
@@ -30,10 +29,10 @@ export class Progress {
 
     increment(value) {
         if (value != null && typeof value === `number`) {
-            if (100 - this._percent > value) {
+            if (MAX_PERCENT - this._percent > value) {
                 this._percent = this._percent + value;
             } else {
-                this._percent = 100;
+                this._percent = MAX_PERCENT;
             }
             //console.log(`Percent: ${this._percent}`);
         } else {

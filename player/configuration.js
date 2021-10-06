@@ -1,7 +1,6 @@
-let { outputMinsAndSecs, outputMinsSecsAndMillis } = await import(`../utils.js`);
-let { Progress } = await import(`./progress.js`);
-let { Timer } = await import(`../timer/timer.js`);
-let { Player } = await import(`./player.js`);
+let {outputMinsAndSecs, outputMinsSecsAndMillis} = await import(`../utils/utils.js`);
+let {Timer} = await import(`../timer/timer.js`);
+let {Player} = await import(`./player.js`);
 
 let playerElement = null;
 
@@ -12,48 +11,31 @@ if (elements.length === 1) {
     throw new Error(`Can't find player`);
 }
 
-let audioElement = playerElement.children[0];
-audioElement.volume = 0.25;
-let playElement = playerElement.children[1];
-let barElement = playerElement.children[2];
+let playElement = playerElement.children[0];
+let barElement = playerElement.children[1];
 let timeElement = barElement.firstElementChild;
 let progressElement = barElement.lastElementChild;
-let dropdownElement = playerElement.children[3];
-
-let barRect = barElement.getBoundingClientRect();
-
-let start = 0;
-let end = audioElement.duration * 1000;
-let time = Math.abs(end - start);
-let coefficient = 5;
-let step = time / (100 * coefficient);
+let dropdownElement = playerElement.children[2];
 
 progressElement.style.width = `0%`;
-let increment = 1 / coefficient;
-let progress = new Progress();
-
-let output = (hours, mins, secs, millis) => {
+let outputToElement = (progress, hours, mins, secs, millis) => {
     progressElement.innerHTML = outputMinsSecsAndMillis(hours, mins, secs, millis);
-    progress.increment(increment);
-    progressElement.style.width = progress.get() + `%`;
+    progressElement.style.width = progress + `%`;
 };
 
-let timer = new Timer(output, start, end, step);
-let player = new Player(audioElement, progress, timer);
+let player = new Player(outputToElement, 'nirvana_-_smells-like-teen-spirit.mp3');
 
-let t = Timer.millisToTime(0);
-progressElement.innerHTML = outputMinsSecsAndMillis(t.hours, t.mins, t.secs, t.millis);
+outputToElement(0, ...Timer.millisToTime(0));
 
-playElement.addEventListener(`click`, (e) => {
+playElement.addEventListener(`click`, () => {
     if (player.isPlaying()) {
-        player.pause();
-        playElement.innerHTML = `▷`;
+        player.stop().then(() => playElement.innerHTML = `▷`);
     } else {
-        player.play();
-        playElement.innerHTML = `⏸`;
+        player.play().then(() => playElement.innerHTML = `⏸`);
     }
 }, false);
 
+let barRect = barElement.getBoundingClientRect();
 barElement.addEventListener(`click`, (e) => {
     if (e.clientX >= barRect.left && e.clientX <= barRect.right &&
         e.clientY >= barRect.top && e.clientY <= barRect.bottom) {
@@ -70,7 +52,9 @@ volumeElement.setAttribute(`class`, `volume`);
 volumeElement.innerText = `🔈`;
 
 dropdownElement.addEventListener(`click`, () => {
-    if (playerElement.lastChild === volumeElement) {
+    outputToElement(...Timer.millisToTime(0));
+    player.load(`progmathist_-_bsuir.mp3`).then(() => player.next());
+    /*if (playerElement.lastChild === volumeElement) {
         dropdownElement.innerHTML = `▽`;
         playerElement.setAttribute(`class`, `player`);
         playerElement.removeChild(element);
@@ -80,5 +64,5 @@ dropdownElement.addEventListener(`click`, () => {
         playerElement.setAttribute(`class`, `player open-player`);
         playerElement.appendChild(element);
         playerElement.appendChild(volumeElement);
-    }
+    }*/
 }, false);

@@ -1,4 +1,4 @@
-let {throwError} = await import(`../utils.js`);
+let {throwError} = await import(`../utils/utils.js`);
 
 const MILLIS_IN_SEC = 1000;
 const SECS_IN_MIN = 60;
@@ -13,11 +13,11 @@ const MILLIS_IN_DAY = MILLIS_IN_HOUR * HOURS_IN_DAY;
 
 export class Timer {
 
-    constructor(output, start, end = 0, step = 1000) {
-        if (output != null && typeof output == 'function') {
-            this._output = output;
+    constructor(callback, start, end = 0, step = 1000) {
+        if (callback != null && typeof callback == 'function') {
+            this._callback = callback;
         } else {
-            throwError({output});
+            throwError({callback});
         }
 
         if (start != null && typeof start === `number` && (start >= MIN_TIME && start <= MILLIS_IN_DAY)) {
@@ -77,24 +77,12 @@ export class Timer {
 
     #initialize() {
         if (this._direction) {
-            let time = Timer.millisToTime(this._start);
-            this._hours = time.hours;
-            this._mins = time.mins;
-            this._secs = time.secs;
-            this._millis = time.millis;
+            [this._hours, this._mins, this._secs, this._millis] = Timer.millisToTime(this._start);
         } else {
             if (this._end !== 0) {
-                let time = Timer.millisToTime(this._start);
-                this._hours = time.hours;
-                this._mins = time.mins;
-                this._secs = time.secs;
-                this._millis = time.millis;
+                [this._hours, this._mins, this._secs, this._millis] = Timer.millisToTime(this._start);
             } else {
-                let time = Timer.millisToTime(this._time);
-                this._hours = time.hours;
-                this._mins = time.mins;
-                this._secs = time.secs;
-                this._millis = time.millis;
+                [this._hours, this._mins, this._secs, this._millis] = Timer.millisToTime(this._time);
             }
         }
     }
@@ -184,7 +172,7 @@ export class Timer {
         let secs = Math.trunc(fractionalSecs);
         let fractionalMillis = (fractionalSecs - secs) * MILLIS_IN_SEC;
         let millis = Math.trunc(fractionalMillis);
-        return {hours, mins, secs, millis};
+        return [hours, mins, secs, millis];
     }
 
     start() {
@@ -197,7 +185,7 @@ export class Timer {
                     this.stop();
                     this.#finalize();
                 }
-                this._output(this._hours, this._mins, this._secs, this._millis);
+                this._callback(this._hours, this._mins, this._secs, this._millis);
             },
             this._stepInMillis);
     }
@@ -208,11 +196,7 @@ export class Timer {
     }
 
     #finalize() {
-        let time = Timer.millisToTime(this._end);
-        this._hours = time.hours;
-        this._mins = time.mins;
-        this._secs = time.secs;
-        this._millis = time.millis;
+        [this._hours, this._mins, this._secs, this._millis] = Timer.millisToTime(this._end);
     }
 
     stop() {
