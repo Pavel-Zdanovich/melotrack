@@ -58,7 +58,7 @@ const indexElement = document.body.children[0].children[0];
 
 const load = (mode) => {
     mode(DZ, data).then(tour => {
-        indexElement.innerHTML = `${tour.title} [${modes.indexOf(mode) + 1}/${modes.length}]`;
+        indexElement.innerHTML = `${tour.name} [${modes.indexOf(mode) + 1}/${modes.length}]`;
         current = mode;
         document.dispatchEvent(new CustomEvent(`tour`, {detail: tour}));
         document.documentElement.style.setProperty(`--background-color`, tour.background);
