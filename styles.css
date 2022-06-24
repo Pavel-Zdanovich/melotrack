@@ -48,16 +48,7 @@ CSS Vendor Prefix
     justify-content: center;
 }
 
-.absoluted {
-    position: absolute;
 
-    left: 50%;
-    top: 50%;
-
-    -webkit-transform: translate(-50%, -50%);
-    -ms-transform: translate(-50%, -50%);
-    transform: translate(-50%, -50%);
-}
 
 html {
     background-color: var(--background-color);
@@ -110,7 +101,7 @@ header {
     left: 0;
 
     width: 100%;
-    height: 10%;
+    height: 10vh;
 
     background-color: var(--background-color);
 }
@@ -120,8 +111,8 @@ header {
     flex-basis: 12.5%;
 }
 
-.logo {
-    margin-right: 0;
+.heading .icon {
+    height: 50%;
 }
 
 .text {
@@ -379,7 +370,7 @@ table {
 }
 
 caption {
-    margin-bottom: 2%;
+    margin-bottom: 3vh;
 }
 
 tbody {
@@ -567,14 +558,20 @@ footer {
     left: 0;
 
     width: 100%;
-    height: 10%;
+    height: 10vh;
 
     background-color: var(--background-color);
 }
 
 footer > * {
-    -ms-flex-preferred-size: 100%;
-    flex-basis: 100%;
+    -ms-flex-preferred-size: 0;
+    flex-basis: 0;
+
+    -webkit-box-flex: 1;
+    -ms-flex-positive: 1;
+    flex-grow: 1;
+
+    min-width: 0;
 }
 
 .copyright {
@@ -611,11 +608,21 @@ footer > * {
 a {
     color: inherit;
     height: 50%;
-    white-space: nowrap;
     overflow: hidden;
-
+    white-space: nowrap;
     -o-text-overflow: ellipsis;
     text-overflow: ellipsis;
+}
+
+.spinner {
+    height: 25%;
+
+    left: 50%;
+    top: 50%;
+
+    -webkit-transform: translate(-50%, -50%);
+    -ms-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
 }
 
 .spinner circle {
@@ -718,14 +725,6 @@ svg {
         -ms-grid-column: 1;
         -ms-grid-column-span: 2;
     }
-
-    caption {
-        width: 100%;
-    }
-
-    thead, tbody {
-        width: 80%;
-    }
 }
 
 @media (max-width: 480px) {
@@ -734,20 +733,16 @@ svg {
         /*background-color: red;*/
     }
 
-    .spinner {
-        width: 25%;
+    .heading .icon {
+        height: 100%;
     }
 
-    .logo {
-        width: 10%;
-    }
-
-    .logo svg {
-        stroke-width: 4%;
+    .contacts a {
+        height: 25%;
     }
 
     .icon svg {
-        stroke-width: 5%;
+        stroke-width: 3%;
     }
 }
 
@@ -756,20 +751,8 @@ svg {
         /*background-color: orange;*/
     }
 
-    .spinner {
-        width: 20%;
-    }
-
-    .logo {
-        width: 20%;
-    }
-
-    .logo svg {
-        stroke-width: 3.5%;
-    }
-
     .icon svg {
-        stroke-width: 4%;
+        stroke-width: 2.5%;
     }
 }
 
@@ -778,20 +761,8 @@ svg {
         /*background-color: yellow;*/
     }
 
-    .spinner {
-        width: 15%;
-    }
-
-    .logo {
-        width: 22.5%;
-    }
-
-    .logo svg {
-        stroke-width: 3%;
-    }
-
     .icon svg {
-        stroke-width: 3.5%;
+        stroke-width: 3%;
     }
 }
 
@@ -800,18 +771,6 @@ svg {
         /*background-color: green;*/
     }
 
-    .spinner {
-        width: 10%;
-    }
-
-    .logo {
-        width: 25%;
-    }
-
-    .logo svg {
-        stroke-width: 2.5%;
-    }
-
     .side {
         width: 3%;
     }
@@ -825,7 +784,7 @@ svg {
     }
 
     .icon svg {
-        stroke-width: 3.5%;
+        stroke-width: 3%;
     }
 }
 
@@ -834,18 +793,6 @@ svg {
         /*background-color: blue;*/
     }
 
-    .spinner {
-        width: 10%;
-    }
-
-    .logo {
-        width: 27.5%;
-    }
-
-    .logo svg {
-        stroke-width: 2%;
-    }
-
     .side {
         width: 3%;
     }
@@ -859,6 +806,6 @@ svg {
     }
 
     .icon svg {
-        stroke-width: 3.5%;
+        stroke-width: 3%;
     }
 }

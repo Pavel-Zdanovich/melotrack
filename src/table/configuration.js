@@ -17,8 +17,8 @@ const headRowElement = headElement.children[0];
 const headCellElement = headRowElement.children[0];
 
 const exampleRowElement = bodyElement.children[0];
-
-const clefElement = footerElement.children[1].children[0].cloneNode(true);
+const clefElement = footerElement.children[1].children[0];
+const pointerElement = clefElement.cloneNode(true);
 const upperElement = document.createElement(`div`);
 upperElement.classList.add(`upper`);
 const lowerElement = document.createElement(`div`);
@@ -175,7 +175,7 @@ const bodyCellEnter = (rowIndex, colIndex) => {
     const cellElement = map[rowIndex][colIndex];
     cellElement.style.setProperty(`display`, `flex`);
     const labelElement = cellElement.children[0];
-    labelElement.appendChild(clefElement);
+    labelElement.appendChild(pointerElement);
     upperElement.innerHTML = rowIndex;
     lowerElement.innerHTML = bodyElement.childElementCount;
     labelElement.appendChild(signElement);
@@ -309,7 +309,7 @@ const check = () => {
 };
 
 timer.addEventListener(`end`, check);
-footerElement.addEventListener(`click`, check);
+clefElement.addEventListener(`click`, check);
 
 tableElement.addEventListener(`keydown`, (e) => {
     switch (e.code) {

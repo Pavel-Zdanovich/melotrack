@@ -22,34 +22,6 @@ let width = window.innerWidth;
 
 export {height, width, mobile, os};
 
-let fullscreen = false;
-let screenState = fullscreen;
-let keyboard = false;
-
-document.addEventListener(`dblclick`, () => {
-    const documentElement = document.documentElement;
-
-    const requestFullScreen = documentElement.requestFullscreen || documentElement.mozRequestFullScreen || documentElement.webkitRequestFullScreen || documentElement.msRequestFullscreen;
-    const cancelFullScreen = document.exitFullscreen || document.mozCancelFullScreen || document.webkitExitFullscreen || document.msExitFullscreen;
-
-    if (!document.fullscreenElement && !document.mozFullScreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement) {
-        requestFullScreen.call(documentElement).then(() => fullscreen = true);
-    } else {
-        cancelFullScreen.call(document).then(() => fullscreen = false);
-    }
-});
-
-window.addEventListener(`load`, () => {
-    setTimeout(() => {
-        //mobileConsole(`\tScroll`);
-        window.scrollTo(0, 1);
-    }, 0);
-});
-
-const mobileConsole = (data) => {
-    document.body.children[2].children[0].innerText = document.body.children[2].children[0].innerText + data;
-};
-
 document.addEventListener(`readystatechange`, () => {
     if (mobile) {
         if (os === `ios`) {
@@ -64,13 +36,7 @@ document.addEventListener(`readystatechange`, () => {
             );
         } else {
             window.addEventListener(`resize`, () => {
-                //mobileConsole(`\tResize from ${height} to ${window.innerHeight}`);
-
-                if (screenState !== fullscreen) {
-                    //mobileConsole(`\tFullscreen ${fullscreen}\n`);
-                    screenState = fullscreen;
-                    height = window.innerHeight;
-                    width = window.innerWidth;
+                if (height === window.innerHeight) {
                     return;
                 }
 
@@ -82,31 +48,16 @@ document.addEventListener(`readystatechange`, () => {
                 }
 
                 if (resizePercentage > 0.3) {
-                    if (window.innerHeight < height) {
-                        if (!keyboard) {
-                            //mobileConsole(`\tKeyboard on\n`);
-                            changeViewport(height, width);
-                            onKeyboardOpened();
-                            keyboard = true;
-                            return;
-                        } else {
-                            return;
-                        }
+                    if (window.innerHeight > height) {
+                        onKeyboardClosed();
                     } else {
-                        return;
+                        onKeyboardOpened();
+                        changeViewport(height, width);
                     }
                 }
 
-                if (resizePercentage > 0) {
-                    //mobileConsole(`\tAddress bar\n`);
-                    changeViewport(window.innerHeight, window.innerWidth);
-                }
-
-                if (keyboard) {
-                    //mobileConsole(`\tKeyboard off\n`);
-                    onKeyboardClosed();
-                    keyboard = false;
-                }
+                height = window.innerHeight;
+                width = window.innerWidth;
             });
         }
     }
