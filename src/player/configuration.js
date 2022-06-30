@@ -40,9 +40,14 @@ const volumeBarElement = volumeSliderElement.firstElementChild;
 const volumeProgressElement = volumeBarElement.firstElementChild;
 const volumeInputElement = volumeSliderElement.lastElementChild;
 
-let duration;
-const outputToAudioElements = (percentage, hours, mins, secs, millis) => {
-    audioTimeElement.innerHTML = `${outputMinsAndSecs(hours, mins, secs, millis)} / ${duration}`;
+const outputToAudioElements = (title, time, percentage) => {
+    audioTitleElement.innerHTML = title;
+    audioTimeElement.innerHTML = time;
+    audioProgressElement.style.width = `${percentage}%`;
+    audioInputElement.value = percentage;
+};
+const outputProgress = (time, percentage) => {
+    audioTimeElement.innerHTML = audioTimeElement.innerHTML.replace(/.+\//, `${time} /`);
     audioProgressElement.style.width = `${percentage}%`;
     audioInputElement.value = percentage;
 };
@@ -50,20 +55,20 @@ const outputToAudioElements = (percentage, hours, mins, secs, millis) => {
 const player = new Player(); //TODO create modal button to create player for https://stackoverflow.com/questions/55026293/google-chrome-javascript-issue-in-getting-user-audio-the-audiocontext-was-not
 player.addEventListener(`load`, (e) => {
     const track = e.detail.track;
-    audioTitleElement.innerHTML = player.isTitle() ? `${track.artist} - ${track.title}` : ``;
-    duration = outputMinsAndSecs(...Timer.millisToTime(track.getDuration()));
-    const progress = e.detail.progress;
-    const time = e.detail.time;
-    outputToAudioElements(progress, ...time);
+    const title = player.isTitle() ? `${track.artist} - ${track.title}` : ``;
+    const time = outputMinsAndSecs(...e.detail.time);
+    const duration = outputMinsAndSecs(...Timer.millisToTime(track.getDuration()));
+    const percentage = e.detail.progress;
+    outputToAudioElements(title, `${time} / ${duration}`, percentage);
 });
 player.addEventListener(`play`, () => {
     playLabelElement.removeChild(playIconElement);
     playLabelElement.appendChild(stopIconElement);
 });
 player.addEventListener(`tick`, (e) => {
-    const progress = e.detail.progress;
-    const time = e.detail.time;
-    outputToAudioElements(progress, ...time);
+    const time = outputMinsAndSecs(...e.detail.time);
+    const percentage = e.detail.progress;
+    outputProgress(time, percentage);
 });
 player.addEventListener(`stop`, () => {
     playLabelElement.removeChild(stopIconElement);
@@ -73,10 +78,8 @@ player.addEventListener(`end`, () => {
     playLabelElement.removeChild(stopIconElement);
     playLabelElement.appendChild(playIconElement);
 });
-player.addEventListener(`unload`, (e) => {
-    audioTitleElement.innerHTML = player.isTitle() ? `Artist - Title` : ``;
-    duration = `00:00`;
-    outputToAudioElements(0, 0, 0, 0, 0);
+player.addEventListener(`unload`, () => {
+    outputToAudioElements(``, ``, 0);
 });
 
 const playListener = () => {
@@ -117,17 +120,19 @@ modeInputElement.addEventListener(`touchstart`, modeListener);
 player.setSelectionMode(modes.get(modeLabelElement.firstElementChild));
 
 audioElement.addEventListener(`input`, () => {
-    const percentage = audioInputElement.value;
     const track = player.get();
     if (!track) {
         return;
     }
+
+    const percentage = audioInputElement.value;
+
     const millis = track.getDuration() * (percentage / 100);
     player.setTime(millis);
+
     if (!player.isPlaying()) {
-        const progress = percentage;
-        const time = Timer.millisToTime(millis);
-        outputToAudioElements(progress, ...time);
+        const time = outputMinsAndSecs(...Timer.millisToTime(millis));
+        outputProgress(time, percentage);
     }
 });
 

@@ -97,7 +97,6 @@ const colLeave = (colIndex) => {
     map[0][colIndex].style = ``;
     headElement.style = ``;
     bodyElement.style = ``;
-    currentColIndex = undefined;
 };
 
 const colLeaveEnter = (prevColIndex, nextColIndex) => {
@@ -135,7 +134,6 @@ const headCellEnter = (rowIndex, colIndex) => {
         bodyElement.style.borderRightColor = tour.border;
     }
     cellElement.style.borderTopColor = tour.border;
-
 };
 
 const headCellLeave = (rowIndex, colIndex) => {
@@ -147,25 +145,22 @@ const headCellLeave = (rowIndex, colIndex) => {
 
 
 
-let reload = true;
 const bodyRowEnter = (rowIndex) => {
     map[rowIndex][0].classList.add(`staved`);
     currentRowIndex = rowIndex;
     const track = tour.tracks[currentRowIndex - 1];
-    if (track && reload) {
-        loader.get(track.url).then(track => player.load(track));
-    }
-    reload = true;
+    loader.get(track.url).then(track => player.load(track));
 };
 
 const bodyRowLeave = (rowIndex) => {
     map[rowIndex][0].classList.remove(`staved`);
-    player.unload();
     currentRowIndex = undefined;
+    player.unload();
 };
 
 const bodyRowLeaveEnter = (prevRowIndex, nextRowIndex) => {
     map[prevRowIndex][0].classList.remove(`staved`);
+    currentRowIndex = undefined;
     bodyRowEnter(nextRowIndex);
 };
 
@@ -209,9 +204,12 @@ const isPlayer = (element) => {
     }
 };
 
+let reenter = true;
 const addEventListeners = (rowIndex, colIndex, colEnter, colLeave, colLeaveEnter, rowEnter, rowLeave, rowLeaveEnter, cellEnter, cellLeave) => {
     const cellElement = map[rowIndex][colIndex];
+    //in col -> row -> cell
     cellElement.addEventListener(`focusin`, (e) => {
+        //e.relatedTarget - previous focus element
         if (isTable(e.relatedTarget)) {
             if (currentColIndex !== colIndex) {
                 colLeaveEnter(currentColIndex, colIndex);
@@ -219,22 +217,36 @@ const addEventListeners = (rowIndex, colIndex, colEnter, colLeave, colLeaveEnter
             if (currentRowIndex !== rowIndex) {
                 rowLeaveEnter(currentRowIndex, rowIndex);
             }
+            cellEnter(rowIndex, colIndex);
         } else {
-            colEnter(colIndex);
-            rowEnter(rowIndex);
+            if (reenter) {
+                colEnter(colIndex);
+                rowEnter(rowIndex);
+                cellEnter(rowIndex, colIndex);
+            }
         }
-        cellEnter(rowIndex, colIndex);
     });
+    //out cell -> row -> col
     cellElement.addEventListener(`focusout`, (e) => {
+        //e.relatedTarget - next focus element
         if (!isTable(e.relatedTarget)) {
             if (!isPlayer(e.relatedTarget)) {
                 cellLeave(rowIndex, colIndex);
                 rowLeave(rowIndex);
                 colLeave(colIndex);
             } else {
-                reload = false;
+                reenter = false;
                 const inputElement = cellElement.lastElementChild;
                 inputElement.focus();
+                reenter = true;
+            }
+        } else {
+            cellLeave(rowIndex, colIndex);
+            if (currentRowIndex !== rowIndex) {
+                rowLeave(rowIndex);
+            }
+            if (currentColIndex !== colIndex) {
+                colLeave(colIndex);
             }
         }
     });
@@ -282,12 +294,13 @@ for (let index = 0; index < bodyElement.childElementCount; index++) {
 
 
 
-player.addEventListener(`end`, (e) => {
-    const current = e.detail;
-    const index = tour.tracks.indexOf(current);
+player.addEventListener(`end`, () => {
+    const index = currentRowIndex;
     const selectNext = player.getSelectionMode();
-    const next = selectNext(index, tour.tracks);
-    loader.get(next.url).then(track => player.load(track));
+    const array = selectNext(index - 1, map.slice(1));
+    const cellElement = array[currentColIndex];
+    const inputElement = cellElement.lastElementChild;
+    inputElement.focus();
 });
 
 const check = () => {
@@ -303,7 +316,7 @@ const check = () => {
             const result = Validator.similarity(expected, actual);
             console.log(`${rowIndex}_${colIndex} '${actual}' = '${expected}' on ${result * 100}%`);
             inputElement.value = expected;
-            inputElement.disabled = true;
+            inputElement.readOnly = true;
         }
     }
 };
@@ -312,36 +325,41 @@ timer.addEventListener(`end`, check);
 clefElement.addEventListener(`click`, check);
 
 tableElement.addEventListener(`keydown`, (e) => {
+    const previousRowIndex = currentRowIndex;
+    const previousColIndex = currentColIndex;
+    let nextRowIndex = currentRowIndex;
+    let nextColIndex = currentColIndex;
+
     switch (e.code) {
         case `ArrowUp`: {
             if (currentRowIndex === 1) {
-                currentRowIndex = map.length - 1;
+                nextRowIndex = map.length - 1;
             } else {
-                currentRowIndex--;
+                nextRowIndex = currentRowIndex - 1;
             }
             break;
         }
         case `ArrowDown`: {
             if (currentRowIndex === map.length - 1) {
-                currentRowIndex = 1;
+                nextRowIndex = 1;
             } else {
-                currentRowIndex++;
+                nextRowIndex = currentRowIndex + 1;
             }
             break;
         }
         case `ArrowLeft`: {
             if (currentColIndex === map[0].length - 1) {
-                currentColIndex = 1;
+                nextColIndex = 1;
             } else {
-                currentColIndex++;
+                nextColIndex = currentColIndex + 1;
             }
             break;
         }
         case `ArrowRight`: {
             if (currentColIndex === 1) {
-                currentColIndex = map[0].length - 1;
+                nextColIndex = map[0].length - 1;
             } else {
-                currentColIndex--;
+                nextColIndex = currentColIndex - 1;
             }
             break;
         }
@@ -350,8 +368,9 @@ tableElement.addEventListener(`keydown`, (e) => {
         }
     }
 
-    const cellElement = map[currentRowIndex][currentColIndex];
-    const inputElement = cellElement.lastElementChild;
+    const previousCellElement = map[previousRowIndex][previousColIndex];
+    const nextCellElement = map[nextRowIndex][nextColIndex];
+    const inputElement = nextCellElement.lastElementChild;
     inputElement.focus();
 });
 

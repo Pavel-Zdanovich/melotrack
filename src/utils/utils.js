@@ -20,7 +20,7 @@ function check(index, array) {
 export function current(index, array) {
     check(index, array);
     if (index < 0 || index >= array.length) {
-        throwError({current: index});
+        throwError({index});
     }
     return array[index];
 }

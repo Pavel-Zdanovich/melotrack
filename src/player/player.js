@@ -15,7 +15,7 @@ export class Player extends EventTarget {
         this._context = new AudioContext();
 
         this._context.addEventListener(`statechange`, () => {
-            console.log(`Context state: ${this._context.state}`);
+            //console.log(`Context state: ${this._context.state}`);
         });
 
         this._gain = this._context.createGain();
@@ -38,13 +38,13 @@ export class Player extends EventTarget {
             this.dispatchEvent(new CustomEvent(`tick`, {detail: {progress, time}}));
         });
         this._timer.addEventListener(`stop`, () => {
-            console.log(`stop`);
+            //console.log(`stop`);
             this._context.suspend().then(() => {
                 this.dispatchEvent(new CustomEvent(`stop`, {detail: this._track}));
             });
         });
         this._timer.addEventListener(`end`, () => {
-            console.log(`end`);
+            //console.log(`end`);
             this._context.suspend().then(() => {
                 this.dispatchEvent(new CustomEvent(`end`, {detail: this._track}));
             });
@@ -69,7 +69,7 @@ export class Player extends EventTarget {
         this._source.buffer = buffer;
         this._source.connect(this._node);
         this._source.onended = (e) => {
-            console.log(e);
+            //console.log(e);
         };
     }
 

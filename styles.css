@@ -427,14 +427,6 @@ th {
     justify-content: center;
 }
 
-input {
-    width: 100%;
-}
-
-table .icon {
-    height: auto;
-}
-
 th {
     border-bottom-width: var(--border-width);
     border-bottom-style: solid;
@@ -532,6 +524,8 @@ tbody {
 }
 
 input {
+    width: 100%;
+    text-align: center;
     background: none;
     border: none;
     color: var(--border-color);
