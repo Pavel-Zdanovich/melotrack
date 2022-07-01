@@ -18,8 +18,8 @@ export const playlist = (DZ, data) => {
                 `Playlist`,
                 `Guess the artists and titles from playlist "${playlist.title}".`,
                 60000,
-                `red`,
-                `green`,
+                `#FAE5DF`,
+                `#303179`,
                 [`artist`, `title`],
                 playlist.tracks.data
                     .slice(0, 10) //TODO

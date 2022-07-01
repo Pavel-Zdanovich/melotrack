@@ -19,8 +19,8 @@ export const artist = (DZ, data) => {
                     `Artist`,
                     `Guess the titles by "${artist.name}".`,
                     60000,
-                    `blue`,
-                    `orange`,
+                    `#E4DDF4`,
+                    `#2D2D2D`,
                     [`title`],
                     tracklist.data
                         .slice(0, 10) //TODO

@@ -16,8 +16,8 @@ export const genre = (DZ, data, markProgressBy) => {
                 `Playlist`,
                 `Guess the artists and titles from playlist "${playlist.title}".`,
                 60000,
-                `yellow`,
-                `green`,
+                `#F2F2F2`,
+                `#2B6777`,
                 [`artist`, `title`],
                 playlist.tracks.data.map(json => Track.parse(json)
                 )

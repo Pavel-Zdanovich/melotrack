@@ -30,6 +30,7 @@ export class Tour {
 
         if (typeof border === `string`) {
             this.border = border;
+            this.transparent = `${border}40`;
         } else {
             throwError({border});
         }

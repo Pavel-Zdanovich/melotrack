@@ -18,7 +18,7 @@ const headCellElement = headRowElement.children[0];
 
 const exampleRowElement = bodyElement.children[0];
 const clefElement = footerElement.children[1].children[0];
-const pointerElement = clefElement.cloneNode(true);
+let pointerElement = clefElement.cloneNode(true);
 const upperElement = document.createElement(`div`);
 upperElement.classList.add(`upper`);
 const lowerElement = document.createElement(`div`);
@@ -91,8 +91,13 @@ const colEnter = (colIndex) => {
 
 const colLeave = (colIndex) => {
     for (let rowIndex = 0; rowIndex <= bodyElement.childElementCount; rowIndex++) {
+        const array = map[rowIndex];
         const cellElement = map[rowIndex][colIndex];
-        cellElement.style = ``;
+        if (colIndex === 1) {
+            cellElement.style.borderLeftColor = ``;
+        } else if (colIndex === array.length - 1) {
+            cellElement.style.borderRightColor = ``;
+        }
     }
     map[0][colIndex].style = ``;
     headElement.style = ``;
@@ -168,7 +173,6 @@ const bodyRowLeaveEnter = (prevRowIndex, nextRowIndex) => {
 
 const bodyCellEnter = (rowIndex, colIndex) => {
     const cellElement = map[rowIndex][colIndex];
-    cellElement.style.setProperty(`display`, `flex`);
     const labelElement = cellElement.children[0];
     labelElement.appendChild(pointerElement);
     upperElement.innerHTML = rowIndex;
@@ -209,6 +213,7 @@ const addEventListeners = (rowIndex, colIndex, colEnter, colLeave, colLeaveEnter
     const cellElement = map[rowIndex][colIndex];
     //in col -> row -> cell
     cellElement.addEventListener(`focusin`, (e) => {
+        console.log(e.relatedTarget);
         //e.relatedTarget - previous focus element
         if (isTable(e.relatedTarget)) {
             if (currentColIndex !== colIndex) {
@@ -300,10 +305,20 @@ player.addEventListener(`end`, () => {
     const array = selectNext(index - 1, map.slice(1));
     const cellElement = array[currentColIndex];
     const inputElement = cellElement.lastElementChild;
+    if (cellElement === map[currentRowIndex][currentColIndex]) {
+        inputElement.blur();
+    }
     inputElement.focus();
 });
 
+let checked = false;
 const check = () => {
+    if (!checked) {
+        checked = true;
+    } else {
+        return;
+    }
+    timer.stop();
     player.setTitleMode(true);
     for (let rowIndex = 1; rowIndex < map.length; rowIndex++) {
         const track = tour.tracks[rowIndex - 1];
@@ -313,8 +328,13 @@ const check = () => {
             const key = tour.keys[colIndex - 1];
             const expected = track[key];
             const actual = inputElement.value;
-            const result = Validator.similarity(expected, actual);
-            console.log(`${rowIndex}_${colIndex} '${actual}' = '${expected}' on ${result * 100}%`);
+            const result = Validator.similarity(expected, actual) * 100;
+            cellElement.style.cssText = `
+                background-image: -webkit-linear-gradient(90deg, var(--transparent-color) 0% ${result}%, transparent ${result}% 100%);
+                background-image: -o-linear-gradient(left, var(--transparent-color) 0% ${result}%, transparent ${result}% 100%);
+                background-image: linear-gradient(90deg, var(--transparent-color) 0% ${result}%, transparent ${result}% 100%);
+            `;
+            //console.log(`${rowIndex}_${colIndex} '${actual}' = '${expected}' on ${result}%`);
             inputElement.value = expected;
             inputElement.readOnly = true;
         }
@@ -452,9 +472,7 @@ document.addEventListener(`tour`, (e) => {
     player.unload();
 
     timer.load(tour.time);
-    if (!timer.isTicking()) {
-        timer.start();
-    }
+    timer.start();
 
     captionElement.innerText = tour.description;
 
@@ -535,6 +553,8 @@ document.addEventListener(`tour`, (e) => {
                 rowElement.appendChild(bodyCellElement);
             }
 
+            bodyCellElement.style = ``;
+
             const id = key + `_` + colIndex;
 
             labelElement = bodyCellElement.children[0];
@@ -547,6 +567,8 @@ document.addEventListener(`tour`, (e) => {
             stretchFor(rowElement, tour.keys.length);
         }
     }
+
+    checked = false;
 });
 
 console.log(`table loaded`);

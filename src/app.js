@@ -63,6 +63,7 @@ const load = (mode) => {
         document.dispatchEvent(new CustomEvent(`tour`, {detail: tour}));
         document.documentElement.style.setProperty(`--background-color`, tour.background);
         document.documentElement.style.setProperty(`--border-color`, tour.border);
+        document.documentElement.style.setProperty(`--transparent-color`, tour.transparent);
     });
 };
 

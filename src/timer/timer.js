@@ -18,6 +18,11 @@ export class Timer extends EventTarget {
     }
 
     load(start, end = 0, step = 1000) {
+        if (this.isTicking()) {
+            clearInterval(this._interval);
+            this._interval = null;
+        }
+
         if (typeof start === `number` && (start >= MIN_TIME && start <= MILLIS_IN_DAY)) {
             this._start = start;
         } else {

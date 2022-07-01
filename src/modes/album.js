@@ -18,8 +18,8 @@ export const album = (DZ, data) => {
                 `Album`,
                 `Guess the titles from album "${album.title}".`,
                 60000,
-                `black`,
-                `white`,
+                `#F5EEC2`,
+                `#416A59`,
                 [`title`],
                 album.tracks.data
                     .slice(0, 10) //TODO

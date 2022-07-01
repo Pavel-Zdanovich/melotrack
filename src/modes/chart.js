@@ -17,8 +17,8 @@ export const chart = (DZ, data) => {
                 `Chart`,
                 `Guess the artists and titles from chart.`,
                 60000,
-                `purple`,
-                `yellow`,
+                `#F6EBF4`,
+                `#ED0B70`,
                 [`artist`, `title`],
                 chart.tracks.data
                     .slice(0, 10) //TODO

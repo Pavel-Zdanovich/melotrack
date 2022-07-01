@@ -21,8 +21,8 @@ export const radio = (DZ, data) => {
                     `Radio`,
                     `Guess the artists and titles from radio "${radio.title}".`,
                     60000,
-                    `orange`,
-                    `blue`,
+                    `#F3F3F3`,
+                    `#932432`,
                     [`artist`, `title`],
                     tracks.data
                         .slice(0, 10) //TODO
