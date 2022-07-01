@@ -325,8 +325,6 @@ timer.addEventListener(`end`, check);
 clefElement.addEventListener(`click`, check);
 
 tableElement.addEventListener(`keydown`, (e) => {
-    const previousRowIndex = currentRowIndex;
-    const previousColIndex = currentColIndex;
     let nextRowIndex = currentRowIndex;
     let nextColIndex = currentColIndex;
 
@@ -368,7 +366,6 @@ tableElement.addEventListener(`keydown`, (e) => {
         }
     }
 
-    const previousCellElement = map[previousRowIndex][previousColIndex];
     const nextCellElement = map[nextRowIndex][nextColIndex];
     const inputElement = nextCellElement.lastElementChild;
     inputElement.focus();
@@ -452,7 +449,7 @@ document.addEventListener(`tour`, (e) => {
     });
 
     player.setTitleMode(false);
-    bodyRowLeave(currentRowIndex);
+    player.unload();
 
     timer.load(tour.time);
     if (!timer.isTicking()) {
