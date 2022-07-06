@@ -1,19 +1,16 @@
 import {Tour} from "../entities/tour.js";
 import {Track} from "../entities/track.js";
-import {spinner} from "../utils/spinner.js";
+import {promisify} from "../utils/utils.js";
 
-export const playlist = (DZ, data) => {
-    spinner.start();
-    spinner.markProgressBy(100, 75);
-    const id = data.playlists[Math.floor(Math.random() * data.playlists.length)];
-    let outsideResolve, outsideReject;
-    const promise = new Promise((resolve, reject) => {
-        outsideResolve = resolve;
-        outsideReject = reject;
-    });
-    promise.then(() => spinner.stop());
+export const playlist = async (id) => {
+    const [promise, resolve, reject] = promisify();
+
     DZ.api(`/playlist/${id}`, (playlist) => {
-        outsideResolve(
+        if (playlist !== null && playlist.hasOwnProperty(`error`)) {
+            reject(playlist);
+            return;
+        }
+        resolve(
             new Tour(
                 `Playlist`,
                 `Guess the artists and titles from playlist "${playlist.title}".`,
@@ -27,5 +24,6 @@ export const playlist = (DZ, data) => {
             )
         );
     });
+
     return promise;
 };

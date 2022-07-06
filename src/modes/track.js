@@ -1,6 +1,6 @@
 import {Tour} from "../entities/tour.js";
 import {Track} from "../entities/track.js";
-import {spinner} from "../utils/spinner.js";
+import {promisify} from "../utils/utils.js";
 
 const letters = '0123456789ABCDEF';
 
@@ -12,35 +12,31 @@ const randomColor = () => {
     return color;
 };
 
-export const track = (DZ, data) => {
-    spinner.start();
-    const ids = [];
+export const track = async (ids) => {
+    const [promise, resolve, reject] = promisify();
+
     const tracks = [];
-    for (let i = 0; i < 10; i++) {
-        let id = data.tracks[Math.floor(Math.random() * data.tracks.length)];
-        while (ids.includes(id)) {
-            id = data.tracks[Math.floor(Math.random() * data.tracks.length)];
-        }
-        ids.push(id);
+    for (let id of ids) {
         tracks.push(
-            new Promise((resolve) => {
-                DZ.api(`/track/${id}`, (track) => {
-                    spinner.markProgressBy(10);
-                    resolve(Track.parse(track));
-                });
-            })
+            new Promise(
+                (resolve, reject) => {
+                    DZ.api(`/track/${id}`, (track) => {
+                            if (track !== null && track.hasOwnProperty(`error`)) {
+                                reject(track);
+                                return;
+                            }
+                            resolve(Track.parse(track));
+                        }
+                    );
+                }
+            )
         );
     }
-    let outsideResolve, outsideReject;
-    const promise = new Promise((resolve, reject) => {
-        outsideResolve = resolve;
-        outsideReject = reject;
-    });
-    promise.then(() => spinner.stop());
+
     Promise.all(tracks).then((tracks) => {
-        outsideResolve(
+        resolve(
             new Tour(
-                `Random`,
+                `Track`,
                 `Guess random artists and titles.`,
                 60000,
                 randomColor(),
@@ -49,6 +45,7 @@ export const track = (DZ, data) => {
                 tracks
             )
         );
-    });
+    }, error => reject(error));
+
     return promise;
 };

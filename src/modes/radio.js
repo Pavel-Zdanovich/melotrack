@@ -1,22 +1,21 @@
 import {Tour} from "../entities/tour.js";
 import {Track} from "../entities/track.js";
-import {spinner} from "../utils/spinner.js";
+import {promisify} from "../utils/utils.js";
 
-export const radio = (DZ, data) => {
-    spinner.start();
-    spinner.markProgressBy(25);
-    const id = data.radios[Math.floor(Math.random() * data.radios.length)];
-    let outsideResolve, outsideReject;
-    const promise = new Promise((resolve, reject) => {
-        outsideResolve = resolve;
-        outsideReject = reject;
-    });
-    promise.then(() => spinner.stop());
+export const radio = async (id) => {
+    const [promise, resolve, reject] = promisify();
+
     DZ.api(`/radio/${id}`, (radio) => {
-        spinner.markProgressBy(37.5);
+        if (radio !== null && radio.hasOwnProperty(`error`)) {
+            reject(radio);
+            return;
+        }
         DZ.api(`/radio/${id}/tracks`, (tracks) => {
-            spinner.markProgressBy(37.5);
-            outsideResolve(
+            if (tracks !== null && tracks.hasOwnProperty(`error`)) {
+                reject(tracks);
+                return;
+            }
+            resolve(
                 new Tour(
                     `Radio`,
                     `Guess the artists and titles from radio "${radio.title}".`,
@@ -31,5 +30,6 @@ export const radio = (DZ, data) => {
             );
         });
     });
+
     return promise;
 };

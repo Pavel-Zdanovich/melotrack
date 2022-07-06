@@ -1,28 +1,29 @@
 import {Tour} from "../entities/tour.js";
 import {Track} from "../entities/track.js";
+import {promisify} from "../utils/utils.js";
 
-export const genre = (DZ, data, markProgressBy) => {
-    markProgressBy(15);
-    const id = 10000000 + Math.floor(Math.random() * 1000000);
-    let outsideResolve, outsideReject;
-    const promise = new Promise((resolve, reject) => {
-        outsideResolve = resolve;
-        outsideReject = reject;
-    });
+export const genre = async (id) => {
+    const [promise, resolve, reject] = promisify();
+
     DZ.api(`/genre/${id}`, (playlist) => {
-        markProgressBy(50);
-        outsideResolve(
+        if (playlist !== null && playlist.hasOwnProperty(`error`)) {
+            reject(playlist);
+            return;
+        }
+        resolve(
             new Tour(
-                `Playlist`,
-                `Guess the artists and titles from playlist "${playlist.title}".`,
+                `Genre`,
+                `Guess the artists and titles from genre "${playlist.title}".`,
                 60000,
                 `#F2F2F2`,
                 `#2B6777`,
                 [`artist`, `title`],
-                playlist.tracks.data.map(json => Track.parse(json)
-                )
+                playlist.tracks.data
+                    .slice(0, 10) //TODO
+                    .map(json => Track.parse(json))
             )
         );
     });
+
     return promise;
 };

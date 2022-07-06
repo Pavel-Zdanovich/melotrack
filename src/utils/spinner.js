@@ -1,6 +1,6 @@
 import {throwError} from "./utils.js";
 
-export class Spinner extends EventTarget {
+class Spinner extends EventTarget {
 
     constructor() {
         super();
@@ -69,21 +69,17 @@ export class Spinner extends EventTarget {
     }
 }
 
-const spinner = new Spinner();
-const spinnerElement = document.body.lastElementChild;
-spinner.addEventListener(`start`, () => {
-    document.body.appendChild(spinnerElement);
-});
-const circleElement = spinnerElement.children[0];
-const textElement = spinnerElement.children[2];
+const spinnerElement = document.body.children[5];
 const DASHES_IN_PERCENT = 3.078;
-spinner.addEventListener(`output`, (e) => {
-    const percentage = e.detail;
+const output = (spinnerElement, percentage) => {
+    const circleElement = spinnerElement.children[0];
+    const textElement = spinnerElement.children[2];
     circleElement.style.strokeDasharray = `${DASHES_IN_PERCENT * percentage}, ${DASHES_IN_PERCENT * (100 - percentage)}`;
     textElement.innerHTML = `${percentage.toFixed(1)}%`;
-});
-spinner.addEventListener(`stop`, () => {
-    document.body.removeChild(spinnerElement);
-});
+};
+const spinner = new Spinner();
+spinner.addEventListener(`start`, () => document.body.appendChild(spinnerElement));
+spinner.addEventListener(`output`, (e) => output(spinnerElement, e.detail));
+spinner.addEventListener(`stop`, () => document.body.removeChild(spinnerElement));
 
-export {spinner};
+export {spinner, spinnerElement, output};

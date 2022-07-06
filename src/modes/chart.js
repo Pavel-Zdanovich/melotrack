@@ -1,18 +1,16 @@
 import {Tour} from "../entities/tour.js";
 import {Track} from "../entities/track.js";
-import {spinner} from "../utils/spinner.js";
+import {promisify} from "../utils/utils.js";
 
-export const chart = (DZ, data) => {
-    spinner.start();
-    spinner.markProgressBy(100, 75);
-    let outsideResolve, outsideReject;
-    const promise = new Promise((resolve, reject) => {
-        outsideResolve = resolve;
-        outsideReject = reject;
-    });
-    promise.then(() => spinner.stop());
+export const chart = async (id) => {
+    const [promise, resolve, reject] = promisify();
+
     DZ.api(`/chart`, (chart) => {
-        outsideResolve(
+        if (chart !== null && chart.hasOwnProperty(`error`)) {
+            reject(chart);
+            return;
+        }
+        resolve(
             new Tour(
                 `Chart`,
                 `Guess the artists and titles from chart.`,
@@ -26,5 +24,6 @@ export const chart = (DZ, data) => {
             )
         );
     });
+
     return promise;
 };
