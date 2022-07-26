@@ -1,12 +1,11 @@
 "use strict";
 
 if (`serviceWorker` in navigator) {
-    //window.addEventListener(`load`, () => {
-        navigator.serviceWorker
-            .register(`/service.js`)
-            .then(event => console.log(event))
-            .catch(error => console.error(error));
-    //});
+    const origin = `pavel-zdanovich.github.io` === window.location.host ? `https://pavel-zdanovich.github.io/melotrack/` : window.location.origin;
+    navigator.serviceWorker
+        .register(`${origin}/service.js`)
+        .then(event => console.log(event))
+        .catch(error => console.error(error));
 }
 
 import "./src/app.js";
