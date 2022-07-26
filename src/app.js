@@ -52,8 +52,7 @@ const data = await loading;
 
 const wrap = (index, mode) => {
     if (mode.name === `chart`) {
-        router.addEventListener(`chart`, (e) => {
-            let [modeName, id] = e.detail.paths;
+        router.addEventListener(`chart`, () => {
             load(() => {
                 current = index;
                 return mode();
@@ -71,8 +70,7 @@ const wrap = (index, mode) => {
 
     if (mode.name === `track`) {
         router.addEventListener(`track`, (e) => {
-            let [modeName] = e.detail.paths;
-            let ids = e.detail.parameters[`id`];
+            const ids = e.detail.parameters[`id`];
             load(() => {
                 current = index;
                 return mode(ids);
@@ -105,7 +103,7 @@ const wrap = (index, mode) => {
     }
 
     router.addEventListener(`${mode.name}/*`, (e) => {
-        let [modeName, id] = e.detail.paths;
+        const [modeName, id] = e.detail.paths;
         load(() => {
             current = index;
             return mode(id);

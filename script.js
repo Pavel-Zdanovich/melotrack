@@ -1,9 +1,9 @@
 "use strict";
 
 if (`serviceWorker` in navigator) {
-    //window.addEventListener('load', () => {
+    //window.addEventListener(`load`, () => {
         navigator.serviceWorker
-            .register(`${window.location.origin}/service.js`)
+            .register(`/service.js`)
             .then(event => console.log(event))
             .catch(error => console.error(error));
     //});
