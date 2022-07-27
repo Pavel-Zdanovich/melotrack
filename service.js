@@ -1,7 +1,9 @@
+const origin = `pavel-zdanovich.github.io` === self.location.host ? `https://pavel-zdanovich.github.io/melotrack` : self.location.origin;
+
 const STATIC = `static`;
 
-const staticRequests = [
-    `/`,
+const staticInsideRequests = [
+    //`/`,
 
     `/audio/melotrack1.mp3`,
     `/audio/melotrack2.mp3`,
@@ -42,9 +44,6 @@ const staticRequests = [
 
     `/src/utils/spinner.js`,
 
-    `https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js`,
-    `https://e-cdn-files.dzcdn.net/js/min/dz.js`,
-
     `/src/utils/utils.js`,
 
     `/src/modes/album.js`,
@@ -75,25 +74,26 @@ const staticRequests = [
     `/src/timer/timer.js`,
 
     `/styles.css`,
+];
+const staticOutsideRequests = [
+    `https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js`,
+    `https://e-cdn-files.dzcdn.net/js/min/dz.js`,
     //`https://fonts.googleapis.com`,
     //`https://fonts.gstatic.com`,
     `https://fonts.googleapis.com/css2?family=Noto+Music&display=swap`,
 ];
 
-const origin = `pavel-zdanovich.github.io` === window.location.host ? `https://pavel-zdanovich.github.io/melotrack` : window.location.origin;
-
 self.addEventListener(`install`, event => {
-    console.log(self.location);
-    /*event.waitUntil(
+    event.waitUntil(
         caches.open(STATIC)
             .then(cache => {
-                for (const request of staticRequests) {
-                    cache.add(request);
+                for (const request of staticInsideRequests) {
+                    cache.add(`${origin}${request}`);
                 }
-                //cache.addAll(staticRequests);
+                cache.addAll(staticOutsideRequests);
             }, error => console.error(error))
         //.then(self.skipWaiting())
-    );*/
+    );
 });
 
 const DYNAMIC = `dynamic`;
@@ -117,13 +117,10 @@ self.addEventListener(`active`, event => {
 });
 
 self.addEventListener(`fetch`, event => {
-    console.log(self.location);
     console.log(event.request.url);
-    //match third party static and cached dynamic
-    if (staticRequests.includes(event.request.url)) {
+    if (staticOutsideRequests.includes(event.request.url)) {
         console.log(event.request.url);
-        //event.respondWith(caches.match(event.request));
-        event.respondWith(fetch(event.request));
+        event.respondWith(caches.match(event.request));
         return;
     }
 
@@ -132,7 +129,6 @@ self.addEventListener(`fetch`, event => {
         event.respondWith(
             caches.open(DYNAMIC).then(cache => {
                 return fetch(event.request).then(response => {
-                    // Put a copy of the response in the runtime cache.
                     return cache.put(event.request, response.clone()).then(() => response);
                 });
             })
@@ -142,15 +138,15 @@ self.addEventListener(`fetch`, event => {
 
     //path starts with '/', if consists of more than one parts (/{1}/{2}), then it needs to be cut off the first part
     const path = event.request.url.replace(origin, ``); // /app.js, /favicon/favicon.ico, /{1}, /{1}/app.js, /{1}/{2}
-    if (staticRequests.includes(path)) {
+    if (staticInsideRequests.includes(path)) {
         console.log(path);
-        event.respondWith(caches.match(path));
+        event.respondWith(caches.match(event.request.url));
         return;
     }
-    for (const staticRequest of staticRequests) { // /{1}, /{1}/app.js, /{1}/{2}
-        if (path.includes(staticRequest)) {
-            console.log(staticRequest);
-            event.respondWith(caches.match(staticRequest));
+    for (const request of staticInsideRequests) { // /{1}, /{1}/app.js, /{1}/{2}
+        if (path.includes(request)) {
+            console.log(request);
+            event.respondWith(caches.match(`${origin}${request}`));
             return;
         }
     }
