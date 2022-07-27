@@ -2,7 +2,7 @@
   "name": "Melotrack",
   "description": "Melotrack is a musical quiz. Recognize the music, solve the riddle and type the answer.",
   "display": "fullscreen",
-  "start_url": "/melotrack",
+  "start_url": "/",
   "theme_color": "#ffffff",
   "background_color": "#ffffff",
   "icons": [

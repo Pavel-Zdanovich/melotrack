@@ -1,7 +1,7 @@
 "use strict";
 
 if (`serviceWorker` in navigator) {
-    const origin = `pavel-zdanovich.github.io` === window.location.host ? `https://pavel-zdanovich.github.io/melotrack/` : window.location.origin;
+    const origin = `pavel-zdanovich.github.io` === window.location.host ? `https://pavel-zdanovich.github.io/melotrack` : window.location.origin;
     navigator.serviceWorker
         .register(
             `${origin}/service.js`
