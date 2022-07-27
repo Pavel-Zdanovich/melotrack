@@ -82,7 +82,11 @@ const staticRequests = [
 
 self.addEventListener(`install`, event => {
     event.waitUntil(
-        caches.open(STATIC).then((cache) => cache.addAll(staticRequests))
+        caches.open(STATIC)
+            .then(cache => {
+                console.log(cache);
+                cache.addAll(staticRequests);
+            }, error => console.error(error))
         //.then(self.skipWaiting())
     );
 });
@@ -108,6 +112,7 @@ self.addEventListener(`active`, event => {
 });
 
 self.addEventListener(`fetch`, event => {
+    console.log(event.request.url);
     //match third party static and cached dynamic
     if (staticRequests.includes(event.request.url)) {
         //console.log(event.request.url);

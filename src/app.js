@@ -61,7 +61,7 @@ const wrap = (index, mode) => {
         return () => {
             current = index;
             return mode()
-                .then((tour) => {
+                .then(tour => {
                     router.set(`${mode.name}`);
                     return tour;
                 });
@@ -91,7 +91,7 @@ const wrap = (index, mode) => {
         return () => {
             current = index;
             return mode(ids)
-                .then((tour) => {
+                .then(tour => {
                     const urlSearchParams = new URLSearchParams();
                     for (let id of ids) {
                         urlSearchParams.append(`id`, id);
@@ -117,7 +117,7 @@ const wrap = (index, mode) => {
     return () => {
         current = index;
         return mode(id)
-            .then((tour) => {
+            .then(tour => {
                 router.set(`${mode.name}/${id}`);
                 return tour;
             });
@@ -142,19 +142,19 @@ const load = (mode) => {
     spinner.start();
     spinner.markProgressBy(100, 80);
     return mode()
-        .then((tour) => {
+        .then(tour => {
             spinner.stop();
             indexElement.innerHTML = `${tour.name} [${current + 1}/${modes.length}]`;
             document.dispatchEvent(new CustomEvent(`tour`, {detail: tour}));
             document.documentElement.style.setProperty(`--background-color`, tour.background);
             document.documentElement.style.setProperty(`--border-color`, tour.border);
             document.documentElement.style.setProperty(`--transparent-color`, tour.transparent);
-        }, (error) => {
+        }, error => {
             spinner.stop();
-            console.log(error); //TODO tour not found
+            console.error(error); //TODO tour not found
         }).catch(error => {
             spinner.stop();
-            console.log(error);
+            console.error(error);
         });
 };
 

@@ -33,7 +33,7 @@ export const track = async (ids) => {
         );
     }
 
-    Promise.all(tracks).then((tracks) => {
+    Promise.all(tracks).then(tracks => {
         resolve(
             new Tour(
                 `Track`,
