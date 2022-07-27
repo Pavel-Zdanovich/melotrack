@@ -80,11 +80,10 @@ const staticRequests = [
     `https://fonts.googleapis.com/css2?family=Noto+Music&display=swap`,
 ];
 
-self.addEventListener(`install`, event => {
+/*self.addEventListener(`install`, event => {
     event.waitUntil(
         caches.open(STATIC)
             .then(cache => {
-                console.log(cache);
                 for (let request of staticRequests) {
                     cache.add(request);
                 }
@@ -92,7 +91,7 @@ self.addEventListener(`install`, event => {
             }, error => console.error(error))
         //.then(self.skipWaiting())
     );
-});
+});*/
 
 const DYNAMIC = `dynamic`;
 
@@ -119,7 +118,8 @@ self.addEventListener(`fetch`, event => {
     //match third party static and cached dynamic
     if (staticRequests.includes(event.request.url)) {
         //console.log(event.request.url);
-        event.respondWith(caches.match(event.request));
+        //event.respondWith(caches.match(event.request));
+        event.respondWith(fetch(event.request));
         return;
     }
 
