@@ -84,7 +84,7 @@ const staticRequests = [
     event.waitUntil(
         caches.open(STATIC)
             .then(cache => {
-                for (let request of staticRequests) {
+                for (const request of staticRequests) {
                     cache.add(request);
                 }
                 //cache.addAll(staticRequests);
@@ -117,14 +117,14 @@ self.addEventListener(`fetch`, event => {
     console.log(event.request.url);
     //match third party static and cached dynamic
     if (staticRequests.includes(event.request.url)) {
-        //console.log(event.request.url);
+        console.log(event.request.url);
         //event.respondWith(caches.match(event.request));
         event.respondWith(fetch(event.request));
         return;
     }
 
     if (dynamicRequests.some(value => event.request.url.startsWith(value))) {
-        //console.log(event.request.url);
+        console.log(event.request.url);
         event.respondWith(
             caches.open(DYNAMIC).then(cache => {
                 return fetch(event.request).then(response => {
@@ -139,19 +139,19 @@ self.addEventListener(`fetch`, event => {
     //path starts with '/', if consists of more than one parts (/{1}/{2}), then it needs to be cut off the first part
     const path = event.request.url.replace(self.location.origin, ``); // /app.js, /favicon/favicon.ico, /{1}, /{1}/app.js, /{1}/{2}
     if (staticRequests.includes(path)) {
-        //console.log(path);
+        console.log(path);
         event.respondWith(caches.match(path));
         return;
     }
     for (const staticRequest of staticRequests) { // /{1}, /{1}/app.js, /{1}/{2}
         if (path.includes(staticRequest)) {
-            //console.log(staticRequest);
+            console.log(staticRequest);
             event.respondWith(caches.match(staticRequest));
             return;
         }
     }
 
-    //console.log(self.location.origin);
+    console.log(self.location.origin);
     event.respondWith(caches.match(self.location.origin).then(response => {
         if (response) {
             return response;
