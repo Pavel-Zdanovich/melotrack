@@ -1,7 +1,7 @@
 const STATIC = `static`;
 
 const staticRequests = [
-    //`/`,
+    `/`,
 
     `/audio/melotrack1.mp3`,
     `/audio/melotrack2.mp3`,
