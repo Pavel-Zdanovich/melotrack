@@ -80,6 +80,8 @@ const staticRequests = [
     `https://fonts.googleapis.com/css2?family=Noto+Music&display=swap`,
 ];
 
+const origin = `pavel-zdanovich.github.io` === window.location.host ? `https://pavel-zdanovich.github.io/melotrack` : window.location.origin;
+
 self.addEventListener(`install`, event => {
     console.log(self.location);
     /*event.waitUntil(
@@ -139,7 +141,7 @@ self.addEventListener(`fetch`, event => {
     }
 
     //path starts with '/', if consists of more than one parts (/{1}/{2}), then it needs to be cut off the first part
-    const path = event.request.url.replace(self.location.origin, ``); // /app.js, /favicon/favicon.ico, /{1}, /{1}/app.js, /{1}/{2}
+    const path = event.request.url.replace(origin, ``); // /app.js, /favicon/favicon.ico, /{1}, /{1}/app.js, /{1}/{2}
     if (staticRequests.includes(path)) {
         console.log(path);
         event.respondWith(caches.match(path));
@@ -153,12 +155,12 @@ self.addEventListener(`fetch`, event => {
         }
     }
 
-    console.log(self.location.origin);
-    event.respondWith(caches.match(self.location.origin).then(response => {
+    console.log(origin);
+    event.respondWith(caches.match(origin).then(response => {
         if (response) {
             return response;
         }
-        return fetch(self.location.origin);
+        return fetch(origin);
     }));
 });
 
