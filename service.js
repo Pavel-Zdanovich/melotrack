@@ -149,7 +149,12 @@ self.addEventListener(`fetch`, event => {
     }
 
     //console.log(self.location.origin);
-    event.respondWith(caches.match(self.location.origin));
+    event.respondWith(caches.match(self.location.origin).then(response => {
+        if (response) {
+            return response;
+        }
+        return fetch(self.location.origin);
+    }));
 });
 
 self.addEventListener(`message`, event => {
