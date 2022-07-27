@@ -85,7 +85,10 @@ self.addEventListener(`install`, event => {
         caches.open(STATIC)
             .then(cache => {
                 console.log(cache);
-                cache.addAll(staticRequests);
+                for (let request of staticRequests) {
+                    cache.add(request);
+                }
+                //cache.addAll(staticRequests);
             }, error => console.error(error))
         //.then(self.skipWaiting())
     );
