@@ -7,8 +7,11 @@ class Router extends EventTarget {
     }
 
     set(url) { //TODO set mapping as contract: exists - map, not - 404, reach - set url
-        if (typeof url === `string` && /^\/[\w`~!@#\$;%&\?\*\(\)_\-\+=\{}\\\|'",<\.>\/]+/.test(url)) {
-            if (window.location.pathname !== url) {
+        if (typeof url === `string` && /[\w`~!@#\$;%&\?\*\(\)_\-\+=\{}\\\|'",<\.>\/]+/.test(url)) {
+            if (url.startsWith(`/`)) {
+                url = url.substring(1);
+            }
+            if (window.location.pathname.substring(1) !== url) {
                 window.history.pushState(``, ``, url);
             } else {
                 console.log(`Location is already: ${url}`);

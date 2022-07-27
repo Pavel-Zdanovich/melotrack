@@ -3,7 +3,9 @@
 if (`serviceWorker` in navigator) {
     const origin = `pavel-zdanovich.github.io` === window.location.host ? `https://pavel-zdanovich.github.io/melotrack/` : window.location.origin;
     navigator.serviceWorker
-        .register(`${origin}/service.js`)
+        .register(
+            `${origin}/service.js`
+        )
         .then(event => console.log(event))
         .catch(error => console.error(error));
 }

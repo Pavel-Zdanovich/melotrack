@@ -62,7 +62,7 @@ const wrap = (index, mode) => {
             current = index;
             return mode()
                 .then((tour) => {
-                    router.set(`/${mode.name}`);
+                    router.set(`${mode.name}`);
                     return tour;
                 });
         };
@@ -96,7 +96,7 @@ const wrap = (index, mode) => {
                     for (let id of ids) {
                         urlSearchParams.append(`id`, id);
                     }
-                    router.set(`/track?${urlSearchParams}`);
+                    router.set(`track?${urlSearchParams}`);
                     return tour;
                 });
         };
@@ -118,7 +118,7 @@ const wrap = (index, mode) => {
         current = index;
         return mode(id)
             .then((tour) => {
-                router.set(`/${mode.name}/${id}`);
+                router.set(`${mode.name}/${id}`);
                 return tour;
             });
     };
