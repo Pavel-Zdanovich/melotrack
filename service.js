@@ -156,7 +156,7 @@ self.addEventListener(`fetch`, event => {
         if (response) {
             return response;
         }
-        return fetch(origin);
+        return fetch(event.request);
     }));
 });
 
