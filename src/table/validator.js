@@ -1,44 +1,83 @@
+import {throwError} from "../utils/utils.js";
+import {Node, Tree} from "./tree.js";
+
 export class Validator {
 
-    static similarity(expected, actual) {
-        let longer = expected;
-        let shorter = actual;
-        if (expected.length < actual.length) {
-            longer = actual;
-            shorter = expected;
+    /**
+     * Compares expected and actual strings using a custom algorithm
+     * based on an approximate string comparison and a variant tree
+     */
+    constructor(expected, actual) {
+        if (typeof expected === `string` && expected.length !== 0) {
+            this.expected = expected;
+        } else {
+            throwError({expected});
         }
-        const longerLength = longer.length;
-        if (longerLength === 0) {
-            return 1.0;
+
+        if (typeof actual === `string`) {
+            this.actual = actual;
+        } else {
+            throwError({actual});
         }
-        return (longerLength - this.#editDistance(longer, shorter)) / parseFloat(longerLength);
+
+        this.tree = new Tree(actual);
     }
 
-    static #editDistance(string1, string2) {
-        string1 = string1.toLowerCase();
-        string2 = string2.toLowerCase();
+    similarity() {
+        const expectedChars = this.expected.split(``);
+        const actualChars = this.actual.split(``);
+        if (
+            this.actual.length === 0 ||
+            actualChars.filter(char => expectedChars.includes(char)).length < this.expected.length / 2
+        ) {
+            return 0;
+        }
 
-        const costs = [];
-        for (let i = 0; i <= string1.length; i++) {
-            let lastValue = i;
-            for (let j = 0; j <= string2.length; j++) {
-                if (i === 0) {
-                    costs[j] = j;
-                } else {
-                    if (j > 0) {
-                        let newValue = costs[j - 1];
-                        if (string1.charAt(i - 1) !== string2.charAt(j - 1)) {
-                            newValue = Math.min(Math.min(newValue, lastValue), costs[j]) + 1;
-                        }
-                        costs[j - 1] = lastValue;
-                        lastValue = newValue;
-                    }
+        this.#recursion(this.tree.get(),0, this.actual, 0);
+        //console.log(this.tree);
+        const node = this.tree.find(this.expected);
+        //console.log(node);
+        let count = 0;
+        (function recursion(child) {
+            if (child) {
+                count++;
+                recursion(child.parent);
+            }
+        })(node.parent);
+        //console.log(count);
+        return (this.expected.length - count) / this.expected.length;
+    }
+
+    #recursion(parent, expectedIndex, actual, actualIndex) {
+        if (actual !== this.expected) {
+            //console.log(`[${expectedIndex}] actual = '${actual}', actualIndex = ${actualIndex}`);
+            let expectedChar = this.expected[expectedIndex];
+            let actualChar = actual[actualIndex];
+            if (actualChar) {
+                //console.log(`'${actualChar}' ${actualChar === expectedChar ? `=` : `!=`} '${expectedChar}'`);
+                if (actualChar === expectedChar) {
+                    this.#recursion(parent, expectedIndex + 1, actual, actualIndex + 1);
+                    return;
+                }
+
+                if (actualIndex < this.actual.length) {
+                    const deleted = actual.slice(0, actualIndex) + actual.slice(actualIndex + 1);
+                    //console.log(`del '${actual}' - '${actualChar}' = '${deleted}'`);
+                    const child = new Node(deleted);
+                    parent.add(child);
+                    this.#recursion(child, expectedIndex, deleted, actualIndex);
                 }
             }
-            if (i > 0) {
-                costs[string2.length] = lastValue;
+
+            if (actualIndex < this.expected.length) {
+                const added = actual.slice(0, actualIndex) + expectedChar + actual.slice(actualIndex);
+                //console.log(`add '${actual.slice(0, actualIndex)}' + '${expectedChar}' + '${actual.slice(actualIndex)}'`);
+                const child = new Node(added);
+                parent.add(child);
+                this.#recursion(child, expectedIndex + 1, added, actualIndex + 1);
             }
+        } else {
+            //console.log(`'${actual}' = '${this.expected}'`);
         }
-        return costs[string2.length];
     }
 }

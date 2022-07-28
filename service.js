@@ -117,15 +117,15 @@ self.addEventListener(`active`, event => {
 });
 
 self.addEventListener(`fetch`, event => {
-    console.log(event.request.url);
+    //console.log(event.request.url);
     if (staticOutsideRequests.includes(event.request.url)) {
-        console.log(event.request.url);
+        //console.log(event.request.url);
         event.respondWith(caches.match(event.request));
         return;
     }
 
     if (dynamicRequests.some(value => event.request.url.startsWith(value))) {
-        console.log(event.request.url);
+        //console.log(event.request.url);
         event.respondWith(
             caches.open(DYNAMIC).then(cache => {
                 return fetch(event.request).then(response => {
@@ -139,19 +139,19 @@ self.addEventListener(`fetch`, event => {
     //path starts with '/', if consists of more than one parts (/{1}/{2}), then it needs to be cut off the first part
     const path = event.request.url.replace(origin, ``); // /app.js, /favicon/favicon.ico, /{1}, /{1}/app.js, /{1}/{2}
     if (staticInsideRequests.includes(path)) {
-        console.log(path);
+        //console.log(path);
         event.respondWith(caches.match(event.request.url));
         return;
     }
     for (const request of staticInsideRequests) { // /{1}, /{1}/app.js, /{1}/{2}
         if (path.includes(request)) {
-            console.log(request);
+            //console.log(request);
             event.respondWith(caches.match(`${origin}${request}`));
             return;
         }
     }
 
-    console.log(origin);
+    //console.log(origin);
     event.respondWith(caches.match(origin).then(response => {
         if (response) {
             return response;

@@ -213,7 +213,7 @@ const addEventListeners = (rowIndex, colIndex, colEnter, colLeave, colLeaveEnter
     const cellElement = map[rowIndex][colIndex];
     //in col -> row -> cell
     cellElement.addEventListener(`focusin`, (e) => {
-        console.log(e.relatedTarget);
+        //console.log(e.relatedTarget);
         //e.relatedTarget - previous focus element
         if (isTable(e.relatedTarget)) {
             if (currentColIndex !== colIndex) {
@@ -328,7 +328,7 @@ const check = () => {
             const key = tour.keys[colIndex - 1];
             const expected = track[key];
             const actual = inputElement.value;
-            const result = Validator.similarity(expected, actual) * 100;
+            const result = new Validator(expected, actual).similarity() * 100;
             cellElement.style.cssText = `
                 background-image: -webkit-linear-gradient(90deg, var(--transparent-color) 0% ${result}%, transparent ${result}% 100%);
                 background-image: -o-linear-gradient(left, var(--transparent-color) 0% ${result}%, transparent ${result}% 100%);
@@ -563,6 +563,7 @@ document.addEventListener(`tour`, (e) => {
             inputElement = bodyCellElement.children[1];
             inputElement.id = id;
             inputElement.value = ``;
+            inputElement.maxLength = tour.tracks[rowIndex - 1][key].length;
 
             stretchFor(rowElement, tour.keys.length);
         }
