@@ -19,7 +19,7 @@ class Router extends EventTarget {
 const router = new Router();
 
 window.addEventListener(`load`, () => {
-    let path = window.location.pathname.substring(1);
+    let path = window.location.hash.substring(2);//window.location.pathname.substring(1);
     const paths = path.split(`/`);
     const urlSearchParams = new URLSearchParams(window.location.search);
     const parameters = Object.fromEntries(
