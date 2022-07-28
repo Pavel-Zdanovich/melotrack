@@ -9,7 +9,7 @@ class Router extends EventTarget {
 
     set(url) { //TODO set mapping as contract: exists - map, not - 404, reach - set url
         if (typeof url === `string` && /[\w`~!@#\$;%&\?\*\(\)_\-\+=\{}\\\|'",<\.>\/]+/.test(url)) {
-            window.history.pushState(``, ``, `${this.origin}/${url}`);
+            window.history.pushState(``, ``, `${this.origin}/#/${url}`);
         } else {
             throwError({url});
         }
