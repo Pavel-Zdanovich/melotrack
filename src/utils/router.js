@@ -35,6 +35,7 @@ window.addEventListener(`load`, () => {
         } else {
             pathParams = path;
         }
+        console.log(pathParams);
         router.dispatchEvent(new CustomEvent(pathParams, {detail: {paths, parameters}}));
     }
 });
