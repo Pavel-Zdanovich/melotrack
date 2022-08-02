@@ -53,12 +53,14 @@ const data = await loading;
 const wrap = (index, mode) => {
     if (mode.name === `chart`) {
         router.addEventListener(`chart`, () => {
-            load(() => {
+            const wrapped = () => {
                 current = index;
                 return mode();
-            });
+            };
+            Object.defineProperty(wrapped, `name`, {value: mode.name, writable: false});
+            load(wrapped);
         });
-        return () => {
+        const wrapped = () => {
             current = index;
             return mode()
                 .then(tour => {
@@ -66,15 +68,19 @@ const wrap = (index, mode) => {
                     return tour;
                 });
         };
+        Object.defineProperty(wrapped, `name`, {value: mode.name, writable: false});
+        return wrapped;
     }
 
     if (mode.name === `track`) {
         router.addEventListener(`track`, (e) => {
             const ids = e.detail.parameters[`id`];
-            load(() => {
+            const wrapped = () => {
                 current = index;
                 return mode(ids);
-            });
+            };
+            Object.defineProperty(wrapped, `name`, {value: mode.name, writable: false});
+            load(wrapped);
         });
         const getIds = () => {
             const ids = [];
@@ -88,7 +94,7 @@ const wrap = (index, mode) => {
             return ids;
         }
         const ids = getIds();
-        return () => {
+        const wrapped = () => {
             current = index;
             return mode(ids)
                 .then(tour => {
@@ -100,21 +106,25 @@ const wrap = (index, mode) => {
                     return tour;
                 });
         };
+        Object.defineProperty(wrapped, `name`, {value: mode.name, writable: false});
+        return wrapped;
     }
 
     router.addEventListener(`${mode.name}/*`, (e) => {
         const [modeName, id] = e.detail.paths;
-        load(() => {
+        const wrapped = () => {
             current = index;
             return mode(id);
-        });
+        };
+        Object.defineProperty(wrapped, `name`, {value: mode.name, writable: false});
+        load(wrapped);
     });
     const getId = () => {
         const modeData = data[mode.name];
         return modeData[Math.floor(Math.random() * modeData.length)];
     }
     const id = getId();
-    return () => {
+    const wrapped = () => {
         current = index;
         return mode(id)
             .then(tour => {
@@ -122,7 +132,9 @@ const wrap = (index, mode) => {
                 return tour;
             });
     };
-}
+    Object.defineProperty(wrapped, `name`, {value: mode.name, writable: false});
+    return wrapped;
+};
 
 const modes = [
     wrap(0, album),
@@ -132,48 +144,39 @@ const modes = [
     wrap(3, playlist),
     wrap(4, radio),
     wrap(5, track)
-]
+];
 
 let current = -1;
 
-const indexElement = document.body.children[0].children[0];
+import {table} from "./table/configuration.js";
 
 const load = (mode) => {
+    if (current !== -1 && !table.isChecked()) {
+        const previous = modes[current];
+        if (!confirm(`Are you sure you want to load the '${mode.name}' without finishing the '${previous.name}'?`)) {
+            return;
+        } else {
+            table.check();
+        }
+    }
+
     spinner.start();
     spinner.markProgressBy(100, 80);
     return mode()
-        .then(tour => {
-            spinner.stop();
-            indexElement.innerHTML = `${tour.name} [${current + 1}/${modes.length}]`;
-            document.dispatchEvent(new CustomEvent(`tour`, {detail: tour}));
-            document.documentElement.style.setProperty(`--background-color`, tour.background);
-            document.documentElement.style.setProperty(`--border-color`, tour.border);
-            document.documentElement.style.setProperty(`--transparent-color`, tour.transparent);
-        }, error => {
-            spinner.stop();
-            console.error(error); //TODO tour not found
-        }).catch(error => {
-            spinner.stop();
-            console.error(error);
-        });
+        //tour.name = `${tour.name} [${current + 1}/${modes.length}]`;
+        .then(tour => table.load(tour))
+        .catch(error => console.error(error))
+        .finally(() => spinner.stop());
 };
-
-indexElement.addEventListener(`click`, () => {
-    load(modes[current]);
-});
 
 const leftElement = document.body.children[1];
 const rightElement = document.body.children[3];
 
 leftElement.addEventListener(`click`, () => {
-    const mode = previous(current, modes);
-    current--;
-    load(mode);
+    load(previous(current, modes));
 });
 rightElement.addEventListener(`click`, () => {
-    const mode = next(current, modes);
-    current++;
-    load(mode);
+    load(next(current, modes));
 });
 
 console.log(`app loaded`);

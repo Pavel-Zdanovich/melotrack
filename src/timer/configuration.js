@@ -8,7 +8,7 @@ const outputToElement = (hours, mins, secs, millis) => {
 };
 
 const timer = new Timer();
-timer.addEventListener(`load`, (e) => {
+timer.addEventListener(`output`, (e) => {
     const time = e.detail;
     outputToElement(...time);
 });

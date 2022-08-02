@@ -9,13 +9,13 @@ export class Validator {
      */
     constructor(expected, actual) {
         if (typeof expected === `string` && expected.length !== 0) {
-            this.expected = expected;
+            this.expected = expected.trim().toLowerCase();
         } else {
             throwError({expected});
         }
 
         if (typeof actual === `string`) {
-            this.actual = actual;
+            this.actual = actual.trim().toLowerCase();
         } else {
             throwError({actual});
         }
@@ -24,11 +24,15 @@ export class Validator {
     }
 
     similarity() {
+        if (this.actual === this.expected) {
+            return 1;
+        }
+
         const expectedChars = this.expected.split(``);
         const actualChars = this.actual.split(``);
         if (
             this.actual.length === 0 ||
-            actualChars.filter(char => expectedChars.includes(char)).length < this.expected.length / 2
+            actualChars.filter(char => expectedChars.includes(char)).length < this.expected.length / 3
         ) {
             return 0;
         }

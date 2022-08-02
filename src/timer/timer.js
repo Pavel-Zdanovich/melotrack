@@ -67,7 +67,7 @@ export class Timer extends EventTarget {
 
         this.#initialize();
 
-        this.dispatchEvent(new CustomEvent(`load`, {detail: [this._hours, this._mins, this._secs, this._millis]}));
+        this.dispatchEvent(new CustomEvent(`output`, {detail: [this._hours, this._mins, this._secs, this._millis]}));
     }
 
     #initialize() {

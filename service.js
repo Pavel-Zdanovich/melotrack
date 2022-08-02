@@ -58,6 +58,9 @@ const staticInsideRequests = [
 
     `/src/utils/router.js`,
 
+    `/src/entities/tour.js`,
+    `/src/entities/track.js`,
+
     `/src/player/configuration.js`,
     `/src/player/player.js`,
     `/src/player/progress.js`,
@@ -65,13 +68,14 @@ const staticInsideRequests = [
     `/src/loader/configuration.js`,
     `/src/loader/loader.js`,
 
-    `/src/table/configuration.js`,
-    `/src/entities/tour.js`,
-    `/src/entities/track.js`,
-    `/src/table/validator.js`,
-
     `/src/timer/configuration.js`,
     `/src/timer/timer.js`,
+
+    `/src/table/validator.js`,
+    `/src/table/table.js`,
+    `/src/table/configuration.js`,
+    `/src/table/leaderboard.js`,
+    `/src/table/statistics.js`,
 
     `/styles.css`,
 ];

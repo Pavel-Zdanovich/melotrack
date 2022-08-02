@@ -125,7 +125,7 @@ export class Player extends EventTarget {
 
         const progress = this._progress.get();
         const time = Timer.millisToTime(this._track.getStart());
-        this.dispatchEvent(new CustomEvent(`load`, {detail: {track, progress, time}}));
+        this.dispatchEvent(new CustomEvent(`output`, {detail: {track, progress, time}}));
     }
 
     unload() {

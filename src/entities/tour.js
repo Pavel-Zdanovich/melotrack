@@ -1,5 +1,4 @@
 import {throwError} from "../utils/utils.js";
-import {Track} from "./track.js";
 
 export class Tour {
 
@@ -41,7 +40,7 @@ export class Tour {
             throwError({keys});
         }
 
-        if (tracks != null && tracks instanceof Array && tracks[0] instanceof Track) {
+        if (tracks != null && tracks instanceof Array) {
             this.tracks = tracks;
         } else {
             throwError({tracks});

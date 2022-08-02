@@ -1,11 +1,13 @@
+import {Table} from "./table.js";
 import {loader} from "../loader/configuration.js";
 import {player} from "../player/configuration.js";
 import {timer} from "../timer/configuration.js";
 import {mobile} from "../utils/mobile.js";
+import {next, previous} from "../utils/utils.js";
 import {Tour} from "../entities/tour.js";
 import {Track} from "../entities/track.js";
-import {Validator} from "./validator.js";
 
+const indexElement = document.body.children[0].children[0];
 const tableElement = document.body.children[2];
 const footerElement = document.body.children[4];
 
@@ -18,7 +20,7 @@ const headCellElement = headRowElement.children[0];
 
 const exampleRowElement = bodyElement.children[0];
 const clefElement = footerElement.children[1].children[0];
-let pointerElement = clefElement.cloneNode(true);
+const pointerElement = clefElement.cloneNode(true);
 const upperElement = document.createElement(`div`);
 upperElement.classList.add(`upper`);
 const lowerElement = document.createElement(`div`);
@@ -28,80 +30,42 @@ signElement.classList.add(`signature`);
 signElement.appendChild(upperElement);
 signElement.appendChild(lowerElement);
 
-let tour = new Tour(
-    `Melotrack`,
-    captionElement.innerText,
-    0,
-    document.documentElement.style.getPropertyValue(`--background-color`),
-    document.documentElement.style.getPropertyValue(`--border-color`),
-    [...headRowElement.children].map(cellElement => cellElement.innerText.toLowerCase()),
-    [
-        new Track(`1`, `Melotrack`, `1`, `./audio/melotrack1.mp3`),
-        new Track(`2`, `Melotrack`, `2`, `./audio/melotrack2.mp3`),
-        new Track(`3`, `Melotrack`, `3`, `./audio/melotrack3.mp3`),
-        new Track(`4`, `Melotrack`, `4`, `./audio/melotrack4.mp3`),
-        new Track(`5`, `Melotrack`, `5`, `./audio/melotrack5.mp3`),
-        new Track(`6`, `Melotrack`, `6`, `./audio/melotrack6.mp3`),
-        new Track(`7`, `Melotrack`, `7`, `./audio/melotrack7.mp3`),
-        new Track(`8`, `Melotrack`, `8`, `./audio/melotrack8.mp3`),
-        new Track(`9`, `Melotrack`, `9`, `./audio/melotrack9.mp3`),
-        new Track(`10`, `Melotrack`, `10`, `./audio/melotrack10.mp3`)
-    ]
-);
 
-tour.tracks.forEach(track => loader.load(track));
-
-const map = [[]]; //map[row][col] - [[thr, th1, th2], [tbr1, td1, td2], [tbr2, td1, td2], ..., [tbr10, td1, td2]]
-
-let currentRowIndex;
-let currentColIndex;
-
+const table = new Table();
 
 
 const colEnter = (colIndex) => {
-    for (let rowIndex = 0; rowIndex <= bodyElement.childElementCount; rowIndex++) {
-        const array = map[rowIndex];
-        const cellElement = map[rowIndex][colIndex];
-        if (colIndex === 1) {
-            cellElement.style.borderLeftColor = tour.border;
-        } else if (colIndex === array.length - 1) {
-            cellElement.style.borderRightColor = tour.border;
-        }
+    const headCellElement = table.head[colIndex];
+    headCellElement.style.borderTopColor = table.tour.border;
+
+    if (headCellElement === headRowElement.firstElementChild) {
+        headCellElement.style.borderLeftColor = table.tour.border;
+        headElement.style.borderLeftColor = table.tour.border;
     }
-    map[0][colIndex].style.borderTopColor = tour.border;
-    if (colIndex === 1) {
-        headElement.style.borderLeftColor = tour.border;
-        bodyElement.style.borderLeftColor = tour.border;
-        bodyElement.style.borderRightColor = tour.border;
-    } else if (colIndex === map[0].length - 1) {
-        headElement.style.borderRightColor = tour.border;
-        bodyElement.style.borderRightColor = tour.border;
-    } else {
-        bodyElement.style.borderLeftColor = tour.border;
-        bodyElement.style.borderRightColor = tour.border;
+    if (headCellElement === headRowElement.lastElementChild) {
+        headCellElement.style.borderRightColor = table.tour.border;
+        headElement.style.borderRightColor = table.tour.border;
     }
 
+    bodyElement.style.borderLeftColor = table.tour.border;
+    bodyElement.style.borderRightColor = table.tour.border;
+
     let width = 0;
-    for (let index = 1; index <= colIndex - 1; index++) {
-        width = width + map[1][index].getBoundingClientRect().width;
+    for (let index = 0; index < colIndex; index++) {
+        width = width + table.head[index].getBoundingClientRect().width;
     }
     bodyElement.scrollTo(width + 0.5, 0);
-    currentColIndex = colIndex;
+
+    table.colIndex = colIndex;
 };
 
 const colLeave = (colIndex) => {
-    for (let rowIndex = 0; rowIndex <= bodyElement.childElementCount; rowIndex++) {
-        const array = map[rowIndex];
-        const cellElement = map[rowIndex][colIndex];
-        if (colIndex === 1) {
-            cellElement.style.borderLeftColor = ``;
-        } else if (colIndex === array.length - 1) {
-            cellElement.style.borderRightColor = ``;
-        }
-    }
-    map[0][colIndex].style = ``;
+    const headCellElement = table.head[colIndex];
+    headCellElement.style = ``;
     headElement.style = ``;
     bodyElement.style = ``;
+
+    table.colIndex = undefined;
 };
 
 const colLeaveEnter = (prevColIndex, nextColIndex) => {
@@ -109,84 +73,52 @@ const colLeaveEnter = (prevColIndex, nextColIndex) => {
     colEnter(nextColIndex);
 };
 
+const rowEnter = (rowIndex) => {
+    const cellElement = table.body[rowIndex][0];
+    const rowElement = cellElement.parentElement;
+    rowElement.classList.add(`staved`);
 
+    table.rowIndex = rowIndex;
 
-const headRowEnter = (rowIndex) => {
-    currentRowIndex = rowIndex;
-};
-
-const headRowLeave = (rowIndex) => {
-    currentRowIndex = undefined;
-};
-
-const headRowLeaveEnter = (prevRowIndex, nextRowIndex) => {
-    currentRowIndex = nextRowIndex;
-};
-
-
-
-const headCellEnter = (rowIndex, colIndex) => {
-    const array = map[rowIndex];
-    const cellElement = array[colIndex];
-    if (colIndex === 1) {
-        cellElement.style.borderLeftColor = tour.border;
-        headElement.style.borderLeftColor = tour.border;
-        bodyElement.style.borderLeftColor = tour.border;
-        bodyElement.style.borderRightColor = tour.border;
-    } else if (colIndex === array.length - 1) {
-        cellElement.style.borderRightColor = tour.border;
-        headElement.style.borderRightColor = tour.border;
-        bodyElement.style.borderRightColor = tour.border;
-    }
-    cellElement.style.borderTopColor = tour.border;
-};
-
-const headCellLeave = (rowIndex, colIndex) => {
-    const cellElement = map[rowIndex][colIndex];
-    cellElement.style = ``;
-    headElement.style = ``;
-    bodyElement.style = ``;
-};
-
-
-
-const bodyRowEnter = (rowIndex) => {
-    map[rowIndex][0].classList.add(`staved`);
-    currentRowIndex = rowIndex;
-    const track = tour.tracks[currentRowIndex - 1];
+    const track = table.tour.tracks[table.rowIndex];
     loader.get(track.url).then(track => player.load(track));
 };
 
-const bodyRowLeave = (rowIndex) => {
-    map[rowIndex][0].classList.remove(`staved`);
-    currentRowIndex = undefined;
+const rowLeave = (rowIndex) => {
+    const cellElement = table.body[rowIndex][0];
+    const rowElement = cellElement.parentElement;
+    rowElement.classList.remove(`staved`);
+
+    table.rowIndex = undefined;
+
+    player.stop();
     player.unload();
 };
 
-const bodyRowLeaveEnter = (prevRowIndex, nextRowIndex) => {
-    map[prevRowIndex][0].classList.remove(`staved`);
-    currentRowIndex = undefined;
-    bodyRowEnter(nextRowIndex);
+const rowLeaveEnter = (prevRowIndex, nextRowIndex) => {
+    const cellElement = table.body[prevRowIndex][0];
+    const rowElement = cellElement.parentElement;
+    rowElement.classList.remove(`staved`);
+
+    table.rowIndex = undefined;
+
+    rowEnter(nextRowIndex);
 };
 
-
-
-const bodyCellEnter = (rowIndex, colIndex) => {
-    const cellElement = map[rowIndex][colIndex];
+const cellEnter = (rowIndex, colIndex) => {
+    const cellElement = table.body[rowIndex][colIndex];
     const labelElement = cellElement.children[0];
     labelElement.appendChild(pointerElement);
-    upperElement.innerHTML = rowIndex;
+    upperElement.innerHTML = rowIndex + 1;
     lowerElement.innerHTML = bodyElement.childElementCount;
     labelElement.appendChild(signElement);
 };
 
-const bodyCellLeave = (rowIndex, colIndex) => {
-    const cellElement = map[rowIndex][colIndex];
+const cellLeave = (rowIndex, colIndex) => {
+    const cellElement = table.body[rowIndex][colIndex];
     const labelElement = cellElement.children[0];
     labelElement.innerHTML = ``;
 };
-
-
 
 const isTable = (element) => {
     if (!element) {
@@ -208,19 +140,46 @@ const isPlayer = (element) => {
     }
 };
 
-let reenter = true;
-const addEventListeners = (rowIndex, colIndex, colEnter, colLeave, colLeaveEnter, rowEnter, rowLeave, rowLeaveEnter, cellEnter, cellLeave) => {
-    const cellElement = map[rowIndex][colIndex];
+const addHeadEventListeners = (colIndex) => {
+    const cellElement = table.head[colIndex];
     //in col -> row -> cell
     cellElement.addEventListener(`focusin`, (e) => {
-        //console.log(e.relatedTarget);
         //e.relatedTarget - previous focus element
         if (isTable(e.relatedTarget)) {
-            if (currentColIndex !== colIndex) {
-                colLeaveEnter(currentColIndex, colIndex);
+            if (table.colIndex !== colIndex) {
+                colLeaveEnter(table.colIndex, colIndex);
             }
-            if (currentRowIndex !== rowIndex) {
-                rowLeaveEnter(currentRowIndex, rowIndex);
+        } else {
+            colEnter(colIndex);
+        }
+    });
+    //out cell -> row -> col
+    cellElement.addEventListener(`focusout`, (e) => {
+        //e.relatedTarget - next focus element
+        if (!isTable(e.relatedTarget)) {
+            if (!isPlayer(e.relatedTarget)) {
+                colLeave(colIndex);
+            }
+        } else {
+            if (table.colIndex !== colIndex) {
+                colLeave(colIndex);
+            }
+        }
+    });
+};
+
+let reenter = true;
+const addBodyEventListeners = (rowIndex, colIndex) => {
+    const cellElement = table.body[rowIndex][colIndex];
+    //in col -> row -> cell
+    cellElement.addEventListener(`focusin`, (e) => {
+        //e.relatedTarget - previous focus element
+        if (isTable(e.relatedTarget)) {
+            if (table.colIndex !== colIndex) {
+                colLeaveEnter(table.colIndex, colIndex);
+            }
+            if (table.rowIndex !== rowIndex) {
+                rowLeaveEnter(table.rowIndex, rowIndex);
             }
             cellEnter(rowIndex, colIndex);
         } else {
@@ -247,33 +206,25 @@ const addEventListeners = (rowIndex, colIndex, colEnter, colLeave, colLeaveEnter
             }
         } else {
             cellLeave(rowIndex, colIndex);
-            if (currentRowIndex !== rowIndex) {
+            if (table.rowIndex !== rowIndex) {
                 rowLeave(rowIndex);
             }
-            if (currentColIndex !== colIndex) {
+            if (table.colIndex !== colIndex) {
                 colLeave(colIndex);
             }
         }
     });
 };
 
-const fillCellsInRow = (rowIndex, colEnter, colLeave, colLeaveEnter, rowEnter, rowLeave, rowLeaveEnter, cellEnter, cellLeave) => {
-    const rowElement = map[rowIndex][0];
+table.addEventListener(`addHeadEventListeners`, (e) => {
+    const {colIndex} = e.detail;
+    addHeadEventListeners(colIndex);
+});
 
-    for (let index = 0; index < rowElement.childElementCount; index++) {
-        const cellElement = rowElement.children[index];
-
-        const colIndex = index + 1;
-
-        map[rowIndex][colIndex] = cellElement;
-
-        addEventListeners(rowIndex, colIndex, colEnter, colLeave, colLeaveEnter, rowEnter, rowLeave, rowLeaveEnter, cellEnter, cellLeave);
-    }
-};
-
-map[0][0] = headRowElement; //initialization
-
-fillCellsInRow(0, colEnter, colLeave, colLeaveEnter, headRowEnter, headRowLeave, headRowLeaveEnter, headCellEnter, headCellLeave);
+table.addEventListener(`addBodyEventListeners`, (e) => {
+    const {rowIndex, colIndex} = e.detail;
+    addBodyEventListeners(rowIndex, colIndex);
+});
 
 const scrollWidth = exampleRowElement.getBoundingClientRect().width;
 
@@ -285,108 +236,89 @@ const stretchFor = (rowElement, cols) => {
     }
 };
 
-for (let index = 0; index < bodyElement.childElementCount; index++) {
-    const rowElement = bodyElement.children[index];
+table.addEventListener(`stretch`, (e) => {
+    stretchFor(e.detail, table.tour.keys.length);
+});
 
-    const rowIndex = index + 1;
+table.addEventListener(`remove`, (e) => {
+    bodyElement.removeChild(e.detail);
+});
 
-    map[rowIndex] = [rowElement];
+table.addEventListener(`append`, (e) => {
+    bodyElement.appendChild(e.detail);
+});
 
-    stretchFor(rowElement, rowElement.childElementCount);
+table.addEventListener(`output`, () => {
+    indexElement.innerHTML = table.tour.name;
 
-    fillCellsInRow(rowIndex, colEnter, colLeave, colLeaveEnter, bodyRowEnter, bodyRowLeave, bodyRowLeaveEnter, bodyCellEnter, bodyCellLeave);
-}
+    captionElement.innerText = table.tour.description;
 
+    timer.load(table.tour.time);
 
+    document.documentElement.style.setProperty(`--background-color`, table.tour.background);
+    document.documentElement.style.setProperty(`--border-color`, table.tour.border);
+    document.documentElement.style.setProperty(`--transparent-color`, table.tour.transparent);
+});
+
+table.addEventListener(`load`, () => {
+    table.tour.tracks.forEach(track => {
+        if (!loader.get(track.url)) {
+            loader.load(track);
+        }
+    });
+});
+
+table.addEventListener(`start`, () => {
+    player.setTitleMode(false);
+    player.unload();
+
+    timer.start();
+});
 
 player.addEventListener(`end`, () => {
-    const index = currentRowIndex;
     const selectNext = player.getSelectionMode();
-    const array = selectNext(index - 1, map.slice(1));
-    const cellElement = array[currentColIndex];
+    const array = selectNext(table.rowIndex, table.body);
+    const cellElement = array[table.colIndex];
     const inputElement = cellElement.lastElementChild;
-    if (cellElement === map[currentRowIndex][currentColIndex]) {
+    if (cellElement === table.body[table.rowIndex][table.colIndex]) {
         inputElement.blur();
     }
     inputElement.focus();
 });
 
-let checked = false;
-const check = () => {
-    if (!checked) {
-        checked = true;
-    } else {
-        return;
-    }
+timer.addEventListener(`end`, () => {
+    player.setTitleMode(true);
+    table.check();
+});
+clefElement.addEventListener(`click`, () => {
     timer.stop();
     player.setTitleMode(true);
-    for (let rowIndex = 1; rowIndex < map.length; rowIndex++) {
-        const track = tour.tracks[rowIndex - 1];
-        for (let colIndex = 1; colIndex < map[0].length; colIndex++) {
-            const cellElement = map[rowIndex][colIndex];
-            const inputElement = cellElement.lastElementChild;
-            const key = tour.keys[colIndex - 1];
-            const expected = track[key];
-            const actual = inputElement.value;
-            const result = new Validator(expected, actual).similarity() * 100;
-            cellElement.style.cssText = `
-                background-image: -webkit-linear-gradient(90deg, var(--transparent-color) 0% ${result}%, transparent ${result}% 100%);
-                background-image: -o-linear-gradient(left, var(--transparent-color) 0% ${result}%, transparent ${result}% 100%);
-                background-image: linear-gradient(90deg, var(--transparent-color) 0% ${result}%, transparent ${result}% 100%);
-            `;
-            //console.log(`${rowIndex}_${colIndex} '${actual}' = '${expected}' on ${result}%`);
-            inputElement.value = expected;
-            inputElement.readOnly = true;
-        }
-    }
-};
-
-timer.addEventListener(`end`, check);
-clefElement.addEventListener(`click`, check);
+    table.check();
+});
 
 tableElement.addEventListener(`keydown`, (e) => {
-    let nextRowIndex = currentRowIndex;
-    let nextColIndex = currentColIndex;
-
+    let nextCellElement;
     switch (e.code) {
         case `ArrowUp`: {
-            if (currentRowIndex === 1) {
-                nextRowIndex = map.length - 1;
-            } else {
-                nextRowIndex = currentRowIndex - 1;
-            }
+            nextCellElement = previous(table.rowIndex, table.body)[table.colIndex];
             break;
         }
         case `ArrowDown`: {
-            if (currentRowIndex === map.length - 1) {
-                nextRowIndex = 1;
-            } else {
-                nextRowIndex = currentRowIndex + 1;
-            }
+            nextCellElement = next(table.rowIndex, table.body)[table.colIndex];
             break;
         }
         case `ArrowLeft`: {
-            if (currentColIndex === map[0].length - 1) {
-                nextColIndex = 1;
-            } else {
-                nextColIndex = currentColIndex + 1;
-            }
+            nextCellElement = previous(table.colIndex, table.body[table.rowIndex]);
             break;
         }
         case `ArrowRight`: {
-            if (currentColIndex === 1) {
-                nextColIndex = map[0].length - 1;
-            } else {
-                nextColIndex = currentColIndex - 1;
-            }
+            nextCellElement = next(table.colIndex, table.body[table.rowIndex]);
             break;
         }
         default: {
             return;
         }
     }
-
-    const nextCellElement = map[nextRowIndex][nextColIndex];
     const inputElement = nextCellElement.lastElementChild;
     inputElement.focus();
 });
@@ -459,117 +391,47 @@ bodyElement.addEventListener(`scroll`, () => {
     //output(direction, left, right, diffLeft, diffRight);
 });
 
-document.addEventListener(`tour`, (e) => {
-    tour = e.detail;
 
-    tour.tracks.forEach(track => {
-        if (!loader.get(track.url)) {
-            loader.load(track);
-        }
-    });
-
-    player.setTitleMode(false);
-    player.unload();
-
-    timer.load(tour.time);
-    timer.start();
-
-    captionElement.innerText = tour.description;
-
-    const prevRowsCount = map.length - 1;
-    const prevColsCount = map[0].length - 1;
-
-    if (prevRowsCount === tour.tracks.length) {
-        //nothing
-    } else if (prevRowsCount > tour.tracks.length) {
-        const rows = map.splice(tour.tracks.length + 1);
-        rows.map(array => array[0]).forEach(rowElement => bodyElement.removeChild(rowElement));
-    } else {
-        for (let rowIndex = 1; rowIndex <= tour.tracks.length; rowIndex++) {
-            const array = map[rowIndex];
-
-            let rowElement;
-            if (array) {
-                rowElement = array[0];
-            } else {
-                rowElement = document.createElement(`tr`);
-                map[rowIndex] = [rowElement];
-                bodyElement.appendChild(rowElement);
-            }
-        }
+//initialization
+table.initialize(
+    new Tour(
+        `Melotrack`,
+        captionElement.innerText,
+        0,
+        document.documentElement.style.getPropertyValue(`--background-color`),
+        document.documentElement.style.getPropertyValue(`--border-color`),
+        [...headRowElement.children].map(cellElement => cellElement.innerText.toLowerCase()),
+        [
+            new Track(`1`, `Melotrack`, `Melotrack`, `./audio/melotrack1.mp3`),
+            new Track(`2`, `Melotrack`, `Play mode`, `./audio/melotrack2.mp3`),
+            new Track(`3`, `Melotrack`, `Bar volume`, `./audio/melotrack3.mp3`),
+            new Track(`4`, `Melotrack`, `Arrows index`, `./audio/melotrack4.mp3`),
+            new Track(`5`, `Melotrack`, `timer clef`, `./audio/melotrack5.mp3`),
+            new Track(`6`, `Melotrack`, `Caption`, `./audio/melotrack6.mp3`),
+            new Track(`7`, `Melotrack`, `header Keys`, `./audio/melotrack7.mp3`),
+            new Track(`8`, `Melotrack`, `tracks`, `./audio/melotrack8.mp3`),
+            new Track(`9`, `Melotrack`, `:)`, `./audio/melotrack9.mp3`),
+            new Track(`10`, `Rick Astley`, `Never Gonna Give You Up`, `./audio/melotrack10.mp3`)
+        ]
+    ),
+    bodyElement.childElementCount,
+    headRowElement.childElementCount,
+    (colIndex) => {
+        table.head[colIndex] = headRowElement.children[colIndex];
+        addHeadEventListeners(colIndex);
+    },
+    (rowIndex) => {
+        const rowElement = bodyElement.children[rowIndex];
+        table.body[rowIndex] = [];
+        stretchFor(rowElement, rowElement.childElementCount);
+        return rowElement;
+    },
+    (rowElement, rowIndex, colIndex) => {
+        table.body[rowIndex][colIndex] = rowElement.children[colIndex];
+        addBodyEventListeners(rowIndex, colIndex);
     }
+);
 
-    if (prevColsCount > tour.keys.length) {
-        map.forEach(array => {
-            const cells = array.splice(tour.keys.length + 1);
-            const rowElement = array[0];
-            cells.forEach(cellElement => rowElement.removeChild(cellElement));
-        });
-    }
-
-    for (let colIndex = 1; colIndex <= tour.keys.length; colIndex++) {
-        const rowIndex = 0;
-
-        const array = map[rowIndex];
-
-        const rowElement = array[0];
-
-        let headCellElement = array[colIndex];
-        if (!headCellElement) {
-            headCellElement = document.createElement(`th`);
-            headCellElement.tabIndex = -1;
-
-            array[colIndex] = headCellElement;
-
-            addEventListeners(rowIndex, colIndex, colEnter, colLeave, colLeaveEnter, headRowEnter, headRowLeave, headRowLeaveEnter, headCellEnter, headCellLeave);
-
-            rowElement.appendChild(headCellElement);
-        }
-
-        const key = tour.keys[colIndex - 1];
-        headCellElement.innerText = key.charAt(0).toUpperCase() + key.slice(1).toLowerCase();
-
-        for (let rowIndex = 1; rowIndex <= tour.tracks.length; rowIndex++) {
-            const array = map[rowIndex];
-
-            const rowElement = array[0];
-
-            let bodyCellElement = array[colIndex];
-            let labelElement;
-            let inputElement;
-            if (!bodyCellElement) {
-                bodyCellElement = document.createElement(`td`);
-                labelElement = document.createElement(`label`);
-                inputElement = document.createElement(`input`);
-                inputElement.type = `text`;
-                inputElement.autocomplete = `off`;
-
-                array[colIndex] = bodyCellElement;
-
-                addEventListeners(rowIndex, colIndex, colEnter, colLeave, colLeaveEnter, bodyRowEnter, bodyRowLeave, bodyRowLeaveEnter, bodyCellEnter, bodyCellLeave);
-
-                bodyCellElement.appendChild(labelElement);
-                bodyCellElement.appendChild(inputElement);
-                rowElement.appendChild(bodyCellElement);
-            }
-
-            bodyCellElement.style = ``;
-
-            const id = key + `_` + colIndex;
-
-            labelElement = bodyCellElement.children[0];
-            labelElement.htmlFor = id;
-
-            inputElement = bodyCellElement.children[1];
-            inputElement.id = id;
-            inputElement.value = ``;
-            inputElement.maxLength = tour.tracks[rowIndex - 1][key].length;
-
-            stretchFor(rowElement, tour.keys.length);
-        }
-    }
-
-    checked = false;
-});
+export {table};
 
 console.log(`table loaded`);

@@ -53,7 +53,7 @@ const outputProgress = (time, percentage) => {
 };
 
 const player = new Player(); //TODO create modal button to create player for https://stackoverflow.com/questions/55026293/google-chrome-javascript-issue-in-getting-user-audio-the-audiocontext-was-not
-player.addEventListener(`load`, (e) => {
+player.addEventListener(`output`, (e) => {
     const track = e.detail.track;
     const title = player.isTitle() ? `${track.artist} - ${track.title}` : ``;
     const time = outputMinsAndSecs(...e.detail.time);
@@ -138,11 +138,13 @@ audioElement.addEventListener(`input`, () => {
 
 volumeElement.addEventListener(`input`, () => {
     const percentage = volumeInputElement.value;
+    window.localStorage.setItem(`volume`, percentage);
     player.setVolume(percentage / 100);
     volumeProgressElement.style.height = `${percentage}%`;
     volumeValueElement.innerHTML = percentage;
 });
-volumeInputElement.value = 50;
+const volume = window.localStorage.getItem(`volume`);
+volumeInputElement.value = volume !== null ? volume : 50;
 volumeElement.dispatchEvent(new Event('input'));
 
 export {player};
