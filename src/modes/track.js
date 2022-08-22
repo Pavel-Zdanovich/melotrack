@@ -1,6 +1,6 @@
 import {Tour} from "../entities/tour.js";
 import {Track} from "../entities/track.js";
-import {promisify} from "../utils/utils.js";
+import {image, promisify} from "../utils/utils.js";
 
 const letters = '0123456789ABCDEF';
 
@@ -16,7 +16,7 @@ export const track = async (ids) => {
     const [promise, resolve, reject] = promisify();
 
     const tracks = [];
-    for (let id of ids) {
+    for (const id of ids) {
         tracks.push(
             new Promise(
                 (resolve, reject) => {
@@ -25,7 +25,15 @@ export const track = async (ids) => {
                                 reject(track);
                                 return;
                             }
-                            resolve(Track.parse(track));
+
+                            let src;
+                            if (Math.round(Math.random())) {
+                                src = track.album.cover_big;
+                            } else {
+                                src = track.artist.picture_big;
+                            }
+
+                            resolve({src, track: Track.parse(track)});
                         }
                     );
                 }
@@ -33,16 +41,25 @@ export const track = async (ids) => {
         );
     }
 
-    Promise.all(tracks).then(tracks => {
+    Promise.all(tracks).then((tracks) => {
+        const descriptionElement = document.createElement(`div`);
+        const containerElement = document.createElement(`div`);
+        for (const img of tracks) {
+            const imageElement = image(img.src);
+            containerElement.appendChild(imageElement);
+        }
+        descriptionElement.appendChild(containerElement);
+        descriptionElement.innerHTML = descriptionElement.innerHTML + `Guess random artists and titles.`;
+
         resolve(
             new Tour(
                 `Track`,
-                `Guess random artists and titles.`,
+                descriptionElement.innerHTML,
                 60000,
                 randomColor(),
                 randomColor(),
                 [`artist`, `title`],
-                tracks
+                tracks.map(track => track.track)
             )
         );
     }, error => reject(error));

@@ -9,7 +9,7 @@ export class Tour {
             throwError({name});
         }
 
-        if (typeof description === `string`) {
+        if (typeof description === `string` || description instanceof Element) {
             this.description = description;
         } else {
             throwError({description});

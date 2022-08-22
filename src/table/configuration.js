@@ -251,7 +251,7 @@ table.addEventListener(`append`, (e) => {
 table.addEventListener(`output`, () => {
     indexElement.innerHTML = table.tour.name;
 
-    captionElement.innerText = table.tour.description;
+    captionElement.innerHTML = table.tour.description;
 
     timer.load(table.tour.time);
 

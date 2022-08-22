@@ -1,6 +1,6 @@
 import {Tour} from "../entities/tour.js";
 import {Track} from "../entities/track.js";
-import {promisify} from "../utils/utils.js";
+import {image, promisify} from "../utils/utils.js";
 
 export const radio = async (id) => {
     const [promise, resolve, reject] = promisify();
@@ -10,15 +10,24 @@ export const radio = async (id) => {
             reject(radio);
             return;
         }
+
         DZ.api(`/radio/${id}/tracks`, (tracks) => {
             if (tracks !== null && tracks.hasOwnProperty(`error`)) {
                 reject(tracks);
                 return;
             }
+
+            const descriptionElement = document.createElement(`div`);
+            const containerElement = document.createElement(`div`);
+            const imageElement = image(radio.picture_big);
+            containerElement.appendChild(imageElement);
+            descriptionElement.appendChild(containerElement);
+            descriptionElement.innerHTML = descriptionElement.innerHTML + `Guess the artists and titles from radio "${radio.title}".`;
+
             resolve(
                 new Tour(
                     `Radio`,
-                    `Guess the artists and titles from radio "${radio.title}".`,
+                    descriptionElement.innerHTML,
                     60000,
                     `#F3F3F3`,
                     `#932432`,

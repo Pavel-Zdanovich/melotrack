@@ -1,6 +1,6 @@
 import {Tour} from "../entities/tour.js";
 import {Track} from "../entities/track.js";
-import {promisify} from "../utils/utils.js";
+import {image, promisify} from "../utils/utils.js";
 
 export const chart = async (id) => {
     const [promise, resolve, reject] = promisify();
@@ -10,10 +10,26 @@ export const chart = async (id) => {
             reject(chart);
             return;
         }
+
+        const descriptionElement = document.createElement(`div`);
+        const containerElement = document.createElement(`div`);
+        for (const track of chart.tracks.data) {
+            let src;
+            if (Math.round(Math.random())) {
+                src = track.album.cover_big;
+            } else {
+                src = track.artist.picture_big;
+            }
+            const imageElement = image(src);
+            containerElement.appendChild(imageElement);
+        }
+        descriptionElement.appendChild(containerElement);
+        descriptionElement.innerHTML = descriptionElement.innerHTML + `Guess the artists and titles from chart.`;
+
         resolve(
             new Tour(
                 `Chart`,
-                `Guess the artists and titles from chart.`,
+                descriptionElement.innerHTML,
                 60000,
                 `#F6EBF4`,
                 `#ED0B70`,

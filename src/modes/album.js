@@ -1,6 +1,6 @@
 import {Tour} from "../entities/tour.js";
 import {Track} from "../entities/track.js";
-import {promisify} from "../utils/utils.js";
+import {image, promisify} from "../utils/utils.js";
 
 export const album = async (id) => {
     const [promise, resolve, reject] = promisify();
@@ -12,10 +12,18 @@ export const album = async (id) => {
                 reject(album);
                 return;
             }
+
+            const descriptionElement = document.createElement(`div`);
+            const containerElement = document.createElement(`div`);
+            const imageElement = image(album.cover_big);
+            containerElement.appendChild(imageElement);
+            descriptionElement.appendChild(containerElement);
+            descriptionElement.innerHTML = descriptionElement.innerHTML + `Guess the titles from album "${album.title}".`;
+
             resolve(
                 new Tour(
                     `Album`,
-                    `Guess the titles from album "${album.title}".`,
+                    descriptionElement.innerHTML,
                     60000,
                     `#F5EEC2`,
                     `#416A59`,

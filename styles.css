@@ -368,6 +368,16 @@ caption {
     margin-bottom: 3vh;
 }
 
+caption div {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+caption div img {
+    width: 10%;
+}
+
 tbody {
     display: -webkit-box;
     display: -moz-box;

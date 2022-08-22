@@ -7,6 +7,14 @@ export function promisify() {
     return [promise, resolve, reject];
 }
 
+export function image(url, height = 500, width = 500, compression = 100) {
+    const imageElement = document.createElement(`img`);
+    const src = url.substring(0, url.lastIndexOf(`/`)) + `/${height}x${width}-000000-${compression}-0-0.jpg`;
+    imageElement.src = src;
+    imageElement.alt = src;
+    return imageElement;
+}
+
 function check(index, array) {
     if (array.constructor !== Array) {
         throwError({array});
