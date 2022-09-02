@@ -58,6 +58,8 @@ const staticInsideRequests = [
 
     `/src/utils/router.js`,
 
+    `/src/utils/database.js`,
+
     `/src/entities/tour.js`,
     `/src/entities/track.js`,
 
@@ -85,6 +87,7 @@ const staticOutsideRequests = [
     //`https://fonts.googleapis.com`,
     //`https://fonts.gstatic.com`,
     `https://fonts.googleapis.com/css2?family=Noto+Music&display=swap`,
+    `https://cdn.skypack.dev/octokit?dts`
 ];
 
 self.addEventListener(`install`, event => {

@@ -30,7 +30,9 @@ DZ.ready((sdk_options) => {
 
 spinner.markProgressBy(25);
 
-const loading = fetch("data.json").then(response => response.json());
+import {get} from "./utils/database.js";
+
+const loading = get();
 
 Promise.all(
     [

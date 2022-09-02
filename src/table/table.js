@@ -95,6 +95,8 @@ export class Table extends EventTarget {
             return;
         }
 
+        let rowResult = 0;
+        let tourResult = 0;
         this.#iterate(
             this.body.length,
             this.head.length,
@@ -103,12 +105,24 @@ export class Table extends EventTarget {
             () => {
             },
             (rowElement, rowIndex, colIndex) => {
-                const result = this.#checkCell(rowIndex, colIndex);
+                const cellResult = this.#checkCell(rowIndex, colIndex);
                 this.#output(rowIndex, colIndex);
-                this.#outputProgress(rowIndex, colIndex, result);
-                this.#outputStatistic(rowIndex, colIndex, result);
+                this.#outputProgress(rowIndex, colIndex, cellResult);
+
+                rowResult = rowResult + cellResult;
+                if (colIndex === this.head.length - 1) {
+                    this.#outputStatistic(rowIndex, rowResult / this.head.length);
+                    rowResult = 0;
+                }
+
+                tourResult = tourResult + cellResult;
             }
         );
+
+        const item = window.localStorage.getItem(this.tour.name);
+        if (!item || tourResult > item) {
+            window.localStorage.setItem(this.tour.name, tourResult);
+        }
     }
 
     isChecked() {
@@ -265,9 +279,13 @@ export class Table extends EventTarget {
         `;
     }
 
-    #outputStatistic(rowIndex, colIndex, result) {
-        const key = this.tour.keys[colIndex];
-        const expected = this.tour.tracks[rowIndex][key];
-        window.localStorage.setItem(`${this.tour.name}.${key}.${expected}`, result);
+    #outputStatistic(rowIndex, rowResult) {
+        const track = this.tour.tracks[rowIndex];
+        const key = `${track.artist} - ${track.title}`;
+        const item = window.localStorage.getItem(key);
+        if (item && item > rowResult) {
+            return;
+        }
+        window.localStorage.setItem(key, rowResult);
     }
 }

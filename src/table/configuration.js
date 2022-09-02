@@ -52,7 +52,7 @@ const colEnter = (colIndex) => {
 
     let width = 0;
     for (let index = 0; index < colIndex; index++) {
-        width = width + table.head[index].getBoundingClientRect().width;
+        width = width + table.body[0][index].getBoundingClientRect().width;
     }
     bodyElement.scrollTo(width + 0.5, 0);
 
