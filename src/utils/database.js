@@ -1,7 +1,8 @@
 import {Octokit} from "https://cdn.skypack.dev/octokit?dts";
+import {GITHUB_ACCESS_TOKEN} from "../../env.js";
 
 const octokit = new Octokit({
-    auth: env.ACCESS_TOKEN
+    auth: GITHUB_ACCESS_TOKEN
 });
 
 const path = `data.json`;
