@@ -210,6 +210,12 @@ header {
     border-right-color: var(--transparent-color);
 }
 
+canvas {
+    position: fixed;
+    height: 100%;
+    width: 100%;
+}
+
 .volume {
     -ms-flex-preferred-size: 10%;
     flex-basis: 10%;

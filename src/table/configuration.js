@@ -91,7 +91,9 @@ const rowLeave = (rowIndex) => {
 
     table.rowIndex = undefined;
 
-    player.stop();
+    if (player.isPlaying()) {
+        player.stop();
+    }
     player.unload();
 };
 
@@ -201,7 +203,7 @@ const addBodyEventListeners = (rowIndex, colIndex) => {
             } else {
                 reenter = false;
                 const inputElement = cellElement.lastElementChild;
-                inputElement.focus();
+                inputElement.focus(); //re-focus is ignored, focus on other element causes focusout on current and then focusin on next element
                 reenter = true;
             }
         } else {
@@ -263,7 +265,9 @@ table.addEventListener(`output`, () => {
 table.addEventListener(`load`, () => {
     table.tour.tracks.forEach(track => {
         if (!loader.get(track.url)) {
-            loader.load(track);
+            loader.load(track).then(track => {
+                //console.log(`${track.url} is loading`)
+            });
         }
     });
 });
@@ -271,7 +275,6 @@ table.addEventListener(`load`, () => {
 table.addEventListener(`start`, () => {
     player.setTitleMode(false);
     player.unload();
-
     timer.start();
 });
 
@@ -281,7 +284,10 @@ player.addEventListener(`end`, () => {
     const cellElement = array[table.colIndex];
     const inputElement = cellElement.lastElementChild;
     if (cellElement === table.body[table.rowIndex][table.colIndex]) {
-        inputElement.blur();
+        const track = player.get();
+        player.unload();
+        player.load(track);
+        return;
     }
     inputElement.focus();
 });

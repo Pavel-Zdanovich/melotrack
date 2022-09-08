@@ -49,7 +49,7 @@ export class Track {
     setBuffer(buffer) {
         if (buffer instanceof AudioBuffer) {
             this._buffer = buffer;
-            this._duration = buffer.duration * 1000;
+            this._duration = this._buffer.duration * 1000;
             this._start = 0;
             this._end = this._duration;
         } else {

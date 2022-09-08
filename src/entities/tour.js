@@ -34,7 +34,7 @@ export class Tour {
             throwError({border});
         }
 
-        if (keys != null && keys instanceof Array && typeof keys[0] === 'string') {
+        if (keys != null && keys instanceof Array && typeof keys[0] === `string`) {
             this.keys = keys;
         } else {
             throwError({keys});

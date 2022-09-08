@@ -4,17 +4,17 @@ spinner.markProgressBy(25);
 
 import "https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js";
 import "https://e-cdn-files.dzcdn.net/js/min/dz.js";
-import {next, previous, promisify} from "./utils/utils.js";
+import {next, previous, promisify, random} from "./utils/utils.js";
 
 spinner.markProgressBy(25);
 
 const [init, initResolve] = promisify();
 DZ.init({
-    appId: '509082',
-    channelUrl: 'http://melotrack/channel.html',
+    appId: `509082`,
+    channelUrl: `http://melotrack/channel.html`,
     player: {
         onload: (response) => {
-            console.log('DZ.player is ready', response);
+            console.log(`DZ.player is ready`, response);
             initResolve();
         }
     }
@@ -24,7 +24,7 @@ spinner.markProgressBy(25);
 
 const [ready, readyResolve] = promisify();
 DZ.ready((sdk_options) => {
-    console.log('DZ SDK is ready', sdk_options);
+    console.log(`DZ SDK is ready`, sdk_options);
     readyResolve();
 });
 
@@ -87,9 +87,9 @@ const wrap = (index, mode) => {
         const getIds = () => {
             const ids = [];
             for (let i = 0; i < 10; i++) {
-                let id = data.track[Math.floor(Math.random() * data.track.length)];
+                let id = random(data.track);
                 while (ids.includes(id)) {
-                    id = data.track[Math.floor(Math.random() * data.track.length)];
+                    id = random(data.track);
                 }
                 ids.push(id);
             }
@@ -123,7 +123,7 @@ const wrap = (index, mode) => {
     });
     const getId = () => {
         const modeData = data[mode.name];
-        return modeData[Math.floor(Math.random() * modeData.length)];
+        return random(modeData);
     }
     const id = getId();
     const wrapped = () => {

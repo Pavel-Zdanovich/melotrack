@@ -20,9 +20,13 @@ export class Player extends EventTarget {
 
         this._gain = this._context.createGain();
 
-        this._node = this._gain;
+        this._analyser = this._context.createAnalyser();
 
-        this._node.connect(this._context.destination);
+        this._gain.connect(this._analyser);
+
+        this._analyser.connect(this._context.destination);
+
+        this._node = this._gain;
 
         this._progress = new Progress();
         this._timer = new Timer();
@@ -129,6 +133,10 @@ export class Player extends EventTarget {
     }
 
     unload() {
+        if (this.isPlaying()) {
+            console.warn(`Trying to unload track from the player while playing!`);
+        }
+
         this._track = undefined;
 
         if (this._source != null) {
@@ -215,5 +223,9 @@ export class Player extends EventTarget {
         } else {
             throwError({selectionMode});
         }
+    }
+
+    getAnalyser() {
+        return this._analyser;
     }
 }

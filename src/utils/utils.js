@@ -57,7 +57,7 @@ export function throwError(variable) {
     throw new Error(`Illegal ${name}: ${value}`);
 }
 
-export function outputHoursMinsAndSecs(hours, mins, secs, millis) {
+export function toHoursMinsAndSecsString(hours, mins, secs, millis) {
     let hh = hours;
     if (hours < 10) {
         hh = `0` + hours;
@@ -73,7 +73,7 @@ export function outputHoursMinsAndSecs(hours, mins, secs, millis) {
     return `${hh}:${mm}:${ss}`;
 }
 
-export function outputMinsAndSecs(hours, mins, secs, millis) {
+export function toMinsAndSecsString(hours, mins, secs, millis) {
     let mm = mins;
     if (mins < 10) {
         mm = `0` + mins;
@@ -83,4 +83,8 @@ export function outputMinsAndSecs(hours, mins, secs, millis) {
         ss = `0` + secs;
     }
     return `${mm}:${ss}`;
+}
+
+export function random(array) {
+    return array[Math.floor(Math.random() * array.length)];
 }
