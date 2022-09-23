@@ -1,0 +1,56 @@
+name: GitHub Pages with environment variables
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+env:
+  name: github-pages
+  url: ${{ steps.deployment.outputs.page_url }}
+  ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Configure pages
+        uses: actions/configure-pages@v2
+
+      - name: Jekyll build pages
+        uses: actions/jekyll-build-pages@v1
+        with:
+          source: ./
+          destination: ./_site
+
+  deploy:
+    needs: build
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Upload pages artifact
+        uses: actions/upload-pages-artifact@v1
+
+      - name: Deploy pages
+        id: deployment
+        uses: actions/deploy-pages@v1
+
+      - run: echo ${{ secrets.ACCESS_TOKEN }} ${{ secrets.GITHUB_TOKEN }}
