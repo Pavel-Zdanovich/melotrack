@@ -19,7 +19,6 @@ concurrency:
 
 env:
   name: github-pages
-  url: ${{ steps.deployment.outputs.page_url }}
   ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -42,6 +41,10 @@ jobs:
 
   deploy:
     needs: build
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
 
     runs-on: ubuntu-latest
 
